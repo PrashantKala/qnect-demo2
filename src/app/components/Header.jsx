@@ -10,12 +10,12 @@ export function Header() {
   
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-sm shadow-md">
-      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+      <nav className="container mx-auto px-6  flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/Qnect.jpg" alt="QNect Logo" width={40} height={40} className="rounded-full" />
-          <span className="text-3xl font-bold text-primary-blue">
+          <Image src="/qnect_logo.svg" alt="QNect Logo" width={100} height={100} className="rounded-full" />
+          {/* <span className="text-3xl font-bold text-primary-blue">
             QN<span className="text-accent-cyan">e</span>ct
-          </span>
+          </span> */}
         </Link>
         <div className="hidden md:flex space-x-8 items-center text-text-secondary">
           <Link href="/" className="font-medium hover:text-primary-blue transition-colors">Home</Link>
