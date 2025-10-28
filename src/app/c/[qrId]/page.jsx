@@ -6,8 +6,7 @@ import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
 import { Phone, PhoneOff, Loader2 } from 'lucide-react';
 
-const SOCKET_SERVER_URL = 'http://192.168.0.193:3001'; // Your PC's IP
-
+const SOCKET_SERVER_URL = 'https://qnect-backend.onrender.com'; // NEW
 export default function CallPage() {
   const params = useParams();
   const { qrId } = params;

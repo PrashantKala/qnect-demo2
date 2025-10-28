@@ -2,7 +2,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import './globals.css';
 import { Poppins } from 'next/font/google';
-import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -24,11 +23,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      {/*
-        ▼▼▼ THIS IS THE FIX ▼▼▼
-        We apply the background and text colors from your theme directly here
-        using the utility classes.
-      */}
+
       <body className={`${poppins.variable} font-sans bg-background-color text-text-primary`} suppressHydrationWarning={true}>
       {/* ▲▲▲ THIS IS THE FIX ▲▲▲ */}
         <AuthProvider>
