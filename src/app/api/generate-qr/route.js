@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
 // -------------------------
 
 // Your backend server
-const BACKEND_API_URL = 'http://localhost:3001/api';
+const BACKEND_API_URL = 'https://qnect-backend.onrender.com/api';
 
 export async function POST(request) {
   try {
