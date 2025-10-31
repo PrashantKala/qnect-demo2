@@ -1,17 +1,14 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import './globals.css';
+import './global.css';
 import { Poppins } from 'next/font/google';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
-// Setup the Poppins font
 const poppins = Poppins({
   weight: ['400', '600', '700'],
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-poppins', // Connects to tailwind.config.js
+  variable: '--font-poppins',
 });
 
 export const metadata = {
@@ -19,13 +16,10 @@ export const metadata = {
   description: 'Instantly connect with vehicle owners for parking issues or emergencies, 100% anonymously.',
 };
 
-// Main Layout
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
-
       <body className={`${poppins.variable} font-sans bg-background-color text-text-primary`} suppressHydrationWarning={true}>
-      {/* ▲▲▲ THIS IS THE FIX ▲▲▲ */}
         <AuthProvider>
           <Header />
           <main className="pt-20 min-h-screen">

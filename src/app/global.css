@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  /* Instead of flat colors, use gradient references */
+  --color-primary-blue: linear-gradient(90deg, #0a2a88 0%, #22d3ee 100%);
+  --color-accent-cyan: linear-gradient(90deg, #22d3ee 0%, #0a2a88 100%);
+}
+
+/* Make the gradients usable for text and backgrounds */
+.bg-primary-blue {
+  background: var(--color-primary-blue);
+}
+
+.bg-accent-cyan {
+  background: var(--color-accent-cyan);
+}
+
+.text-primary-blue {
+  background: var(--color-primary-blue);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-accent-cyan {
+  background: var(--color-accent-cyan);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+
+/* === Animated Gradient Background === */
+@keyframes gradientMotion {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-qnect-gradient {
+  background-image: linear-gradient(120deg, #0A2768 0%, #124B8C 35%, #1CB7D1 70%, #26BCCA 100%);
+  background-size: 200% 200%;
+  animation: gradientMotion 10s ease-in-out infinite;
+}
+
+/* === Glowing Text Animation === */
+@keyframes glowShift {
+  0% { text-shadow: 0 0 5px #1CB7D1, 0 0 10px #26BCCA; }
+  50% { text-shadow: 0 0 20px #26BCCA, 0 0 30px #1CB7D1; }
+  100% { text-shadow: 0 0 5px #1CB7D1, 0 0 10px #26BCCA; }
+}
+
+.glow-text {
+  animation: glowShift 4s ease-in-out infinite;
+}
+
+/* === Gradient Border Button === */
+.gradient-border {
+  position: relative;
+  display: inline-block;
+  padding: 0.75rem 2.5rem;
+  font-weight: 700;
+  color: white;
+  border-radius: 0.75rem;
+  background: transparent;
+  overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(120deg, #0A2768, #1CB7D1, #26BCCA);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+}
+
+.gradient-border:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* Optional Light Rays Overlay */
+@keyframes raysMove {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 200%; }
+}
+
+.light-rays {
+  background: url('/light-rays.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.1;
+  animation: raysMove 15s linear infinite;
+}
+
+
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientMove 4s linear infinite alternate;
+}

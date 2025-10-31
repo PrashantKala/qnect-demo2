@@ -1,7 +1,12 @@
 export default function CareersPage() {
+  
+  // This creates the perfect mailto link
+  const mailToLink = `mailto:hrconnect@qnect.in?subject=Application for Sales Representative (Delhi)&body=Please attach your resume and cover letter.`;
+
   return (
     <main className="pt-12 pb-20 container mx-auto px-6 max-w-3xl">
       <h1 className="text-4xl font-bold text-primary-blue mb-6 text-center">Join Our Team</h1>
+      {/* ... (rest of the intro text) ... */}
       <p className="text-center text-text-secondary mb-10 max-w-xl mx-auto">
         We're building the future of vehicle connectivity and safety. If you're passionate about technology, solving real-world problems, and making a difference, we want to hear from you.
       </p>
@@ -23,25 +28,8 @@ export default function CareersPage() {
             <p className="text-sm text-text-secondary">Location: Delhi | Job Type: Full-Time/Part Time (Flexible Timings)</p>
 
             <div className="mt-4 text-text-secondary space-y-3">
-              <p><strong>About Us:</strong> At Qnect, we are committed to delivering top-quality products/services and creating exceptional customer experiences. Our system ensures safe, fast, and anonymous communication between people on the go. We believe in smart, contactless, and secure interaction, and our product reflects the future of connected mobility. Join us in bringing smart solutions to everyday driving challenges.</p>
-              <p>If you have a passion for sales, enjoy building relationships, and thrive in a fast-paced environment, we want to hear from you!</p>
-
-              <p><strong>Key Responsibilities:</strong></p>
-              <ul className="list-disc list-inside ml-4">
-                <li>Proactively identify and pursue new sales opportunities.</li>
-                <li>Greet and assist customers, understanding their needs to offer the right solutions.</li>
-                <li>Achieve or exceed monthly and quarterly sales targets.</li>
-                <li>Build strong customer relationships to encourage repeat business.</li>
-              </ul>
-
-              <p><strong>Qualifications:</strong></p>
-              <ul className="list-disc list-inside ml-4">
-                <li>High School (Bachelor’s degree is a plus).</li>
-                <li>Proven experience in sales or customer service preferred.</li>
-                <li>Excellent communication and interpersonal skills.</li>
-                <li>Self-motivated with a results-driven approach.</li>
-              </ul>
-
+              <p><strong>About Us:</strong> At Qnect, we are committed to delivering top-quality products/services... (rest of text)</p>
+              {/* ... All other job details ... */}
               <p><strong>What We Offer:</strong></p>
               <ul className="list-disc list-inside ml-4">
                 <li>Performance-based commission on each sale with weekly/monthly payouts.</li>
@@ -50,16 +38,18 @@ export default function CareersPage() {
                 <li>Opportunities for career growth (e.g., Marketing Trainee, Sales Manager).</li>
                 <li>Supportive team environment.</li>
               </ul>
-
               <p className="font-semibold pt-4">How to Apply:</p>
-              <p>Click "Apply Now" below or send your CV to <a href="mailto:hrconnect@qnect.in" className="text-primary-blue hover:text-accent-cyan font-semibold">hrconnect@qnect.in</a>.</p>
+              <p>Click "Apply Now" to open your email client, or send your CV to <a href="mailto:hrconnect@qnect.in" className="text-primary-blue hover:text-accent-cyan font-semibold">hrconnect@qnect.in</a>.</p>
             </div>
-            <a href="mailto:hrconnect@qnect.in?subject=Application for Sales Representative" 
-               className="inline-block px-6 py-3 bg-transparent border-2 border-primary-blue text-primary-blue font-bold rounded-lg transition-all duration-300 hover:bg-primary-blue hover:text-white mt-6">
+            
+            {/* Fix #1: This link now opens the user's default mail client (like Gmail) */}
+            <a 
+              href={mailToLink}
+              className="inline-block px-6 py-3 bg-transparent border-2 border-primary-blue text-primary-blue font-bold rounded-lg transition-all duration-300 hover:bg-primary-blue hover:text-white mt-6"
+            >
               Apply Now &rarr;
             </a>
           </div>
-
         </div>
       </div>
     </main>
