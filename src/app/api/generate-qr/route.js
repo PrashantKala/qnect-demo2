@@ -30,7 +30,16 @@ export async function POST(request) {
     );
 
   } catch (error) {
-    console.error('API Error:', error.message);
-    return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+    console.error('API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    return NextResponse.json({ 
+      message: error.response?.data?.message || 'An internal server error occurred.',
+      error: error.response?.data
+    }, { 
+      status: error.response?.status || 500 
+    });
   }
 }
