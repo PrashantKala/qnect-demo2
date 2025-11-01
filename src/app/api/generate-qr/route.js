@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import axios from 'axios';
 
 // Your backend server
-const BACKEND_API_URL = '/api';
+const BACKEND_API_URL = 'https://qnect-backend.onrender.com/api';
 
 export async function POST(request) {
   try {
