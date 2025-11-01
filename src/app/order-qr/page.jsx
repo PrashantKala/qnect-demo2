@@ -37,11 +37,12 @@ export default function OrderQRPage() {
       
       console.log('Sending request to generate QR...');
 
-      const response = await fetch('/api/generate-qr', {
+      const response = await fetch('https://qnect-backend.onrender.com/api/qrs/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Access-Control-Allow-Origin': '*'
         }
       });
 
