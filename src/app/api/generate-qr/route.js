@@ -13,21 +13,35 @@ export async function POST(request) {
     }
     
     // Forward request to backend
-    const backendResponse = await axios.post(
-      `${BACKEND_API_URL}/qrs/generate`,
-      {},  // No body needed as user info comes from token
-      { 
-        headers: { 
-          Authorization: authHeader 
-        } 
-      }
-    );
+    try {
+      const backendResponse = await axios.post(
+        `${BACKEND_API_URL}/qrs/generate`,
+        {},  // No body needed as user info comes from token
+        { 
+          headers: { 
+            Authorization: authHeader 
+          },
+          validateStatus: false // This will prevent axios from throwing on non-2xx status
+        }
+      );
 
-    // Return backend response to frontend
-    return NextResponse.json(
-      backendResponse.data,
-      { status: backendResponse.status }
-    );
+      // Ensure we have a valid response
+      if (!backendResponse.data) {
+        throw new Error('Empty response from backend');
+      }
+
+      // Return backend response to frontend
+      return NextResponse.json(
+        backendResponse.data,
+        { status: backendResponse.status }
+      );
+    } catch (axiosError) {
+      // Handle axios specific errors
+      if (axiosError.response?.data) {
+        return NextResponse.json(axiosError.response.data, { 
+          status: axiosError.response.status || 500 
+        });
+      }
 
   } catch (error) {
     console.error('API Error:', {

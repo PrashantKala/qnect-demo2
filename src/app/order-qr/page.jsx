@@ -41,18 +41,30 @@ export default function OrderQRPage() {
           'Authorization': `Bearer ${token}`
         }
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Something went wrong');
 
-      // --- Success Popup Logic (Fix #1) ---
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('JSON Parse Error:', jsonError);
+        throw new Error('Invalid response from server');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Failed to generate QR code');
+      }
+
+      // --- Success Popup Logic ---
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
         router.push('/profile'); // Redirect to their new QR list
-      }, 2000); // Show popup for 2 seconds
+      }, 2000);
 
     } catch (err) {
-      setError(err.message);
+      console.error('Purchase Error:', err);
+      setError(err.message || 'Failed to generate QR code. Please try again.');
+    } finally {
       setIsProcessing(false);
     }
   };
