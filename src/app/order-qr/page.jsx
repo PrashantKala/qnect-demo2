@@ -32,7 +32,10 @@ export default function OrderQRPage() {
 
     try {
       const token = localStorage.getItem('qnect_token');
+      console.log('Retrieved token:', token);
       if (!token) throw new Error('You are not logged in. Please refresh and try again.');
+      
+      console.log('Sending request to generate QR...');
 
       const response = await fetch('/api/generate-qr', {
         method: 'POST',

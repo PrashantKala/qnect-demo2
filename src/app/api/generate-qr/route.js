@@ -12,14 +12,23 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('Sending request to backend:', `${BACKEND_API_URL}/qrs/generate`);
+    console.log('With auth header:', authHeader);
+    
     const backendResponse = await axios.post(
       `${BACKEND_API_URL}/qrs/generate`,
       {},
       {
         headers: { Authorization: authHeader },
-        validateStatus: false
+        validateStatus: false,
+        timeout: 30000 // 30 second timeout
       }
     );
+    
+    console.log('Backend response:', {
+      status: backendResponse.status,
+      data: backendResponse.data
+    });
 
     if (!backendResponse.data) {
       throw new Error('Empty response from backend');
