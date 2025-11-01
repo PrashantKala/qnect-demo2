@@ -32,43 +32,27 @@ export default function OrderQRPage() {
 
     try {
       const token = localStorage.getItem('qnect_token');
-      console.log('Retrieved token:', token);
       if (!token) throw new Error('You are not logged in. Please refresh and try again.');
-      
-      console.log('Sending request to generate QR...');
 
-      const response = await fetch('https://qnect-backend.onrender.com/api/qrs/generate', {
+      const response = await fetch('/api/generate-qr', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Access-Control-Allow-Origin': '*'
+          'Authorization': `Bearer ${token}`
         }
       });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Something went wrong');
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error('JSON Parse Error:', jsonError);
-        throw new Error('Invalid response from server');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to generate QR code');
-      }
-
-      // --- Success Popup Logic ---
+      // --- Success Popup Logic (Fix #1) ---
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
         router.push('/profile'); // Redirect to their new QR list
-      }, 2000);
+      }, 2000); // Show popup for 2 seconds
 
     } catch (err) {
-      console.error('Purchase Error:', err);
-      setError(err.message || 'Failed to generate QR code. Please try again.');
-    } finally {
+      setError(err.message);
       setIsProcessing(false);
     }
   };
