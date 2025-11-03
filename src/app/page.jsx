@@ -36,21 +36,34 @@ export default function HomePage() {
       {/* How It Works Section (Fix #2 - Doc) */}
       <section id="how-it-works" className="py-20 container mx-auto px-6 text-center">
         <h2 className="text-4xl font-bold text-center mb-12 text-primary-blue">How It Works</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
-            <h3 className="text-2xl font-bold text-primary-blue mb-3">1. Get Your QR</h3>
-            <p className="text-text-secondary">Get your personalized QNect QR code today! We’ll email you a high-quality PDF to print and display on your vehicle until your original sticker arrives at your doorstep.</p>
+
+        <div className="flex flex-col items-center gap-12 relative">
+          {/* Card 1 */}
+          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-2/5 transform transition-all duration-300 hover:-translate-y-1 relative left-0">
+            <h3 className="text-2xl font-bold mb-3">1. Get Your QR</h3>
+            <p className="text-white/90">
+              Get your personalized QNect QR code today! We’ll email you a high-quality PDF to print and display on your vehicle until your original sticker arrives at your doorstep.
+            </p>
           </div>
-          <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
-            <h3 className="text-2xl font-bold text-primary-blue mb-3">2. Activate in App</h3>
-            <p className="text-text-secondary">Download QNect app to activate and sync QR to your vehicle. Quick, encrypted, and fully private.</p>
+
+          {/* Card 2 */}
+          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-2/5 transform transition-all duration-300 hover:-translate-y-1 relative md:left-12">
+            <h3 className="text-2xl font-bold mb-3">2. Activate in App</h3>
+            <p className="text-white/90">
+              Download QNect app to activate and sync QR to your vehicle. Quick, encrypted, and fully private.
+            </p>
           </div>
-          <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
-            <h3 className="text-2xl font-bold text-primary-blue mb-3">3. Get Connected</h3>
-            <p className="text-text-secondary">If your car causes an issue, anyone can scan your QNect QR to contact you instantly—without ever seeing your phone number.</p>
+
+          {/* Card 3 */}
+          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-2/5 transform transition-all duration-300 hover:-translate-y-1 relative md:left-24">
+            <h3 className="text-2xl font-bold mb-3">3. Get Connected</h3>
+            <p className="text-white/90">
+              If your car causes an issue, anyone can scan your QNect QR to contact you instantly—without ever seeing your phone number.
+            </p>
           </div>
         </div>
       </section>
+
 
       {/* Pricing Section (Fix #2 - Doc) */}
       <section id="pricing" className="py-20 bg-white">
@@ -76,11 +89,15 @@ export default function HomePage() {
               </ul>
               <Link
                 href="/order-qr"
-                className="inline-block w-full px-10 py-4 bg-accent-cyan text-primary-blue text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
-                style={{ boxShadow: "0 4px 15px rgba(59, 218, 215, 0.3)" }}
+                className="inline-block w-full px-10 py-4 text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
+                style={{
+                  background: "linear-gradient(90deg, #1e40af, #22d3ee)",
+                  boxShadow: "0 4px 15px rgba(59, 218, 215, 0.3)",
+                }}
               >
                 Buy Now
               </Link>
+
             </div>
           </div>
         </div>
@@ -92,116 +109,191 @@ export default function HomePage() {
           <h2 className="text-4xl font-bold text-primary-blue mb-12">What Our Customers Say</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {/* Review 1 */}
-            <div className="bg-white p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col">
-              <Image src="https://placehold.co/100x100/EBF8FF/1C2541?text=A.S." alt="Reviewer A. Sharma" width={80} height={80} className="rounded-full mb-4 self-center" />
-              <p className="text-text-secondary flex-grow">"Got a call via the QNect app while in a meeting—my car was blocking someone. Problem solved in 2 minutes! Every car in Jaipur needs this."</p>
-              <p className="font-bold text-primary-blue mt-4 text-center">- A. Sharma</p>
+            <div
+              className="p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              style={{
+                background: "linear-gradient(135deg, #1e40af, #22d3ee)",
+                boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
+              }}
+            >
+              <Image
+                src="/pic1.png"
+                alt="Reviewer A. Sharma"
+                width={80}
+                height={80}
+                className="rounded-full mb-4 self-center border-4 border-white"
+              />
+              <p className="flex-grow opacity-90">
+                "Got a call via the QNect app while in a meeting—my car was blocking someone. Problem solved in 2 minutes! Every car in Jaipur needs this."
+              </p>
+              <p className="font-bold mt-4 text-center text-white">- A. Sharma</p>
             </div>
+
             {/* Review 2 */}
-            <div className="bg-white p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col">
-              <Image src="https://placehold.co/100x100/EBF8FF/1C2541?text=R.S." alt="Reviewer R. Singh" width={80} height={80} className="rounded-full mb-4 self-center" />
-              <p className="text-text-secondary flex-grow">"I was worried about putting my phone number on my car. QNect is the perfect solution. So simple and totally private."</p>
-              <p className="font-bold text-primary-blue mt-4 text-center">- R. Singh</p>
+            <div
+              className="p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              style={{
+                background: "linear-gradient(135deg, #1e40af, #22d3ee)",
+                boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
+              }}
+            >
+              <Image
+                src="/pic2.png"
+                alt="Reviewer R. Singh"
+                width={80}
+                height={80}
+                className="rounded-full mb-4 self-center border-4 border-white"
+              />
+              <p className="flex-grow opacity-90">
+                "I was worried about putting my phone number on my car. QNect is the perfect solution. So simple and totally private."
+              </p>
+              <p className="font-bold mt-4 text-center text-white">- R. Singh</p>
             </div>
+
             {/* Review 3 */}
-            <div className="bg-white p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col">
-              <Image src="https://placehold.co/100x100/EBF8FF/1C2541?text=P.K." alt="Reviewer Priya K." width={80} height={80} className="rounded-full mb-4 self-center" />
-              <p className="text-text-secondary flex-grow">"The best ₹299 I've spent. It's already saved me from one towing. The peace of mind is worth 10x the price."</p>
-              <p className="font-bold text-primary-blue mt-4 text-center">- Priya K.</p>
+            <div
+              className="p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              style={{
+                background: "linear-gradient(135deg, #1e40af, #22d3ee)",
+                boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
+              }}
+            >
+              <Image
+                src="/pic3.png"
+                alt="Reviewer Priya K."
+                width={80}
+                height={80}
+                className="rounded-full mb-4 self-center border-4 border-white"
+              />
+              <p className="flex-grow opacity-90">
+                "The best ₹299 I've spent. It's already saved me from one towing. The peace of mind is worth 10x the price."
+              </p>
+              <p className="font-bold mt-4 text-center text-white">- Priya K.</p>
             </div>
           </div>
+
         </div>
       </section>
 
       {/* FAQ Section (First 3 FAQs) */}
-<section id="faq" className="py-20 container mx-auto px-6">
-  <h2 className="text-4xl font-bold text-primary-blue mb-16 text-center">
-    Frequently Asked Questions
-  </h2>
+      <section id="faq" className="py-20 container mx-auto px-6">
+        <h2 className="text-4xl font-bold text-primary-blue mb-16 text-center">
+          Frequently Asked Questions
+        </h2>
 
-  <div className="space-y-16">
-    {/* Row 1 - FAQ left, Image right */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-      <div>
-        <h3 className="text-2xl font-bold text-primary-blue mb-3">
-          How is my privacy protected?
-        </h3>
-        <p className="text-text-secondary text-lg leading-relaxed">
-          With QNect, your phone number is never shared. When someone scans your
-          QR code, they connect with you through our secure Web-to-App system.
-          You receive the call in the app, keeping your number 100% private and
-          protected.
-        </p>
-      </div>
-      <img
-        src="https://via.placeholder.com/500x350"
-        alt="Privacy Protection"
-        className="w-full rounded-xl shadow-md"
-      />
-    </div>
+        <div className="space-y-16">
+          {/* Row 1 - FAQ left, Image right */}
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center p-8 rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #1e40af, #22d3ee)",
+              boxShadow: "0 4px 25px rgba(30, 64, 175, 0.25)",
+              color: "white",
+            }}
+          >
+            <div>
+              <h3 className="text-2xl font-bold mb-3 text-white">
+                How is my privacy protected?
+              </h3>
+              <p className="text-white/90 text-lg leading-relaxed">
+                With QNect, your phone number is never shared. When someone scans your
+                QR code, they connect with you through our secure Web-to-App system.
+                You receive the call in the app, keeping your number 100% private and
+                protected.
+              </p>
+            </div>
+            <img
+              src="https://via.placeholder.com/500x350"
+              alt="Privacy Protection"
+              className="w-full rounded-xl shadow-md"
+            />
+          </div>
 
-    {/* Row 2 - Image left, FAQ right */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-      <img
-        src="https://via.placeholder.com/500x350"
-        alt="Sell Car"
-        className="w-full rounded-xl shadow-md order-1 md:order-none"
-      />
-      <div>
-        <h3 className="text-2xl font-bold text-primary-blue mb-3">
-          What if I sell my car?
-        </h3>
-        <p className="text-text-secondary text-lg leading-relaxed">
-          Selling your car? Just deactivate your QR in the app. It’s unlinked
-          instantly, and you can get a new QR for your new ride—easy and
-          hassle-free.
-        </p>
-      </div>
-    </div>
+          {/* Row 2 - Image left, FAQ right */}
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center p-8 rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #1e40af, #22d3ee)",
+              boxShadow: "0 4px 25px rgba(30, 64, 175, 0.25)",
+              color: "white",
+            }}
+          >
+            <img
+              src="https://via.placeholder.com/500x350"
+              alt="Sell Car"
+              className="w-full rounded-xl shadow-md order-1 md:order-none"
+            />
+            <div>
+              <h3 className="text-2xl font-bold mb-3 text-white">
+                What if I sell my car?
+              </h3>
+              <p className="text-white/90 text-lg leading-relaxed">
+                Selling your car? Just deactivate your QR in the app. It’s unlinked
+                instantly, and you can get a new QR for your new ride—easy and
+                hassle-free.
+              </p>
+            </div>
+          </div>
 
-    {/* Row 3 - FAQ left, Image right */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-      <div>
-        <h3 className="text-2xl font-bold text-primary-blue mb-3">
-          Do I need to pay every year?
-        </h3>
-        <p className="text-text-secondary text-lg leading-relaxed">
-          No! Get full QNect services free for 2 years when you purchase your QR
-          for ₹299 + GST. After that, you can easily recharge to continue.
-        </p>
-      </div>
-      <img
-        src="https://via.placeholder.com/500x350"
-        alt="Payment Info"
-        className="w-full rounded-xl shadow-md"
-      />
-    </div>
-  </div>
+          {/* Row 3 - FAQ left, Image right */}
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center p-8 rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #1e40af, #22d3ee)",
+              boxShadow: "0 4px 25px rgba(30, 64, 175, 0.25)",
+              color: "white",
+            }}
+          >
+            <div>
+              <h3 className="text-2xl font-bold mb-3 text-white">
+                Do I need to pay every year?
+              </h3>
+              <p className="text-white/90 text-lg leading-relaxed">
+                No! Get full QNect services free for 2 years when you purchase your QR
+                for ₹299 + GST. After that, you can easily recharge to continue.
+              </p>
+            </div>
+            <img
+              src="https://via.placeholder.com/500x350"
+              alt="Payment Info"
+              className="w-full rounded-xl shadow-md"
+            />
+          </div>
+        </div>
 
-  <div className="text-center mt-16">
-    <Link
-      href="/faq"
-      className="inline-block px-10 py-4 bg-primary-blue text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-    >
-      Have More Questions?
-    </Link>
-  </div>
-</section>
+
+        <div className="text-center mt-16">
+          <Link
+            href="/faq"
+            className="inline-block px-10 py-4 bg-primary-blue text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+          >
+            Have More Questions?
+          </Link>
+        </div>
+      </section>
 
 
       {/* Refer Section (No changes, but now in correct theme) */}
-      <section id="refer" className="py-20 bg-white">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-primary-blue mb-6">Refer a Friend, Get Rewarded</h2>
-          <p className="text-lg text-text-secondary mb-8 max-w-xl mx-auto">
-            Love QNect? Share it with your friends and family. Our referral program is coming soon!
-          </p>
-          <div className="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
-            <h3 className="text-2xl font-bold text-primary-blue mb-4">Coming Soon</h3>
-            <p className="text-text-secondary">We're building a system to reward you for spreading the word. Stay tuned for updates in the app!</p>
-          </div>
-        </div>
-      </section>
+<section id="refer" className="py-20 bg-white">
+  <div className="container mx-auto px-6 text-center">
+    <h2 className="text-4xl font-bold text-primary-blue mb-6">
+      Refer a Friend, Get Rewarded
+    </h2>
+    <p className="text-lg text-text-secondary mb-8 max-w-xl mx-auto">
+      Love QNect? Share it with your friends and family and earn exciting
+      rewards for every successful referral.
+    </p>
+
+      <Link
+        href="/refer"
+        className="inline-block px-10 py-4 bg-gradient-to-r from-[#3BDAD7] to-[#26BCCA] text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
+        style={{ boxShadow: "0 4px 15px rgba(59, 218, 215, 0.3)" }}
+      >
+        Know More
+      </Link>
+  </div>
+</section>
+
 
       {/* Sticky App Scanner */}
       <div className="fixed bottom-6 right-6 z-50">

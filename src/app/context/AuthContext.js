@@ -49,9 +49,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (name, email, password) => {
+  const signup = async (userData) => {
     try {
-      const response = await registerUser(name, email, password);
+      const response = await registerUser(userData);
       setSession(response.data.token);
       // We no longer redirect here. The signup page will do it.
     } catch (error) { 
