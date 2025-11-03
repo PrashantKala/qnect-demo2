@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import axios from 'axios';
 
 // Your backend server
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL;
+const BACKEND_API_URL = process.env.API_URL;
 
 export async function POST(request) {
   try {
