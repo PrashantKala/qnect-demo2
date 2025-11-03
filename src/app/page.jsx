@@ -5,6 +5,7 @@ import Image from 'next/image';
 export default function HomePage() {
   return (
     <div>
+
       {/* Hero Section (Fix #3) */}
       <section className="relative flex flex-col items-center justify-center text-center min-h-[90vh] overflow-hidden">
         {/* Animated Gradient Background */}
@@ -34,35 +35,38 @@ export default function HomePage() {
 
 
       {/* How It Works Section (Fix #2 - Doc) */}
-      <section id="how-it-works" className="py-20 container mx-auto px-6 text-center">
-        <h2 className="text-4xl font-bold text-center mb-12 text-primary-blue">How It Works</h2>
+<section id="how-it-works" className="py-20 container mx-auto px-6 text-center">
+  <h2 className="text-4xl font-bold text-center mb-12 text-primary-blue">
+    How It Works
+  </h2>
 
-        <div className="flex flex-col items-center gap-12 relative">
-          {/* Card 1 */}
-          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-2/5 transform transition-all duration-300 hover:-translate-y-1 relative left-0">
-            <h3 className="text-2xl font-bold mb-3">1. Get Your QR</h3>
-            <p className="text-white/90">
-              Get your personalized QNect QR code today! We’ll email you a high-quality PDF to print and display on your vehicle until your original sticker arrives at your doorstep.
-            </p>
-          </div>
+  <div className="flex flex-col md:flex-row justify-center items-stretch gap-8">
+    {/* Card 1 */}
+    <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
+      <h3 className="text-2xl font-bold mb-3">1. Get Your QR</h3>
+      <p className="text-white/90">
+        Get your personalized QNect QR code today! We’ll email you a high-quality PDF to print and display on your vehicle until your original sticker arrives at your doorstep.
+      </p>
+    </div>
 
-          {/* Card 2 */}
-          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-2/5 transform transition-all duration-300 hover:-translate-y-1 relative md:left-12">
-            <h3 className="text-2xl font-bold mb-3">2. Activate in App</h3>
-            <p className="text-white/90">
-              Download QNect app to activate and sync QR to your vehicle. Quick, encrypted, and fully private.
-            </p>
-          </div>
+    {/* Card 2 */}
+    <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
+      <h3 className="text-2xl font-bold mb-3">2. Activate in App</h3>
+      <p className="text-white/90">
+        Download QNect app to activate and sync QR to your vehicle. Quick, encrypted, and fully private.
+      </p>
+    </div>
 
-          {/* Card 3 */}
-          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-2/5 transform transition-all duration-300 hover:-translate-y-1 relative md:left-24">
-            <h3 className="text-2xl font-bold mb-3">3. Get Connected</h3>
-            <p className="text-white/90">
-              If your car causes an issue, anyone can scan your QNect QR to contact you instantly—without ever seeing your phone number.
-            </p>
-          </div>
-        </div>
-      </section>
+    {/* Card 3 */}
+    <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
+      <h3 className="text-2xl font-bold mb-3">3. Get Connected</h3>
+      <p className="text-white/90">
+        If your car causes an issue, anyone can scan your QNect QR to contact you instantly—without ever seeing your phone number.
+      </p>
+    </div>
+  </div>
+</section>
+
 
 
       {/* Pricing Section (Fix #2 - Doc) */}

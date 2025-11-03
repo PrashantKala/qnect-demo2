@@ -69,6 +69,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ userToken, userEmail, isLoading, login, signup, logout }}>
+          {console.log("api url"+process.env.API_URL)}
       {children}
     </AuthContext.Provider>
   );

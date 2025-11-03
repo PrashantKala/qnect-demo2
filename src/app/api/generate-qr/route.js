@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import axios from 'axios';
 
 // Your backend server
-const BACKEND_API_URL = process.env.API_URL;
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(request) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request) {
     if (!authHeader) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
+          {console.log("api url"+process.env.API_URL)}
     // Forward the request to the backend
     const backendResponse = await axios.post(
       `${BACKEND_API_URL}/qrs/create-and-send`,
