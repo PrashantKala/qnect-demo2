@@ -5,6 +5,8 @@ import Image from 'next/image';
 export default function HomePage() {
   return (
     <div>
+    {console.log('API Base URL:', process.env.NEXT_PUBLIC_API_URL)
+}
       {/* Hero Section (Fix #3) */}
       <section className="relative flex flex-col items-center justify-center text-center min-h-[90vh] overflow-hidden">
         {/* Animated Gradient Background */}
