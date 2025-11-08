@@ -4,6 +4,8 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { loginUser, registerUser } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+import { setupPushNotifications, requestNotificationPermission, saveFCMToken } from '../../../lib/notificationService';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -19,6 +21,29 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('qnect_token', token);
       setUserToken(token);
       setUserEmail(decoded.email);
+
+      // Register for push notifications
+      setupPushNotifications()
+        .then(() => {
+          console.log('[AuthContext] Push notifications setup complete');
+          return requestNotificationPermission();
+        })
+        .then((granted) => {
+          if (granted) {
+            console.log('[AuthContext] Notification permission granted');
+            // Send FCM token to backend
+            saveFCMToken(token);
+            axios.post(
+              `${process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend.onrender.com'}/api/users/web-push-token`,
+              { token: token },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ).catch(err => console.error('Error registering web push token:', err));
+          }
+        })
+        .catch((error) => {
+          console.error('[AuthContext] Error setting up notifications:', error);
+          // Don't fail auth if notifications fail
+        });
     } catch (e) {
       console.error("Failed to decode token", e);
       // If token is bad, log them out

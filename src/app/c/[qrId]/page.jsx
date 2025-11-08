@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
-import { Phone, PhoneOff, Loader2 } from 'lucide-react';
+import { Phone, PhoneOff, Loader2, MessageCircle, Send, X } from 'lucide-react';
 
 const SOCKET_SERVER_URL = 'https://qnect-backend.onrender.com'; // NEW
 export default function CallPage() {
@@ -13,19 +13,41 @@ export default function CallPage() {
 
   const [callStatus, setCallStatus] = useState('idle');
   const [error, setError] = useState('');
+  
+  // Chat states
+  const [showChat, setShowChat] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState('');
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [ownerUserId, setOwnerUserId] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
+  const messagesEndRef = useRef(null);
   
   // ▼▼▼ FIX 1: Store the app's socket ID ▼▼▼
   const remoteSocketIdRef = useRef(null);
   // ▲▲▲ FIX 1 ▲▲▲
 
+  // Auto-scroll to latest message
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   useEffect(() => {
     socketRef.current = io(SOCKET_SERVER_URL);
     const socket = socketRef.current;
+
+    // Get current user ID from localStorage or session
+    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId') || 'guest-' + Math.random().toString(36).substr(2, 9);
+    setCurrentUserId(userId);
 
     socket.on('call-answered', (data) => {
       console.log("Call answered by app");
@@ -33,6 +55,11 @@ export default function CallPage() {
       
       // ▼▼▼ FIX 2: Save the app's socket ID so we can hang up ▼▼▼
       remoteSocketIdRef.current = data.fromSocketId;
+      
+      // Store owner user ID for chat
+      if (data.userId) {
+        setOwnerUserId(data.userId);
+      }
       // ▲▲▲ FIX 2 ▲▲▲
 
       peerRef.current.signal(data.answer);
@@ -58,11 +85,43 @@ export default function CallPage() {
       cleanup();
     });
 
+    // Chat event listeners
+    socket.on('receive-message', (data) => {
+      console.log("[Chat] Received message:", data);
+      setMessages(prev => [...prev, {
+        id: Math.random(),
+        senderId: data.senderId,
+        senderName: data.senderName,
+        content: data.content,
+        timestamp: data.timestamp,
+        isOwn: false
+      }]);
+    });
+
+    socket.on('chat-history', (data) => {
+      console.log("[Chat] Received chat history:", data.messages);
+      const formattedMessages = data.messages.map(msg => ({
+        id: msg._id,
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        content: msg.content,
+        timestamp: msg.createdAt,
+        isOwn: false
+      }));
+      setMessages(formattedMessages);
+      setIsLoadingChat(false);
+    });
+
+    socket.on('chat-history-error', (data) => {
+      console.error("[Chat] Error loading chat history:", data);
+      setIsLoadingChat(false);
+    });
+
     return () => {
       console.log("Cleaning up call page.");
       cleanup();
-      if (socket) {
-        socket.disconnect();
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.disconnect();
       }
     };
   }, []);
@@ -86,6 +145,7 @@ export default function CallPage() {
           socketRef.current.emit('call-user', {
             qrId: qrId,
             offer: offer,
+            callerName: 'Website User', // Send caller name for notifications
           });
         }
       });
@@ -138,6 +198,44 @@ export default function CallPage() {
   };
   // ▲▲▲ FIX 3 ▲▲▲
 
+  // Load chat history when chat is opened
+  const handleOpenChat = () => {
+    setShowChat(true);
+    if (ownerUserId && currentUserId && messages.length === 0) {
+      setIsLoadingChat(true);
+      socketRef.current.emit('request-chat-history', {
+        userId: currentUserId,
+        recipientId: ownerUserId
+      });
+    }
+  };
+
+  // Send message
+  const handleSendMessage = () => {
+    if (!messageInput.trim() || !ownerUserId || !currentUserId) return;
+
+    const msg = messageInput.trim();
+    setMessageInput('');
+
+    // Add message to local state
+    setMessages(prev => [...prev, {
+      id: Math.random(),
+      senderId: currentUserId,
+      senderName: 'You',
+      content: msg,
+      timestamp: new Date().toISOString(),
+      isOwn: true
+    }]);
+
+    // Send to server
+    socketRef.current.emit('send-message', {
+      senderUserId: currentUserId,
+      recipientId: ownerUserId,
+      senderName: 'You',
+      content: msg
+    });
+  };
+
   // ... (The rest of the file, renderButton(), and return() remain the same)
   
   const [success, setSuccess] = useState(''); // Add a success state
@@ -174,22 +272,110 @@ export default function CallPage() {
   };
 
   return (
-    <main className="container mx-auto px-6 py-12 pt-24 min-h-screen">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <h1 className="text-3xl font-bold text-primary-blue mb-2">Contact Owner</h1>
-          <p className="text-text-secondary mb-6">You are about to securely call the owner of QR Code:</p>
-          <p className="font-mono text-sm text-gray-500 bg-gray-100 rounded p-2 mb-8 break-all">{qrId}</p>
-          
-          {renderButton()}
+    <main className="container mx-auto px-6 py-12 pt-24 min-h-screen bg-gray-50">
+      <div className="max-w-2xl mx-auto flex gap-6">
+        {/* Call Section */}
+        <div className="flex-1">
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <h1 className="text-3xl font-bold text-primary-blue mb-2">Contact Owner</h1>
+            <p className="text-text-secondary mb-6">You are about to securely call the owner of QR Code:</p>
+            <p className="font-mono text-sm text-gray-500 bg-gray-100 rounded p-2 mb-8 break-all">{qrId}</p>
+            
+            {renderButton()}
 
-          {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-          {success && <p className="text-green-600 text-center mt-4">{success}</p>}
+            {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+            {success && <p className="text-green-600 text-center mt-4">{success}</p>}
 
-          <p className="text-xs text-gray-400 mt-6">
-            Your phone number is 100% private. This call is connected securely over the internet.
-          </p>
+            {callStatus === 'connected' && (
+              <button 
+                onClick={handleOpenChat}
+                className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+              >
+                <MessageCircle size={20} /> Open Chat
+              </button>
+            )}
+
+            {/* Chat button for non-app users (always visible) */}
+            {callStatus !== 'calling' && callStatus !== 'connected' && (
+              <button 
+                onClick={handleOpenChat}
+                className="w-full mt-3 flex items-center justify-center gap-2 px-10 py-3 bg-accent-cyan text-primary-blue font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+              >
+                <MessageCircle size={20} /> Chat with Owner
+              </button>
+            )}
+
+            <p className="text-xs text-gray-400 mt-6">
+              Your phone number is 100% private. This call is connected securely over the internet.
+            </p>
+          </div>
         </div>
+
+        {/* Chat Section */}
+        {showChat && (
+          <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden flex flex-col max-h-[600px]">
+            {/* Chat Header */}
+            <div className="bg-primary-blue text-white p-4 flex justify-between items-center">
+              <h2 className="font-bold">Chat with Owner</h2>
+              <button 
+                onClick={() => setShowChat(false)}
+                className="text-white hover:bg-blue-700 p-2 rounded"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+              {isLoadingChat ? (
+                <div className="text-center text-gray-500 py-4">Loading chat history...</div>
+              ) : messages.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">No messages yet. Start the conversation!</div>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs px-4 py-2 rounded-lg ${
+                        msg.isOwn
+                          ? 'bg-primary-blue text-white'
+                          : 'bg-gray-200 text-gray-900'
+                      }`}
+                    >
+                      <p className="text-sm font-semibold mb-1">{msg.senderName}</p>
+                      <p className="text-sm">{msg.content}</p>
+                      <p className={`text-xs mt-1 ${msg.isOwn ? 'text-blue-100' : 'text-gray-600'}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Message Input */}
+            <div className="border-t p-3 bg-white flex gap-2">
+              <input
+                type="text"
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Type a message..."
+                className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!messageInput.trim()}
+                className="bg-primary-blue text-white p-2 rounded hover:bg-blue-700 disabled:bg-gray-300 transition-all"
+              >
+                <Send size={20} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <audio ref={remoteAudioRef} autoPlay />
     </main>
