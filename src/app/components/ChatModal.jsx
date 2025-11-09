@@ -12,6 +12,7 @@ export default function ChatModal({
   onChangeMessage,
   onSend,
   onClose,
+  sendDisabled = false,
 }) {
   const modalRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -25,12 +26,14 @@ export default function ChatModal({
       }
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        onSend?.();
+        if (!sendDisabled && messageInput?.trim()) {
+          onSend?.();
+        }
       }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onClose, onSend]);
+  }, [open, onClose, onSend, sendDisabled, messageInput]);
 
   // Click outside to close
   const onBackdropClick = (e) => {
@@ -101,21 +104,28 @@ export default function ChatModal({
         </div>
 
         {/* Input */}
-        <div className="border-t p-3 bg-white flex gap-2">
-          <input
-            type="text"
-            value={messageInput}
-            onChange={(e) => onChangeMessage?.(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue"
-          />
-          <button
-            onClick={onSend}
-            disabled={!messageInput?.trim()}
-            className="bg-primary-blue text-white p-2 rounded hover:bg-blue-700 disabled:bg-gray-300 transition-all"
-          >
-            <Send size={20} />
-          </button>
+        <div className="border-t p-3 bg-white flex flex-col gap-2">
+          {sendDisabled && (
+            <div className="text-xs text-gray-500">
+              Looking up owner… please wait a moment.
+            </div>
+          )}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={messageInput}
+              onChange={(e) => onChangeMessage?.(e.target.value)}
+              placeholder="Type a message..."
+              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue"
+            />
+            <button
+              onClick={onSend}
+              disabled={sendDisabled || !messageInput?.trim()}
+              className="bg-primary-blue text-white p-2 rounded hover:bg-blue-700 disabled:bg-gray-300 transition-all"
+            >
+              <Send size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

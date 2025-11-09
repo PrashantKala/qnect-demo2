@@ -118,6 +118,37 @@ export default function CallPage() {
       setIsLoadingChat(false);
     });
 
+    // Acks/errors for send
+    socket.on('message-sent', (ack) => {
+      console.log('[Chat] message-sent ack:', ack);
+    });
+    socket.on('message-error', (err) => {
+      console.error('[Chat] message-error:', err);
+    });
+
+    // Resolve owner by qrId for chat (works even before a call connects)
+    if (qrId) {
+      socket.emit('search-user-by-qr', { qrId });
+    }
+
+    socket.on('user-search-result', (data) => {
+      if (data?.found && data?.userId) {
+        setOwnerUserId(data.userId);
+        // If user already opened chat and no messages loaded, request history now
+        if (showChat && messages.length === 0 && currentUserId) {
+          setIsLoadingChat(true);
+          socketRef.current.emit('request-chat-history', {
+            userId: currentUserId,
+            recipientId: data.userId
+          });
+        }
+      }
+    });
+
+    socket.on('user-search-failed', (payload) => {
+      console.warn('[Chat] Owner lookup failed:', payload?.message);
+    });
+
     return () => {
       console.log("Cleaning up call page.");
       cleanup();
@@ -202,6 +233,19 @@ export default function CallPage() {
   // Load chat history when chat is opened
   const handleOpenChat = () => {
     setShowChat(true);
+    // If owner not yet resolved, trigger lookup now
+    if (!ownerUserId && qrId && socketRef.current) {
+      setIsLoadingChat(true);
+      socketRef.current.emit('search-user-by-qr', { qrId });
+      // Retry the lookup once after a short delay if still not found
+      setTimeout(() => {
+        if (!ownerUserId && socketRef.current?.connected) {
+          console.log('[Chat] Retrying owner lookup...');
+          socketRef.current.emit('search-user-by-qr', { qrId });
+        }
+      }, 1200);
+      return; // wait for user-search-result to request history
+    }
     if (ownerUserId && currentUserId && messages.length === 0) {
       setIsLoadingChat(true);
       socketRef.current.emit('request-chat-history', {
@@ -213,9 +257,13 @@ export default function CallPage() {
 
   // Send message
   const handleSendMessage = () => {
-    if (!messageInput.trim() || !ownerUserId || !currentUserId) return;
+    const trimmed = messageInput.trim();
+    if (!trimmed) return;
+    if (!ownerUserId || !currentUserId) {
+      console.warn('[Chat] Missing ownerUserId or currentUserId; cannot send yet.');
+      return;
+    }
 
-    const msg = messageInput.trim();
     setMessageInput('');
 
     // Add message to local state
@@ -223,7 +271,7 @@ export default function CallPage() {
       id: Math.random(),
       senderId: currentUserId,
       senderName: 'You',
-      content: msg,
+      content: trimmed,
       timestamp: new Date().toISOString(),
       isOwn: true
     }]);
@@ -233,7 +281,7 @@ export default function CallPage() {
       senderUserId: currentUserId,
       recipientId: ownerUserId,
       senderName: 'You',
-      content: msg
+      content: trimmed
     });
   };
 
@@ -322,6 +370,7 @@ export default function CallPage() {
           onChangeMessage={setMessageInput}
           onSend={handleSendMessage}
           onClose={() => setShowChat(false)}
+          sendDisabled={!ownerUserId || !currentUserId}
         />
       </div>
       <audio ref={remoteAudioRef} autoPlay />
