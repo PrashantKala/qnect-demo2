@@ -256,7 +256,7 @@ export default function CallPage() {
   };
 
   // Send message
-  const handleSendMessage = () => {
+    const handleSendMessage = () => {
     const trimmed = messageInput.trim();
     if (!trimmed) return;
     if (!ownerUserId || !currentUserId) {
@@ -276,11 +276,11 @@ export default function CallPage() {
       isOwn: true
     }]);
 
-    // Send to server
+    // Send to server (use stable senderName for push clarity)
     socketRef.current.emit('send-message', {
       senderUserId: currentUserId,
       recipientId: ownerUserId,
-      senderName: 'You',
+      senderName: 'Website User',
       content: trimmed
     });
   };
