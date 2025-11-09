@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
-import { Phone, PhoneOff, Loader2, MessageCircle, Send, X } from 'lucide-react';
+import { Phone, PhoneOff, Loader2, MessageCircle } from 'lucide-react';
+import ChatModal from '../../components/ChatModal';
 
 const SOCKET_SERVER_URL = 'https://qnect-backend.onrender.com'; // NEW
 export default function CallPage() {
@@ -273,9 +274,9 @@ export default function CallPage() {
 
   return (
     <main className="container mx-auto px-6 py-12 pt-24 min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto flex gap-6">
+      <div className="max-w-2xl mx-auto">
         {/* Call Section */}
-        <div className="flex-1">
+        <div>
           <div className="bg-white p-8 rounded-lg shadow-md text-center">
             <h1 className="text-3xl font-bold text-primary-blue mb-2">Contact Owner</h1>
             <p className="text-text-secondary mb-6">You are about to securely call the owner of QR Code:</p>
@@ -311,71 +312,17 @@ export default function CallPage() {
           </div>
         </div>
 
-        {/* Chat Section */}
-        {showChat && (
-          <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden flex flex-col max-h-[600px]">
-            {/* Chat Header */}
-            <div className="bg-primary-blue text-white p-4 flex justify-between items-center">
-              <h2 className="font-bold">Chat with Owner</h2>
-              <button 
-                onClick={() => setShowChat(false)}
-                className="text-white hover:bg-blue-700 p-2 rounded"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-              {isLoadingChat ? (
-                <div className="text-center text-gray-500 py-4">Loading chat history...</div>
-              ) : messages.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">No messages yet. Start the conversation!</div>
-              ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs px-4 py-2 rounded-lg ${
-                        msg.isOwn
-                          ? 'bg-primary-blue text-white'
-                          : 'bg-gray-200 text-gray-900'
-                      }`}
-                    >
-                      <p className="text-sm font-semibold mb-1">{msg.senderName}</p>
-                      <p className="text-sm">{msg.content}</p>
-                      <p className={`text-xs mt-1 ${msg.isOwn ? 'text-blue-100' : 'text-gray-600'}`}>
-                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Message Input */}
-            <div className="border-t p-3 bg-white flex gap-2">
-              <input
-                type="text"
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Type a message..."
-                className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!messageInput.trim()}
-                className="bg-primary-blue text-white p-2 rounded hover:bg-blue-700 disabled:bg-gray-300 transition-all"
-              >
-                <Send size={20} />
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Chat Modal */}
+        <ChatModal
+          open={showChat}
+          title="Chat with Owner"
+          messages={messages}
+          isLoading={isLoadingChat}
+          messageInput={messageInput}
+          onChangeMessage={setMessageInput}
+          onSend={handleSendMessage}
+          onClose={() => setShowChat(false)}
+        />
       </div>
       <audio ref={remoteAudioRef} autoPlay />
     </main>
