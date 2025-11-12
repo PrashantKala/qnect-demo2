@@ -4,8 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
-import { Phone, PhoneOff, Loader2, MessageCircle } from 'lucide-react';
-import ChatModal from '../../components/ChatModal';
+import { Phone, PhoneOff, Loader2, Bell } from 'lucide-react';
 
 const SOCKET_SERVER_URL = 'https://qnect-backend.onrender.com'; // NEW
 export default function CallPage() {
@@ -15,11 +14,8 @@ export default function CallPage() {
   const [callStatus, setCallStatus] = useState('idle');
   const [error, setError] = useState('');
   
-  // Chat states
-  const [showChat, setShowChat] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
-  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  // Notify Owner state
+  const [showNotify, setShowNotify] = useState(false);
   const [ownerUserId, setOwnerUserId] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
 
@@ -28,19 +24,24 @@ export default function CallPage() {
   const localStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const TEMPLATES = [
+    'Your car is blocking mine, please move it.',
+    'Parking alert: You are parked in a no-parking zone.',
+    'Your headlights are on.',
+    'Your window is open.',
+    'Your car alarm is going off.',
+    'You left your trunk open.',
+    'Please return to your vehicle.',
+    'Urgent: Your car needs to be moved immediately.',
+    'You are double-parked.',
+    'Emergency: Please contact me regarding your car.'
+  ];
   
   // ▼▼▼ FIX 1: Store the app's socket ID ▼▼▼
   const remoteSocketIdRef = useRef(null);
   // ▲▲▲ FIX 1 ▲▲▲
 
-  // Auto-scroll to latest message
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // (Chat removed)
 
   useEffect(() => {
     socketRef.current = io(SOCKET_SERVER_URL);
@@ -86,44 +87,15 @@ export default function CallPage() {
       cleanup();
     });
 
-    // Chat event listeners
-    socket.on('receive-message', (data) => {
-      console.log("[Chat] Received message:", data);
-      setMessages(prev => [...prev, {
-        id: Math.random(),
-        senderId: data.senderId,
-        senderName: data.senderName,
-        content: data.content,
-        timestamp: data.timestamp,
-        isOwn: false
-      }]);
+    // Notify acks/errors
+    socket.on('notify-sent', (ack) => {
+      console.log('[Notify] notify-sent:', ack);
+      setSuccess('Owner has been notified.');
+      setShowNotify(false);
     });
-
-    socket.on('chat-history', (data) => {
-      console.log("[Chat] Received chat history:", data.messages);
-      const formattedMessages = data.messages.map(msg => ({
-        id: msg._id,
-        senderId: msg.senderId,
-        senderName: msg.senderName,
-        content: msg.content,
-        timestamp: msg.createdAt,
-        isOwn: false
-      }));
-      setMessages(formattedMessages);
-      setIsLoadingChat(false);
-    });
-
-    socket.on('chat-history-error', (data) => {
-      console.error("[Chat] Error loading chat history:", data);
-      setIsLoadingChat(false);
-    });
-
-    // Acks/errors for send
-    socket.on('message-sent', (ack) => {
-      console.log('[Chat] message-sent ack:', ack);
-    });
-    socket.on('message-error', (err) => {
-      console.error('[Chat] message-error:', err);
+    socket.on('notify-error', (err) => {
+      console.error('[Notify] notify-error:', err);
+      setError(err?.message || 'Failed to notify owner');
     });
 
     // Resolve owner by qrId for chat (works even before a call connects)
@@ -134,14 +106,7 @@ export default function CallPage() {
     socket.on('user-search-result', (data) => {
       if (data?.found && data?.userId) {
         setOwnerUserId(data.userId);
-        // If user already opened chat and no messages loaded, request history now
-        if (showChat && messages.length === 0 && currentUserId) {
-          setIsLoadingChat(true);
-          socketRef.current.emit('request-chat-history', {
-            userId: currentUserId,
-            recipientId: data.userId
-          });
-        }
+        // no-op for chat (removed)
       }
     });
 
@@ -230,58 +195,25 @@ export default function CallPage() {
   };
   // ▲▲▲ FIX 3 ▲▲▲
 
-  // Load chat history when chat is opened
-  const handleOpenChat = () => {
-    setShowChat(true);
-    // If owner not yet resolved, trigger lookup now
+  // Open Notify Owner modal
+  const handleOpenNotify = () => {
+    setShowNotify(true);
     if (!ownerUserId && qrId && socketRef.current) {
-      setIsLoadingChat(true);
       socketRef.current.emit('search-user-by-qr', { qrId });
-      // Retry the lookup once after a short delay if still not found
-      setTimeout(() => {
-        if (!ownerUserId && socketRef.current?.connected) {
-          console.log('[Chat] Retrying owner lookup...');
-          socketRef.current.emit('search-user-by-qr', { qrId });
-        }
-      }, 1200);
-      return; // wait for user-search-result to request history
-    }
-    if (ownerUserId && currentUserId && messages.length === 0) {
-      setIsLoadingChat(true);
-      socketRef.current.emit('request-chat-history', {
-        userId: currentUserId,
-        recipientId: ownerUserId
-      });
     }
   };
 
-  // Send message
-    const handleSendMessage = () => {
-    const trimmed = messageInput.trim();
-    if (!trimmed) return;
-    if (!ownerUserId || !currentUserId) {
-      console.warn('[Chat] Missing ownerUserId or currentUserId; cannot send yet.');
+  const handleSendNotify = (templateText) => {
+    if (!ownerUserId || !socketRef.current) {
+      setError('Owner not resolved yet. Please try again.');
       return;
     }
-
-    setMessageInput('');
-
-    // Add message to local state
-    setMessages(prev => [...prev, {
-      id: Math.random(),
-      senderId: currentUserId,
-      senderName: 'You',
-      content: trimmed,
-      timestamp: new Date().toISOString(),
-      isOwn: true
-    }]);
-
-    // Send to server (use stable senderName for push clarity)
-    socketRef.current.emit('send-message', {
-      senderUserId: currentUserId,
+    socketRef.current.emit('notify-owner', {
       recipientId: ownerUserId,
+      source: 'web',
+      qrId,
+      templateText,
       senderName: 'Website User',
-      content: trimmed
     });
   };
 
@@ -335,24 +267,13 @@ export default function CallPage() {
             {error && <p className="text-red-500 text-center mt-4">{error}</p>}
             {success && <p className="text-green-600 text-center mt-4">{success}</p>}
 
-            {callStatus === 'connected' && (
-              <button 
-                onClick={handleOpenChat}
-                className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-              >
-                <MessageCircle size={20} /> Open Chat
-              </button>
-            )}
-
-            {/* Chat button for non-app users (always visible) */}
-            {callStatus !== 'calling' && callStatus !== 'connected' && (
-              <button 
-                onClick={handleOpenChat}
-                className="w-full mt-3 flex items-center justify-center gap-2 px-10 py-3 bg-accent-cyan text-primary-blue font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-              >
-                <MessageCircle size={20} /> Chat with Owner
-              </button>
-            )}
+            {/* Notify Owner button (always available) */}
+            <button 
+              onClick={handleOpenNotify}
+              className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+            >
+              <Bell size={20} /> Notify Owner
+            </button>
 
             <p className="text-xs text-gray-400 mt-6">
               Your phone number is 100% private. This call is connected securely over the internet.
@@ -360,18 +281,25 @@ export default function CallPage() {
           </div>
         </div>
 
-        {/* Chat Modal */}
-        <ChatModal
-          open={showChat}
-          title="Chat with Owner"
-          messages={messages}
-          isLoading={isLoadingChat}
-          messageInput={messageInput}
-          onChangeMessage={setMessageInput}
-          onSend={handleSendMessage}
-          onClose={() => setShowChat(false)}
-          sendDisabled={!ownerUserId || !currentUserId}
-        />
+        {/* Notify Owner Modal */}
+        {showNotify && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="w-full max-w-md bg-white rounded-lg p-4 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold">Quick Messages</h3>
+                <button onClick={() => setShowNotify(false)} className="text-gray-500">✕</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-2">Select a message to notify the owner:</p>
+              <div className="max-h-80 overflow-auto space-y-2">
+                {TEMPLATES.map((t, idx) => (
+                  <button key={idx} onClick={() => handleSendNotify(t)} className="w-full text-left px-3 py-2 rounded border hover:bg-gray-50">
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <audio ref={remoteAudioRef} autoPlay />
     </main>
