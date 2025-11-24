@@ -9,7 +9,9 @@ import {
   updateAddress,
   updateProfile,
   toggleQRStatus as toggleQRStatusApi,
-  resendQR
+  resendQR,
+  addGuardian,
+  deleteGuardian
 } from '../../../lib/api';
 import {
   IoCopy,
@@ -17,7 +19,10 @@ import {
   IoDownloadOutline,
   IoPencilOutline,
   IoRepeatOutline,
-  IoToggleOutline
+  IoToggleOutline,
+  IoAddCircleOutline,
+  IoTrashOutline,
+  IoCloseCircleOutline
 } from 'react-icons/io5';
 
 export default function ProfilePage() {
@@ -31,6 +36,10 @@ export default function ProfilePage() {
   const [editAddress, setEditAddress] = useState(false);
   const [editedAddress, setEditedAddress] = useState({});
   const [editedProfile, setEditedProfile] = useState({});
+  
+  // Guardian states
+  const [manageGuardians, setManageGuardians] = useState(false);
+  const [newGuardian, setNewGuardian] = useState({ name: '', email: '', phoneNumber: '', relation: '' });
 
   const handleResendQR = async (qrId) => {
     try {
@@ -89,6 +98,39 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error updating address:', error);
       alert('Failed to update address. Please try again.');
+    }
+  };
+
+  const handleAddGuardian = async (e) => {
+    e.preventDefault();
+    if (!newGuardian.name || !newGuardian.phoneNumber) {
+      alert('Name and Phone Number are required');
+      return;
+    }
+    try {
+      const response = await addGuardian(newGuardian);
+      if (response.data) {
+        setProfile(response.data);
+        setNewGuardian({ name: '', email: '', phoneNumber: '', relation: '' });
+        setManageGuardians(false);
+        alert('Guardian added successfully');
+      }
+    } catch (error) {
+      console.error('Error adding guardian:', error);
+      alert('Failed to add guardian');
+    }
+  };
+
+  const handleDeleteGuardian = async (guardianId) => {
+    if (!confirm('Are you sure you want to remove this guardian?')) return;
+    try {
+      const response = await deleteGuardian(guardianId);
+      if (response.data) {
+        setProfile(response.data);
+      }
+    } catch (error) {
+      console.error('Error deleting guardian:', error);
+      alert('Failed to delete guardian');
     }
   };
 
@@ -243,6 +285,74 @@ export default function ProfilePage() {
                 <p>{profile?.address?.country}</p>
               </div>
             )}
+          </div>
+
+          {/* Guardians Card */}
+          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Guardians</h2>
+              <button onClick={() => setManageGuardians(!manageGuardians)} className="p-2 hover:bg-white/20 rounded-full transition">
+                {manageGuardians ? <IoCloseCircleOutline className="h-6 w-6" /> : <IoAddCircleOutline className="h-6 w-6" />}
+              </button>
+            </div>
+
+            {manageGuardians && (
+              <form onSubmit={handleAddGuardian} className="bg-white/10 p-4 rounded-lg mb-4 space-y-3">
+                <h3 className="font-bold mb-2">Add New Guardian</h3>
+                <input
+                  type="text"
+                  placeholder="Name *"
+                  value={newGuardian.name}
+                  onChange={(e) => setNewGuardian({...newGuardian, name: e.target.value})}
+                  className="w-full p-2 rounded text-black"
+                  required
+                />
+                <input
+                  type="tel"
+                  placeholder="Phone Number *"
+                  value={newGuardian.phoneNumber}
+                  onChange={(e) => setNewGuardian({...newGuardian, phoneNumber: e.target.value})}
+                  className="w-full p-2 rounded text-black"
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email (Optional)"
+                  value={newGuardian.email}
+                  onChange={(e) => setNewGuardian({...newGuardian, email: e.target.value})}
+                  className="w-full p-2 rounded text-black"
+                />
+                <input
+                  type="text"
+                  placeholder="Relation (e.g. Father)"
+                  value={newGuardian.relation}
+                  onChange={(e) => setNewGuardian({...newGuardian, relation: e.target.value})}
+                  className="w-full p-2 rounded text-black"
+                />
+                <div className="flex gap-2 pt-2">
+                  <button type="submit" className="flex-1 bg-white text-primary-blue py-2 rounded font-bold">Add</button>
+                  <button type="button" onClick={() => setManageGuardians(false)} className="flex-1 bg-white/20 py-2 rounded">Cancel</button>
+                </div>
+              </form>
+            )}
+
+            <div className="space-y-3">
+              {profile?.guardians && profile.guardians.length > 0 ? (
+                profile.guardians.map((guardian) => (
+                  <div key={guardian._id} className="flex justify-between items-center bg-white/10 p-3 rounded-lg">
+                    <div>
+                      <p className="font-bold">{guardian.name}</p>
+                      <p className="text-sm text-white/80">{guardian.relation} • {guardian.phoneNumber}</p>
+                    </div>
+                    <button onClick={() => handleDeleteGuardian(guardian._id)} className="p-2 hover:bg-red-500/20 rounded-full text-red-200 hover:text-red-100 transition">
+                      <IoTrashOutline className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-white/60 italic text-center py-2">No guardians added yet.</p>
+              )}
+            </div>
           </div>
 
           {/* Wallet Card */}
