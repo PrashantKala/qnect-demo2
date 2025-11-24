@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
-import { Phone, PhoneOff, Loader2, Bell } from 'lucide-react';
+import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X } from 'lucide-react';
+import { fetchQRGuardians, sendEmergencyAlert } from '../../../lib/api';
 
 const SOCKET_SERVER_URL = 'https://qnect-backend.onrender.com'; // NEW
 export default function CallPage() {
@@ -18,6 +19,18 @@ export default function CallPage() {
   const [showNotify, setShowNotify] = useState(false);
   const [ownerUserId, setOwnerUserId] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+
+  // Emergency Connect state
+  const [showEmergency, setShowEmergency] = useState(false);
+  const [guardians, setGuardians] = useState([]);
+  const [loadingGuardians, setLoadingGuardians] = useState(false);
+  const [emergencyForm, setEmergencyForm] = useState({
+    description: '',
+    phoneNumber: '',
+    media: [], // Array of { file, preview, base64 }
+    selectedGuardianId: null
+  });
+  const [sendingEmergency, setSendingEmergency] = useState(false);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -217,7 +230,76 @@ export default function CallPage() {
     });
   };
 
-  // ... (The rest of the file, renderButton(), and return() remain the same)
+  // Emergency Connect Handlers
+  const handleOpenEmergency = async () => {
+    setShowEmergency(true);
+    setLoadingGuardians(true);
+    try {
+      const res = await fetchQRGuardians(qrId);
+      setGuardians(res.data.guardians || []);
+    } catch (err) {
+      console.error("Failed to fetch guardians", err);
+      setError("Could not load emergency contacts.");
+    } finally {
+      setLoadingGuardians(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEmergencyForm(prev => ({
+          ...prev,
+          media: [...prev.media, {
+            file,
+            preview: URL.createObjectURL(file),
+            base64: reader.result // This includes the data:image/...;base64, prefix
+          }]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveMedia = (index) => {
+    setEmergencyForm(prev => ({
+      ...prev,
+      media: prev.media.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSendEmergency = async (guardianId) => {
+    if (emergencyForm.media.length === 0) {
+      alert("Please add at least one photo or video of the situation.");
+      return;
+    }
+
+    setSendingEmergency(true);
+    try {
+      await sendEmergencyAlert({
+        qrId,
+        description: emergencyForm.description,
+        phoneNumber: emergencyForm.phoneNumber,
+        media: emergencyForm.media.map(m => ({
+          base64: m.base64,
+          type: m.file.type
+        })),
+        guardianId
+      });
+      setShowEmergency(false);
+      setSuccess("Emergency alert sent to guardian successfully.");
+      setEmergencyForm({ description: '', phoneNumber: '', media: [], selectedGuardianId: null });
+    } catch (err) {
+      console.error("Emergency alert failed", err);
+      alert("Failed to send emergency alert. Please try again.");
+    } finally {
+      setSendingEmergency(false);
+    }
+  };
   
   const [success, setSuccess] = useState(''); // Add a success state
 
@@ -275,6 +357,14 @@ export default function CallPage() {
               <Bell size={20} /> Notify Owner
             </button>
 
+            {/* Emergency Connect button (always available) */}
+            <button 
+              onClick={handleOpenEmergency}
+              className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-white text-red-600 border-2 border-red-600 font-semibold rounded-lg shadow-md transition-all duration-300 hover:bg-red-50 hover:-translate-y-0.5"
+            >
+              <AlertTriangle size={20} /> Emergency Connect
+            </button>
+
             <p className="text-xs text-gray-400 mt-6">
               Your phone number is 100% private. This call is connected securely over the internet.
             </p>
@@ -296,6 +386,103 @@ export default function CallPage() {
                     {t}
                   </button>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Emergency Connect Modal */}
+        {showEmergency && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
+            <div className="w-full max-w-lg bg-white rounded-lg shadow-lg my-8 flex flex-col max-h-[90vh]">
+              <div className="p-4 border-b flex items-center justify-between bg-red-50 rounded-t-lg">
+                <div className="flex items-center gap-2 text-red-600">
+                  <AlertTriangle size={24} />
+                  <h3 className="text-xl font-bold">Emergency Connect</h3>
+                </div>
+                <button onClick={() => setShowEmergency(false)} className="text-gray-500 hover:text-gray-700">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto">
+                {/* 1. Media Upload */}
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">1. Share Situation (Required)</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {emergencyForm.media.map((m, idx) => (
+                      <div key={idx} className="relative w-24 h-24 border rounded overflow-hidden">
+                        <img src={m.preview} alt="preview" className="w-full h-full object-cover" />
+                        <button 
+                          onClick={() => handleRemoveMedia(idx)}
+                          className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                    <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
+                      <Camera size={24} className="text-gray-400" />
+                      <span className="text-xs text-gray-500 mt-1">Add Photo</span>
+                      <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileChange} />
+                    </label>
+                  </div>
+                </div>
+
+                {/* 2. Description */}
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">2. Describe Situation (Optional)</label>
+                  <textarea 
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
+                    rows="3"
+                    placeholder="What is happening?"
+                    value={emergencyForm.description}
+                    onChange={(e) => setEmergencyForm({...emergencyForm, description: e.target.value})}
+                  />
+                </div>
+
+                {/* 3. Phone Number */}
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">3. Your Phone Number (Optional)</label>
+                  <input 
+                    type="tel"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
+                    placeholder="So they can call you back"
+                    value={emergencyForm.phoneNumber}
+                    onChange={(e) => setEmergencyForm({...emergencyForm, phoneNumber: e.target.value})}
+                  />
+                </div>
+
+                {/* 4. Select Guardian */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">4. Select Guardian to Notify</label>
+                  {loadingGuardians ? (
+                    <div className="flex justify-center py-4"><Loader2 className="animate-spin text-gray-400" /></div>
+                  ) : guardians.length > 0 ? (
+                    <div className="space-y-2">
+                      {guardians.map((g) => (
+                        <button
+                          key={g._id}
+                          onClick={() => handleSendEmergency(g._id)}
+                          disabled={sendingEmergency}
+                          className="w-full flex items-center justify-between p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-left group"
+                        >
+                          <div>
+                            <div className="font-bold text-gray-800">{g.name}</div>
+                            <div className="text-sm text-gray-500">{g.relation}</div>
+                          </div>
+                          <div className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold group-hover:bg-red-700">
+                            {sendingEmergency ? 'Sending...' : 'Notify'}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
+                      No guardians set up for this user.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
