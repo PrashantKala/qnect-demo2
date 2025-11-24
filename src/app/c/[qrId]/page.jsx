@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
 import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X } from 'lucide-react';
-import { fetchQRGuardians, sendEmergencyAlert } from '../../../lib/api';
+import { fetchQRGuardians, sendEmergencyAlert } from '../../../../lib/api';
 
 const SOCKET_SERVER_URL = 'https://qnect-backend.onrender.com'; // NEW
 export default function CallPage() {
