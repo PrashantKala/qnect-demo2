@@ -103,8 +103,8 @@ export default function ProfilePage() {
 
   const handleAddGuardian = async (e) => {
     e.preventDefault();
-    if (!newGuardian.name || !newGuardian.phoneNumber) {
-      alert('Name and Phone Number are required');
+    if (!newGuardian.name || !newGuardian.phoneNumber || !newGuardian.email) {
+      alert('Name, Phone Number, and Email are required');
       return;
     }
     try {
@@ -117,7 +117,8 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('Error adding guardian:', error);
-      alert('Failed to add guardian');
+      const msg = error.response?.data?.message || 'Failed to add guardian';
+      alert(msg);
     }
   };
 
@@ -317,10 +318,11 @@ export default function ProfilePage() {
                 />
                 <input
                   type="email"
-                  placeholder="Email (Optional)"
+                  placeholder="Email (Required - Must have account) *"
                   value={newGuardian.email}
                   onChange={(e) => setNewGuardian({...newGuardian, email: e.target.value})}
                   className="w-full p-2 rounded text-black"
+                  required
                 />
                 <input
                   type="text"
