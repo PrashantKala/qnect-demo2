@@ -17,7 +17,7 @@ export default function HomePage() {
         {/* Hero Content */}
         <div className="relative z-10 px-6 md:px-10 text-white">
           <h1 className="text-5xl md:text-7xl font-bold glow-text">Cars can’t talk.</h1>
-          <h2 className="text-5xl md:text-7xl font-bold text-accent-cyan glow-text mt-2">QNect can.</h2>
+          <h2 className="text-5xl md:text-7xl font-bold glow-text mt-2">QNect can.</h2>
           <p className="max-w-2xl mx-auto mt-6 text-lg text-gray-100 leading-relaxed">
             The smart QR that gives your vehicle a voice. Instantly connect with owners for parking issues or emergencies — privately and securely.
           </p>
