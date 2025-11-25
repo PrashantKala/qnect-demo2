@@ -272,7 +272,9 @@ export default function CallPage() {
     }));
   };
 
-  const handleSendEmergency = async (guardianId) => {
+  const [alertSent, setAlertSent] = useState(false); // New state for success view
+
+  const handleSendEmergency = async () => {
     if (emergencyForm.media.length === 0) {
       alert("Please add at least one photo or video of the situation.");
       return;
@@ -288,11 +290,10 @@ export default function CallPage() {
           base64: m.base64,
           type: m.file.type
         })),
-        guardianId
+        guardianId: null // Send to all
       });
-      setShowEmergency(false);
-      setSuccess("Emergency alert sent to guardian successfully.");
-      setEmergencyForm({ description: '', phoneNumber: '', media: [], selectedGuardianId: null });
+      setAlertSent(true); // Switch to success view
+      setSuccess("Emergency alert sent to guardians successfully.");
     } catch (err) {
       console.error("Emergency alert failed", err);
       alert("Failed to send emergency alert. Please try again.");
@@ -400,89 +401,116 @@ export default function CallPage() {
                   <AlertTriangle size={24} />
                   <h3 className="text-xl font-bold">Emergency Connect</h3>
                 </div>
-                <button onClick={() => setShowEmergency(false)} className="text-gray-500 hover:text-gray-700">
+                <button onClick={() => { setShowEmergency(false); setAlertSent(false); }} className="text-gray-500 hover:text-gray-700">
                   <X size={24} />
                 </button>
               </div>
               
               <div className="p-6 overflow-y-auto">
-                {/* 1. Media Upload */}
-                <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">1. Share Situation (Required)</label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {emergencyForm.media.map((m, idx) => (
-                      <div key={idx} className="relative w-24 h-24 border rounded overflow-hidden">
-                        <img src={m.preview} alt="preview" className="w-full h-full object-cover" />
-                        <button 
-                          onClick={() => handleRemoveMedia(idx)}
-                          className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl"
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ))}
-                    <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
-                      <Camera size={24} className="text-gray-400" />
-                      <span className="text-xs text-gray-500 mt-1">Add Photo</span>
-                      <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileChange} />
-                    </label>
+                {loadingGuardians ? (
+                  <div className="flex justify-center py-8"><Loader2 className="animate-spin text-gray-400" size={32} /></div>
+                ) : guardians.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="bg-gray-100 p-4 rounded-full inline-block mb-4">
+                      <AlertTriangle size={32} className="text-gray-400" />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-700 mb-2">Owner didn't select any guardian</h4>
+                    <p className="text-gray-500">This user has not set up any emergency contacts yet.</p>
+                    <button onClick={() => setShowEmergency(false)} className="mt-6 px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium">
+                      Close
+                    </button>
                   </div>
-                </div>
-
-                {/* 2. Description */}
-                <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">2. Describe Situation (Optional)</label>
-                  <textarea 
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
-                    rows="3"
-                    placeholder="What is happening?"
-                    value={emergencyForm.description}
-                    onChange={(e) => setEmergencyForm({...emergencyForm, description: e.target.value})}
-                  />
-                </div>
-
-                {/* 3. Phone Number */}
-                <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">3. Your Phone Number (Optional)</label>
-                  <input 
-                    type="tel"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
-                    placeholder="So they can call you back"
-                    value={emergencyForm.phoneNumber}
-                    onChange={(e) => setEmergencyForm({...emergencyForm, phoneNumber: e.target.value})}
-                  />
-                </div>
-
-                {/* 4. Select Guardian */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">4. Select Guardian to Notify</label>
-                  {loadingGuardians ? (
-                    <div className="flex justify-center py-4"><Loader2 className="animate-spin text-gray-400" /></div>
-                  ) : guardians.length > 0 ? (
-                    <div className="space-y-2">
-                      {guardians.map((g) => (
-                        <button
-                          key={g._id}
-                          onClick={() => handleSendEmergency(g._id)}
-                          disabled={sendingEmergency}
-                          className="w-full flex items-center justify-between p-4 border rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors text-left group"
-                        >
-                          <div>
-                            <div className="font-bold text-gray-800">{g.name}</div>
-                            <div className="text-sm text-gray-500">{g.relation}</div>
-                          </div>
-                          <div className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold group-hover:bg-red-700">
-                            {sendingEmergency ? 'Sending...' : 'Notify'}
-                          </div>
-                        </button>
-                      ))}
+                ) : alertSent ? (
+                  <div className="text-center py-4">
+                    <div className="bg-green-100 p-4 rounded-full inline-block mb-4">
+                      <div className="text-green-600 text-4xl">✓</div>
                     </div>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
-                      No guardians set up for this user.
+                    <h4 className="text-xl font-bold text-gray-800 mb-2">Alert Sent!</h4>
+                    <p className="text-gray-600 mb-6">Guardians have been notified with your details.</p>
+                    
+                    <div className="text-left bg-gray-50 rounded-lg p-4 mb-6">
+                      <h5 className="font-bold text-gray-700 mb-3 border-b pb-2">Quick Connect</h5>
+                      <div className="space-y-3">
+                        {guardians.map((g) => (
+                          <div key={g._id} className="flex items-center justify-between bg-white p-3 rounded border shadow-sm">
+                            <div>
+                              <div className="font-bold text-gray-800">{g.name}</div>
+                              <div className="text-sm text-gray-500">{g.relation}</div>
+                            </div>
+                            <a href={`tel:${g.phoneNumber}`} className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-colors">
+                              <Phone size={20} />
+                            </a>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  )}
-                </div>
+                    
+                    <button onClick={() => { setShowEmergency(false); setAlertSent(false); }} className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold">
+                      Close
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* 1. Media Upload */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">1. Share Situation (Required)</label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {emergencyForm.media.map((m, idx) => (
+                          <div key={idx} className="relative w-24 h-24 border rounded overflow-hidden">
+                            <img src={m.preview} alt="preview" className="w-full h-full object-cover" />
+                            <button 
+                              onClick={() => handleRemoveMedia(idx)}
+                              className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                        <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
+                          <Camera size={24} className="text-gray-400" />
+                          <span className="text-xs text-gray-500 mt-1">Add Photo</span>
+                          <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileChange} />
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* 2. Description */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">2. Describe Situation (Optional)</label>
+                      <textarea 
+                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
+                        rows="3"
+                        placeholder="What is happening?"
+                        value={emergencyForm.description}
+                        onChange={(e) => setEmergencyForm({...emergencyForm, description: e.target.value})}
+                      />
+                    </div>
+
+                    {/* 3. Phone Number */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">3. Your Phone Number (Optional)</label>
+                      <input 
+                        type="tel"
+                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
+                        placeholder="So they can call you back"
+                        value={emergencyForm.phoneNumber}
+                        onChange={(e) => setEmergencyForm({...emergencyForm, phoneNumber: e.target.value})}
+                      />
+                    </div>
+
+                    <button 
+                      onClick={handleSendEmergency}
+                      disabled={sendingEmergency}
+                      className="w-full py-4 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {sendingEmergency ? (
+                        <><Loader2 className="animate-spin" /> Sending Alert...</>
+                      ) : (
+                        <><AlertTriangle size={20} /> INFORM GUARDIANS</>
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
