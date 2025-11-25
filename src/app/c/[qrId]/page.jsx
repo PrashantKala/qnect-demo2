@@ -273,6 +273,86 @@ export default function CallPage() {
   };
 
   const [alertSent, setAlertSent] = useState(false); // New state for success view
+  const [callingGuardianId, setCallingGuardianId] = useState(null);
+
+  const handleCallGuardian = async (guardian) => {
+    if (!guardian.userId) {
+      // Fallback to phone call if guardian is not a registered user
+      window.location.href = `tel:${guardian.phoneNumber}`;
+      return;
+    }
+
+    setCallingGuardianId(guardian._id);
+    setCallStatus('calling');
+    setError('');
+    setShowEmergency(false); // Close modal to show main call UI
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+      localStreamRef.current = stream;
+      const peer = new SimplePeer({
+        initiator: true,
+        trickle: true,
+        stream: stream,
+      });
+      peerRef.current = peer;
+
+      peer.on('signal', (offer) => {
+        if (offer.type === 'offer') {
+          console.log("Generated offer for guardian, sending to server...");
+          socketRef.current.emit('app-call-user', {
+            targetUserId: guardian.userId,
+            offer: offer,
+            callerName: 'Emergency Contact',
+            callerId: 'web-user', // Anonymous web user
+          });
+        }
+      });
+
+      peer.on('stream', (remoteStream) => {
+        if (remoteAudioRef.current) {
+          remoteAudioRef.current.srcObject = remoteStream;
+          remoteAudioRef.current.play();
+        }
+      });
+
+      peer.on('close', () => {
+        console.log("Peer connection closed.");
+        cleanup();
+        setCallStatus('idle');
+        setCallingGuardianId(null);
+      });
+
+      peer.on('error', (err) => {
+        console.error("Peer error:", err);
+        setError('A connection error occurred.');
+        setCallStatus('failed');
+        cleanup();
+        setCallingGuardianId(null);
+      });
+
+      // Listen for answer (app-call-answered)
+      socketRef.current.on('app-call-answered', (data) => {
+        console.log("Call answered by guardian");
+        setCallStatus('connected');
+        remoteSocketIdRef.current = data.fromSocketId;
+        peerRef.current.signal(data.answer);
+      });
+
+      // Listen for ICE candidates (app-ice-candidate)
+      socketRef.current.on('app-ice-candidate', (data) => {
+        if (peerRef.current && peerRef.current._pc) {
+          peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+      });
+
+    } catch (err) {
+      console.error("Failed to get mic:", err);
+      setError('Microphone permission is required to make a call.');
+      setCallStatus('failed');
+      setCallingGuardianId(null);
+    }
+  };
 
   const handleSendEmergency = async () => {
     if (emergencyForm.media.length === 0) {
@@ -437,9 +517,12 @@ export default function CallPage() {
                               <div className="font-bold text-gray-800">{g.name}</div>
                               <div className="text-sm text-gray-500">{g.relation}</div>
                             </div>
-                            <a href={`tel:${g.phoneNumber}`} className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-colors">
+                            <button 
+                              onClick={() => handleCallGuardian(g)}
+                              className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-colors"
+                            >
                               <Phone size={20} />
-                            </a>
+                            </button>
                           </div>
                         ))}
                       </div>
