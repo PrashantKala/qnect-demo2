@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
-import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X } from 'lucide-react';
+import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X, MapPin } from 'lucide-react';
 import { fetchQRGuardians, sendEmergencyAlert } from '../../../../lib/api';
 
 const SOCKET_SERVER_URL = 'https://qnect-backend.onrender.com'; // NEW
@@ -28,9 +28,12 @@ export default function CallPage() {
     description: '',
     phoneNumber: '',
     media: [], // Array of { file, preview, base64 }
-    selectedGuardianId: null
+    selectedGuardianId: null,
+    includeLocation: true, // Default to true
+    location: null
   });
   const [sendingEmergency, setSendingEmergency] = useState(false);
+  const [locationError, setLocationError] = useState(null);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -234,6 +237,32 @@ export default function CallPage() {
   const handleOpenEmergency = async () => {
     setShowEmergency(true);
     setLoadingGuardians(true);
+    
+    // Try to get location immediately when opening
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setEmergencyForm(prev => ({
+            ...prev,
+            location: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy
+            }
+          }));
+          setLocationError(null);
+        },
+        (err) => {
+          console.warn("Location access denied or failed", err);
+          setLocationError("Location access denied. Enable it to share your location.");
+          setEmergencyForm(prev => ({ ...prev, includeLocation: false }));
+        }
+      );
+    } else {
+      setLocationError("Geolocation is not supported by this browser.");
+      setEmergencyForm(prev => ({ ...prev, includeLocation: false }));
+    }
+
     try {
       const res = await fetchQRGuardians(qrId);
       setGuardians(res.data.guardians || []);
@@ -370,7 +399,8 @@ export default function CallPage() {
           base64: m.base64,
           type: m.file.type
         })),
-        guardianId: null // Send to all
+        guardianId: null, // Send to all
+        location: emergencyForm.includeLocation ? emergencyForm.location : null
       });
       setAlertSent(true); // Switch to success view
       setSuccess("Emergency alert sent to guardians successfully.");
@@ -557,9 +587,41 @@ export default function CallPage() {
                       </div>
                     </div>
 
-                    {/* 2. Description */}
+                    {/* 2. Share Location */}
                     <div className="mb-6">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">2. Describe Situation (Optional)</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">2. Share Location</label>
+                      <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <MapPin size={20} className={emergencyForm.includeLocation ? "text-blue-500" : "text-gray-400"} />
+                          <div>
+                            <div className="font-medium text-gray-800">Include Current Location</div>
+                            {locationError ? (
+                              <div className="text-xs text-red-500">{locationError}</div>
+                            ) : emergencyForm.location ? (
+                              <div className="text-xs text-green-600">
+                                Lat: {emergencyForm.location.latitude.toFixed(4)}, Long: {emergencyForm.location.longitude.toFixed(4)}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-500">Fetching location...</div>
+                            )}
+                          </div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer"
+                            checked={emergencyForm.includeLocation}
+                            onChange={(e) => setEmergencyForm({...emergencyForm, includeLocation: e.target.checked})}
+                            disabled={!!locationError}
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* 3. Description */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">3. Describe Situation (Optional)</label>
                       <textarea 
                         className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
                         rows="3"
@@ -569,9 +631,9 @@ export default function CallPage() {
                       />
                     </div>
 
-                    {/* 3. Phone Number */}
+                    {/* 4. Phone Number */}
                     <div className="mb-6">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">3. Your Phone Number (Optional)</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">4. Your Phone Number (Optional)</label>
                       <input 
                         type="tel"
                         className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
