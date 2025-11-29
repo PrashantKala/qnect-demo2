@@ -85,6 +85,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithToken = (token) => {
+    setSession(token);
+  };
+
   const logout = () => {
     localStorage.removeItem('qnect_token');
     setUserToken(null);
@@ -93,7 +97,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ userToken, userEmail, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ userToken, userEmail, isLoading, login, signup, logout, loginWithToken }}>
           {console.log("api url"+process.env.API_URL)}
       {children}
     </AuthContext.Provider>
