@@ -334,6 +334,7 @@ export default function CallPage() {
             offer: offer,
             callerName: 'Emergency Contact',
             callerId: 'web-user', // Anonymous web user
+            isEmergency: true // Flag as emergency call
           });
         }
       });
