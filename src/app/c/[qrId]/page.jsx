@@ -314,7 +314,7 @@ export default function CallPage() {
     setCallingGuardianId(guardian._id);
     setCallStatus('calling');
     setError('');
-    setShowEmergency(false); // Close modal to show main call UI
+    // setShowEmergency(false); // REMOVED: Keep modal open
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
@@ -382,6 +382,17 @@ export default function CallPage() {
       setCallStatus('failed');
       setCallingGuardianId(null);
     }
+  };
+  
+  const handleHangUpGuardian = () => {
+      console.log("Hanging up guardian call...");
+      cleanup();
+      setCallStatus('idle');
+      setCallingGuardianId(null);
+      
+      if (socketRef.current && remoteSocketIdRef.current) {
+          socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
+      }
   };
 
   const handleSendEmergency = async () => {
@@ -542,20 +553,43 @@ export default function CallPage() {
                     <div className="text-left bg-gray-50 rounded-lg p-4 mb-6">
                       <h5 className="font-bold text-gray-700 mb-3 border-b pb-2">Quick Connect</h5>
                       <div className="space-y-3">
-                        {guardians.map((g) => (
-                          <div key={g._id} className="flex items-center justify-between bg-white p-3 rounded border shadow-sm">
-                            <div>
-                              <div className="font-bold text-gray-800">{g.name}</div>
-                              <div className="text-sm text-gray-500">{g.relation}</div>
+                        {guardians.map((g) => {
+                          const isCallingThis = callingGuardianId === g._id;
+                          return (
+                            <div key={g._id} className="flex items-center justify-between bg-white p-3 rounded border shadow-sm">
+                              <div>
+                                <div className="font-bold text-gray-800">{g.name}</div>
+                                <div className="text-sm text-gray-500">{g.relation}</div>
+                              </div>
+                              
+                              {isCallingThis ? (
+                                callStatus === 'connected' ? (
+                                  <button 
+                                    onClick={handleHangUpGuardian}
+                                    className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-colors flex items-center gap-2"
+                                  >
+                                    <PhoneOff size={18} /> Hang Up
+                                  </button>
+                                ) : (
+                                  <button 
+                                    disabled
+                                    className="bg-gray-300 text-gray-600 px-4 py-2 rounded-full flex items-center gap-2 cursor-not-allowed"
+                                  >
+                                    <Loader2 size={18} className="animate-spin" /> Calling...
+                                  </button>
+                                )
+                              ) : (
+                                <button 
+                                  onClick={() => handleCallGuardian(g)}
+                                  disabled={callingGuardianId !== null} // Disable others while calling one
+                                  className={`p-2 rounded-full transition-colors ${callingGuardianId !== null ? 'bg-gray-200 text-gray-400' : 'bg-green-500 text-white hover:bg-green-600'}`}
+                                >
+                                  <Phone size={20} />
+                                </button>
+                              )}
                             </div>
-                            <button 
-                              onClick={() => handleCallGuardian(g)}
-                              className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-colors"
-                            >
-                              <Phone size={20} />
-                            </button>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                     
