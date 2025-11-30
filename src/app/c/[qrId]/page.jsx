@@ -13,6 +13,7 @@ export default function CallPage() {
   const { qrId } = params;
 
   const [callStatus, setCallStatus] = useState('idle');
+  const [activeCallTarget, setActiveCallTarget] = useState(null); // 'owner' | 'guardian'
   const [error, setError] = useState('');
   
   // Notify Owner state
@@ -99,7 +100,18 @@ export default function CallPage() {
     socket.on('hang-up', () => {
       console.log("Owner hung up.");
       setCallStatus('idle');
+      setActiveCallTarget(null);
       setError('The owner ended the call.');
+      cleanup();
+    });
+
+    // Listen for guardian hang up
+    socket.on('app-hang-up', () => {
+      console.log("Guardian hung up.");
+      setCallStatus('idle');
+      setActiveCallTarget(null);
+      setCallingGuardianId(null);
+      setError('The guardian ended the call.');
       cleanup();
     });
 
@@ -142,6 +154,7 @@ export default function CallPage() {
   const handleCall = async () => {
     // ... (This function remains the same as before)
     setCallStatus('calling');
+    setActiveCallTarget('owner');
     setError('');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
@@ -172,17 +185,20 @@ export default function CallPage() {
         console.log("Peer connection closed.");
         cleanup();
         setCallStatus('idle');
+        setActiveCallTarget(null);
       });
       peer.on('error', (err) => {
         console.error("Peer error:", err);
         setError('A connection error occurred.');
         setCallStatus('failed');
+        setActiveCallTarget(null);
         cleanup();
       });
     } catch (err) {
       console.error("Failed to get mic:", err);
       setError('Microphone permission is required to make a call.');
       setCallStatus('failed');
+      setActiveCallTarget(null);
     }
   };
 
@@ -202,6 +218,7 @@ export default function CallPage() {
     console.log("Website hanging up...");
     cleanup(); // Clean up our local peer
     setCallStatus('idle');
+    setActiveCallTarget(null);
     setSuccess('Call ended.'); // Give user feedback
     
     // Tell the app we are hanging up
@@ -313,6 +330,7 @@ export default function CallPage() {
 
     setCallingGuardianId(guardian._id);
     setCallStatus('calling');
+    setActiveCallTarget('guardian');
     setError('');
     // setShowEmergency(false); // REMOVED: Keep modal open
 
@@ -350,6 +368,7 @@ export default function CallPage() {
         console.log("Peer connection closed.");
         cleanup();
         setCallStatus('idle');
+        setActiveCallTarget(null);
         setCallingGuardianId(null);
       });
 
@@ -357,6 +376,7 @@ export default function CallPage() {
         console.error("Peer error:", err);
         setError('A connection error occurred.');
         setCallStatus('failed');
+        setActiveCallTarget(null);
         cleanup();
         setCallingGuardianId(null);
       });
@@ -365,6 +385,7 @@ export default function CallPage() {
       socketRef.current.on('app-call-answered', (data) => {
         console.log("Call answered by guardian");
         setCallStatus('connected');
+        // activeCallTarget is already 'guardian'
         remoteSocketIdRef.current = data.fromSocketId;
         peerRef.current.signal(data.answer);
       });
@@ -388,6 +409,7 @@ export default function CallPage() {
       console.log("Hanging up guardian call...");
       cleanup();
       setCallStatus('idle');
+      setActiveCallTarget(null);
       setCallingGuardianId(null);
       
       if (socketRef.current && remoteSocketIdRef.current) {
@@ -435,17 +457,35 @@ export default function CallPage() {
           </button>
         );
       case 'calling':
-        return (
-          <button disabled className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-gray-300 text-gray-500 font-bold rounded-lg shadow-md cursor-not-allowed">
-            <Loader2 size={24} className="animate-spin" /> Calling...
-          </button>
-        );
+        if (activeCallTarget === 'owner') {
+          return (
+            <button disabled className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-gray-300 text-gray-500 font-bold rounded-lg shadow-md cursor-not-allowed">
+              <Loader2 size={24} className="animate-spin" /> Calling...
+            </button>
+          );
+        } else {
+          // If calling a guardian, the owner button should just be disabled or show "Call Owner" but disabled
+          return (
+            <button disabled className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-gray-200 text-gray-400 font-bold rounded-lg shadow-md cursor-not-allowed">
+              <Phone size={24} /> Call Vehicle Owner
+            </button>
+          );
+        }
       case 'connected':
-        return (
-          <button onClick={handleHangUp} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-red-600 text-white font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-            <PhoneOff size={24} /> Hang Up
-          </button>
-        );
+        if (activeCallTarget === 'owner') {
+          return (
+            <button onClick={handleHangUp} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-red-600 text-white font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+              <PhoneOff size={24} /> Hang Up
+            </button>
+          );
+        } else {
+           // Connected to guardian, disable owner button
+           return (
+            <button disabled className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-gray-200 text-gray-400 font-bold rounded-lg shadow-md cursor-not-allowed">
+              <Phone size={24} /> Call Vehicle Owner
+            </button>
+          );
+        }
       case 'failed':
          return (
           <button onClick={handleCall} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-accent-cyan text-primary-blue font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
