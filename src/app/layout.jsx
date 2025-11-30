@@ -1,6 +1,7 @@
 import './global.css';
 import { Poppins } from 'next/font/google';
 import { AuthProvider } from './context/AuthContext';
+// 
 import { NotificationProvider } from './context/NotificationContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
