@@ -54,8 +54,10 @@ export default function CallPage() {
     'Emergency: Please contact me regarding your car.'
   ];
   
-  // ▼▼▼ FIX 1: Store the app's socket ID ▼▼▼
+  // ▼▼▼ FIX 1: Store the app's socket ID and queue candidates ▼▼▼
   const remoteSocketIdRef = useRef(null);
+  const iceCandidatesQueue = useRef([]);
+  const currentCallIdRef = useRef(null); // Store callId for reconnection
   // ▲▲▲ FIX 1 ▲▲▲
 
   // (Chat removed)
@@ -68,12 +70,40 @@ export default function CallPage() {
     const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId') || 'guest-' + Math.random().toString(36).substr(2, 9);
     setCurrentUserId(userId);
 
+    // Handle reconnection
+    socket.on('connect', () => {
+        console.log("Socket connected:", socket.id);
+        if (currentCallIdRef.current) {
+            console.log("Reconnected, updating socket for call:", currentCallIdRef.current);
+            socket.emit('update-call-socket', { callId: currentCallIdRef.current });
+        }
+    });
+
+    socket.on('call-notification-sent', (data) => {
+        console.log("Call notification sent, callId:", data.callId);
+        if (data.callId) {
+            currentCallIdRef.current = data.callId;
+        }
+    });
+
     socket.on('call-answered', (data) => {
       console.log("Call answered by app");
       setCallStatus('connected');
       
-      // ▼▼▼ FIX 2: Save the app's socket ID so we can hang up ▼▼▼
+      // ▼▼▼ FIX 2: Save the app's socket ID and flush candidates ▼▼▼
       remoteSocketIdRef.current = data.fromSocketId;
+      
+      // Flush queued candidates
+      if (iceCandidatesQueue.current.length > 0) {
+          console.log(`Flushing ${iceCandidatesQueue.current.length} queued ICE candidates`);
+          iceCandidatesQueue.current.forEach(candidate => {
+              socket.emit('ice-candidate', {
+                  toSocketId: data.fromSocketId,
+                  candidate: candidate
+              });
+          });
+          iceCandidatesQueue.current = [];
+      }
       
       // Store owner user ID for chat
       if (data.userId) {
@@ -88,6 +118,13 @@ export default function CallPage() {
       if (peerRef.current && peerRef.current._pc) {
         peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
       }
+    });
+
+    socket.on('app-call-notification-sent', (data) => {
+        console.log("App call notification sent, callId:", data.callId);
+        if (data.callId) {
+            currentCallIdRef.current = data.callId;
+        }
     });
 
     socket.on('call-failed', (data) => {
@@ -165,14 +202,27 @@ export default function CallPage() {
         stream: stream,
       });
       peerRef.current = peer;
-      peer.on('signal', (offer) => {
-        if (offer.type === 'offer') {
+      peer.on('signal', (data) => {
+        if (data.type === 'offer') {
           console.log("Generated offer, sending to server...");
           socketRef.current.emit('call-user', {
             qrId: qrId,
-            offer: offer,
+            offer: data,
             callerName: 'Website User', // Send caller name for notifications
           });
+        } else if (data.candidate) {
+            // ▼▼▼ FIX 3: Handle ICE candidates ▼▼▼
+            if (remoteSocketIdRef.current) {
+                console.log("Sending ICE candidate directly");
+                socketRef.current.emit('ice-candidate', {
+                    toSocketId: remoteSocketIdRef.current,
+                    candidate: data.candidate
+                });
+            } else {
+                console.log("Queueing ICE candidate");
+                iceCandidatesQueue.current.push(data.candidate);
+            }
+            // ▲▲▲ FIX 3 ▲▲▲
         }
       });
       peer.on('stream', (remoteStream) => {
@@ -211,6 +261,9 @@ export default function CallPage() {
       localStreamRef.current.getTracks().forEach(track => track.stop());
       localStreamRef.current = null;
     }
+    remoteSocketIdRef.current = null;
+    iceCandidatesQueue.current = [];
+    currentCallIdRef.current = null;
   };
   
   // ▼▼▼ FIX 3: Update the hangup function ▼▼▼
