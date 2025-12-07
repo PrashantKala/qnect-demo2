@@ -209,6 +209,12 @@ export default function CallPage() {
             qrId: qrId,
             offer: data,
             callerName: 'Website User', // Send caller name for notifications
+          }, (response) => {
+              // Callback from server
+              if (response && response.callId) {
+                  console.log("Received callId from callback:", response.callId);
+                  currentCallIdRef.current = response.callId;
+              }
           });
         } else if (data.candidate) {
             // ▼▼▼ FIX 3: Handle ICE candidates ▼▼▼
