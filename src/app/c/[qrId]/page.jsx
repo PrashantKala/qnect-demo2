@@ -89,6 +89,9 @@ export default function CallPage() {
     socket.on('call-answered', (data) => {
       console.log("Call answered by app");
       setCallStatus('connected');
+      if (data.callId) {
+        currentCallIdRef.current = data.callId;
+      }
       
       // ▼▼▼ FIX 2: Save the app's socket ID and flush candidates ▼▼▼
       remoteSocketIdRef.current = data.fromSocketId;
@@ -134,8 +137,8 @@ export default function CallPage() {
       cleanup();
     });
 
-    socket.on('hang-up', () => {
-      console.log("Owner hung up.");
+    socket.on('hang-up', (payload) => {
+      console.log("Owner hung up.", payload);
       setCallStatus('idle');
       setActiveCallTarget(null);
       setError('The owner ended the call.');
@@ -275,14 +278,19 @@ export default function CallPage() {
   // ▼▼▼ FIX 3: Update the hangup function ▼▼▼
   const handleHangUp = () => {
     console.log("Website hanging up...");
+    const callId = currentCallIdRef.current;
+    const targetSocket = remoteSocketIdRef.current;
     cleanup(); // Clean up our local peer
     setCallStatus('idle');
     setActiveCallTarget(null);
     setSuccess('Call ended.'); // Give user feedback
     
     // Tell the app we are hanging up
-    if (socketRef.current && remoteSocketIdRef.current) {
-      socketRef.current.emit('hang-up', { toSocketId: remoteSocketIdRef.current });
+    if (socketRef.current) {
+      socketRef.current.emit('hang-up', {
+        toSocketId: targetSocket || '',
+        callId: callId || null,
+      });
     }
   };
   // ▲▲▲ FIX 3 ▲▲▲
