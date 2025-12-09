@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -15,7 +15,7 @@ export default function CallPage() {
   const [callStatus, setCallStatus] = useState('idle');
   const [activeCallTarget, setActiveCallTarget] = useState(null); // 'owner' | 'guardian'
   const [error, setError] = useState('');
-  
+
   // Notify Owner state
   const [showNotify, setShowNotify] = useState(false);
   const [ownerUserId, setOwnerUserId] = useState(null);
@@ -53,7 +53,7 @@ export default function CallPage() {
     'You are double-parked.',
     'Emergency: Please contact me regarding your car.'
   ];
-  
+
   // ▼▼▼ FIX 1: Store the app's socket ID and queue candidates ▼▼▼
   const remoteSocketIdRef = useRef(null);
   const iceCandidatesQueue = useRef([]);
@@ -72,48 +72,50 @@ export default function CallPage() {
 
     // Handle reconnection
     socket.on('connect', () => {
-        console.log("Socket connected:", socket.id);
-        if (currentCallIdRef.current) {
-            console.log("Reconnected, updating socket for call:", currentCallIdRef.current);
-            socket.emit('update-call-socket', { callId: currentCallIdRef.current });
-        }
+      console.log("Socket connected:", socket.id);
+      if (currentCallIdRef.current) {
+        console.log("Reconnected, updating socket for call:", currentCallIdRef.current);
+        socket.emit('update-call-socket', { callId: currentCallIdRef.current });
+      }
     });
 
     socket.on('call-notification-sent', (data) => {
-        console.log("Call notification sent, callId:", data.callId);
-        if (data.callId) {
-            currentCallIdRef.current = data.callId;
-        }
-    });
-
-    socket.on('call-answered', (data) => {
-      console.log("Call answered by app");
-      setCallStatus('connected');
+      console.log("Call notification sent, callId:", data.callId);
       if (data.callId) {
         currentCallIdRef.current = data.callId;
       }
-      
+    });
+
+    socket.on('call-answered', (data) => {
+      console.log("Call answered by app, fromSocketId:", data.fromSocketId);
+      setCallStatus('connecting'); // Don't set to 'connected' yet, wait for actual connection
+      if (data.callId) {
+        currentCallIdRef.current = data.callId;
+      }
+
       // ▼▼▼ FIX 2: Save the app's socket ID and flush candidates ▼▼▼
+      console.log(`[WEB] Updating remote socket ID to: ${data.fromSocketId}`);
       remoteSocketIdRef.current = data.fromSocketId;
-      
+
       // Flush queued candidates
       if (iceCandidatesQueue.current.length > 0) {
-          console.log(`Flushing ${iceCandidatesQueue.current.length} queued ICE candidates`);
-          iceCandidatesQueue.current.forEach(candidate => {
-              socket.emit('ice-candidate', {
-                  toSocketId: data.fromSocketId,
-                  candidate: candidate
-              });
+        console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued ICE candidates to ${data.fromSocketId}`);
+        iceCandidatesQueue.current.forEach(candidate => {
+          socket.emit('ice-candidate', {
+            toSocketId: data.fromSocketId,
+            candidate: candidate
           });
-          iceCandidatesQueue.current = [];
+        });
+        iceCandidatesQueue.current = [];
       }
-      
+
       // Store owner user ID for chat
       if (data.userId) {
         setOwnerUserId(data.userId);
       }
       // ▲▲▲ FIX 2 ▲▲▲
 
+      console.log("[WEB] Signaling answer to SimplePeer");
       peerRef.current.signal(data.answer);
     });
 
@@ -124,10 +126,10 @@ export default function CallPage() {
     });
 
     socket.on('app-call-notification-sent', (data) => {
-        console.log("App call notification sent, callId:", data.callId);
-        if (data.callId) {
-            currentCallIdRef.current = data.callId;
-        }
+      console.log("App call notification sent, callId:", data.callId);
+      if (data.callId) {
+        currentCallIdRef.current = data.callId;
+      }
     });
 
     socket.on('call-failed', (data) => {
@@ -207,47 +209,60 @@ export default function CallPage() {
       peerRef.current = peer;
       peer.on('signal', (data) => {
         if (data.type === 'offer') {
-          console.log("Generated offer, sending to server...");
+          console.log("[WEB] Generated offer, my socket ID:", socketRef.current.id);
+          console.log("[WEB] Sending offer to backend for QR:", qrId);
           socketRef.current.emit('call-user', {
             qrId: qrId,
             offer: data,
             callerName: 'Website User', // Send caller name for notifications
           }, (response) => {
-              // Callback from server
-              if (response && response.callId) {
-                  console.log("Received callId from callback:", response.callId);
-                  currentCallIdRef.current = response.callId;
-              }
+            // Callback from server
+            console.log("[WEB] Server response to call-user:", response);
+            if (response && response.callId) {
+              console.log("[WEB] Received callId from callback:", response.callId);
+              currentCallIdRef.current = response.callId;
+            }
           });
         } else if (data.candidate) {
-            // ▼▼▼ FIX 3: Handle ICE candidates ▼▼▼
-            if (remoteSocketIdRef.current) {
-                console.log("Sending ICE candidate directly");
-                socketRef.current.emit('ice-candidate', {
-                    toSocketId: remoteSocketIdRef.current,
-                    candidate: data.candidate
-                });
-            } else {
-                console.log("Queueing ICE candidate");
-                iceCandidatesQueue.current.push(data.candidate);
-            }
-            // ▲▲▲ FIX 3 ▲▲▲
+          // ▼▼▼ FIX 3: Handle ICE candidates ▼▼▼
+          if (remoteSocketIdRef.current) {
+            console.log("[WEB] Sending ICE candidate directly to:", remoteSocketIdRef.current);
+            socketRef.current.emit('ice-candidate', {
+              toSocketId: remoteSocketIdRef.current,
+              candidate: data.candidate
+            });
+          } else {
+            console.log("[WEB] No remote socket yet, queueing ICE candidate");
+            iceCandidatesQueue.current.push(data.candidate);
+          }
+          // ▲▲▲ FIX 3 ▲▲▲
         }
       });
+
+      peer.on('connect', () => {
+        console.log("[WEB] ✅ Peer connection ESTABLISHED!");
+        setCallStatus('connected');
+      });
+
       peer.on('stream', (remoteStream) => {
+        console.log("[WEB] Received remote audio stream");
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
-          remoteAudioRef.current.play();
+          remoteAudioRef.current.play().then(() => {
+            console.log("[WEB] Remote audio playing");
+          }).catch(err => {
+            console.error("[WEB] Error playing remote audio:", err);
+          });
         }
       });
       peer.on('close', () => {
-        console.log("Peer connection closed.");
+        console.log("[WEB] Peer connection closed.");
         cleanup();
         setCallStatus('idle');
         setActiveCallTarget(null);
       });
       peer.on('error', (err) => {
-        console.error("Peer error:", err);
+        console.error("[WEB] Peer error:", err);
         setError('A connection error occurred.');
         setCallStatus('failed');
         setActiveCallTarget(null);
@@ -274,7 +289,7 @@ export default function CallPage() {
     iceCandidatesQueue.current = [];
     currentCallIdRef.current = null;
   };
-  
+
   // ▼▼▼ FIX 3: Update the hangup function ▼▼▼
   const handleHangUp = () => {
     console.log("Website hanging up...");
@@ -284,7 +299,7 @@ export default function CallPage() {
     setCallStatus('idle');
     setActiveCallTarget(null);
     setSuccess('Call ended.'); // Give user feedback
-    
+
     // Tell the app we are hanging up
     if (socketRef.current) {
       socketRef.current.emit('hang-up', {
@@ -321,7 +336,7 @@ export default function CallPage() {
   const handleOpenEmergency = async () => {
     setShowEmergency(true);
     setLoadingGuardians(true);
-    
+
     // Try to get location immediately when opening
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -471,17 +486,17 @@ export default function CallPage() {
       setCallingGuardianId(null);
     }
   };
-  
+
   const handleHangUpGuardian = () => {
-      console.log("Hanging up guardian call...");
-      cleanup();
-      setCallStatus('idle');
-      setActiveCallTarget(null);
-      setCallingGuardianId(null);
-      
-      if (socketRef.current && remoteSocketIdRef.current) {
-          socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
-      }
+    console.log("Hanging up guardian call...");
+    cleanup();
+    setCallStatus('idle');
+    setActiveCallTarget(null);
+    setCallingGuardianId(null);
+
+    if (socketRef.current && remoteSocketIdRef.current) {
+      socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
+    }
   };
 
   const handleSendEmergency = async () => {
@@ -512,7 +527,7 @@ export default function CallPage() {
       setSendingEmergency(false);
     }
   };
-  
+
   const [success, setSuccess] = useState(''); // Add a success state
 
   const renderButton = () => {
@@ -538,6 +553,20 @@ export default function CallPage() {
             </button>
           );
         }
+      case 'connecting':
+        if (activeCallTarget === 'owner') {
+          return (
+            <button onClick={handleHangUp} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-yellow-500 text-white font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+              <Loader2 size={24} className="animate-spin" /> Connecting...
+            </button>
+          );
+        } else {
+          return (
+            <button disabled className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-gray-200 text-gray-400 font-bold rounded-lg shadow-md cursor-not-allowed">
+              <Phone size={24} /> Call Vehicle Owner
+            </button>
+          );
+        }
       case 'connected':
         if (activeCallTarget === 'owner') {
           return (
@@ -546,15 +575,15 @@ export default function CallPage() {
             </button>
           );
         } else {
-           // Connected to guardian, disable owner button
-           return (
+          // Connected to guardian, disable owner button
+          return (
             <button disabled className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-gray-200 text-gray-400 font-bold rounded-lg shadow-md cursor-not-allowed">
               <Phone size={24} /> Call Vehicle Owner
             </button>
           );
         }
       case 'failed':
-         return (
+        return (
           <button onClick={handleCall} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-accent-cyan text-primary-blue font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
             <Phone size={24} /> Try Call Again
           </button>
@@ -573,14 +602,14 @@ export default function CallPage() {
             <h1 className="text-3xl font-bold text-primary-blue mb-2">Contact Owner</h1>
             <p className="text-text-secondary mb-6">You are about to securely call the owner of QR Code:</p>
             <p className="font-mono text-sm text-gray-500 bg-gray-100 rounded p-2 mb-8 break-all">{qrId}</p>
-            
+
             {renderButton()}
 
             {error && <p className="text-red-500 text-center mt-4">{error}</p>}
             {success && <p className="text-green-600 text-center mt-4">{success}</p>}
 
             {/* Notify Owner button (always available) */}
-            <button 
+            <button
               onClick={handleOpenNotify}
               className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
             >
@@ -588,7 +617,7 @@ export default function CallPage() {
             </button>
 
             {/* Emergency Connect button (always available) */}
-            <button 
+            <button
               onClick={handleOpenEmergency}
               className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-white text-red-600 border-2 border-red-600 font-semibold rounded-lg shadow-md transition-all duration-300 hover:bg-red-50 hover:-translate-y-0.5"
             >
@@ -634,7 +663,7 @@ export default function CallPage() {
                   <X size={24} />
                 </button>
               </div>
-              
+
               <div className="p-6 overflow-y-auto">
                 {loadingGuardians ? (
                   <div className="flex justify-center py-8"><Loader2 className="animate-spin text-gray-400" size={32} /></div>
@@ -656,7 +685,7 @@ export default function CallPage() {
                     </div>
                     <h4 className="text-xl font-bold text-gray-800 mb-2">Alert Sent!</h4>
                     <p className="text-gray-600 mb-6">Guardians have been notified with your details.</p>
-                    
+
                     <div className="text-left bg-gray-50 rounded-lg p-4 mb-6">
                       <h5 className="font-bold text-gray-700 mb-3 border-b pb-2">Quick Connect</h5>
                       <div className="space-y-3">
@@ -668,17 +697,17 @@ export default function CallPage() {
                                 <div className="font-bold text-gray-800">{g.name}</div>
                                 <div className="text-sm text-gray-500">{g.relation}</div>
                               </div>
-                              
+
                               {isCallingThis ? (
                                 callStatus === 'connected' ? (
-                                  <button 
+                                  <button
                                     onClick={handleHangUpGuardian}
                                     className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-colors flex items-center gap-2"
                                   >
                                     <PhoneOff size={18} /> Hang Up
                                   </button>
                                 ) : (
-                                  <button 
+                                  <button
                                     disabled
                                     className="bg-gray-300 text-gray-600 px-4 py-2 rounded-full flex items-center gap-2 cursor-not-allowed"
                                   >
@@ -686,7 +715,7 @@ export default function CallPage() {
                                   </button>
                                 )
                               ) : (
-                                <button 
+                                <button
                                   onClick={() => handleCallGuardian(g)}
                                   disabled={callingGuardianId !== null} // Disable others while calling one
                                   className={`p-2 rounded-full transition-colors ${callingGuardianId !== null ? 'bg-gray-200 text-gray-400' : 'bg-green-500 text-white hover:bg-green-600'}`}
@@ -699,7 +728,7 @@ export default function CallPage() {
                         })}
                       </div>
                     </div>
-                    
+
                     <button onClick={() => { setShowEmergency(false); setAlertSent(false); }} className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold">
                       Close
                     </button>
@@ -713,7 +742,7 @@ export default function CallPage() {
                         {emergencyForm.media.map((m, idx) => (
                           <div key={idx} className="relative w-24 h-24 border rounded overflow-hidden">
                             <img src={m.preview} alt="preview" className="w-full h-full object-cover" />
-                            <button 
+                            <button
                               onClick={() => handleRemoveMedia(idx)}
                               className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl"
                             >
@@ -749,11 +778,11 @@ export default function CallPage() {
                           </div>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             className="sr-only peer"
                             checked={emergencyForm.includeLocation}
-                            onChange={(e) => setEmergencyForm({...emergencyForm, includeLocation: e.target.checked})}
+                            onChange={(e) => setEmergencyForm({ ...emergencyForm, includeLocation: e.target.checked })}
                             disabled={!!locationError}
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -764,28 +793,28 @@ export default function CallPage() {
                     {/* 3. Description */}
                     <div className="mb-6">
                       <label className="block text-sm font-bold text-gray-700 mb-2">3. Describe Situation (Optional)</label>
-                      <textarea 
+                      <textarea
                         className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
                         rows="3"
                         placeholder="What is happening?"
                         value={emergencyForm.description}
-                        onChange={(e) => setEmergencyForm({...emergencyForm, description: e.target.value})}
+                        onChange={(e) => setEmergencyForm({ ...emergencyForm, description: e.target.value })}
                       />
                     </div>
 
                     {/* 4. Phone Number */}
                     <div className="mb-6">
                       <label className="block text-sm font-bold text-gray-700 mb-2">4. Your Phone Number (Optional)</label>
-                      <input 
+                      <input
                         type="tel"
                         className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
                         placeholder="So they can call you back"
                         value={emergencyForm.phoneNumber}
-                        onChange={(e) => setEmergencyForm({...emergencyForm, phoneNumber: e.target.value})}
+                        onChange={(e) => setEmergencyForm({ ...emergencyForm, phoneNumber: e.target.value })}
                       />
                     </div>
 
-                    <button 
+                    <button
                       onClick={handleSendEmergency}
                       disabled={sendingEmergency}
                       className="w-full py-4 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
