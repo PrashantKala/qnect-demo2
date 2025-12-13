@@ -25,7 +25,7 @@ export default function CallingScreen({
     }
 
     return (
-        <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex items-center justify-center">
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
@@ -93,8 +93,8 @@ export default function CallingScreen({
                         <button
                             onClick={onToggleMute}
                             className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${isMuted
-                                    ? 'bg-red-500 hover:bg-red-600'
-                                    : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                                ? 'bg-red-500 hover:bg-red-600'
+                                : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
                                 }`}
                         >
                             {isMuted ? (
@@ -108,8 +108,8 @@ export default function CallingScreen({
                         <button
                             onClick={onToggleSpeaker}
                             className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${isSpeakerOn
-                                    ? 'bg-blue-500 hover:bg-blue-600'
-                                    : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                                ? 'bg-blue-500 hover:bg-blue-600'
+                                : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
                                 }`}
                         >
                             {isSpeakerOn ? (

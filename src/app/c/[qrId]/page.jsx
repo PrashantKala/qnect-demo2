@@ -354,13 +354,16 @@ export default function CallPage() {
 
   // Toggle mute
   const toggleMute = () => {
-    if (localStreamRef.current) {
-      const audioTracks = localStreamRef.current.getAudioTracks();
-      audioTracks.forEach(track => {
-        track.enabled = !track.enabled;
-      });
-      setIsMuted(!isMuted);
-    }
+    setIsMuted(prev => {
+      const isNowMuted = !prev;
+      if (localStreamRef.current) {
+        const audioTracks = localStreamRef.current.getAudioTracks();
+        audioTracks.forEach(track => {
+          track.enabled = !isNowMuted;
+        });
+      }
+      return isNowMuted;
+    });
   };
 
   // Toggle speaker (Note: May not work on all browsers/devices)
@@ -513,16 +516,28 @@ export default function CallPage() {
       });
       peerRef.current = peer;
 
-      peer.on('signal', (offer) => {
-        if (offer.type === 'offer') {
+      peer.on('signal', (data) => {
+        if (data.type === 'offer') {
           console.log("Generated offer for guardian, sending to server...");
           socketRef.current.emit('app-call-user', {
             targetUserId: guardian.userId,
-            offer: offer,
+            offer: data,
             callerName: 'Emergency Contact',
             callerId: 'web-user', // Anonymous web user
             isEmergency: true // Flag as emergency call
           });
+        } else if (data.candidate) {
+          // Handle ICE candidates
+          if (remoteSocketIdRef.current) {
+            console.log("[WEB] Sending ICE candidate to guardian:", remoteSocketIdRef.current);
+            socketRef.current.emit('ice-candidate', {
+              toSocketId: remoteSocketIdRef.current,
+              candidate: data.candidate
+            });
+          } else {
+            console.log("[WEB] No remote socket yet, queueing ICE candidate");
+            iceCandidatesQueue.current.push(data.candidate);
+          }
         }
       });
 
@@ -685,7 +700,10 @@ export default function CallPage() {
       {/* Calling Screen Overlay */}
       <CallingScreen
         callStatus={callStatus}
-        callerName={ownerInfo?.owner.name || "Vehicle Owner"}
+        callerName={activeCallTarget === 'guardian'
+          ? (guardians.find(g => g._id === callingGuardianId)?.name || "Emergency Contact")
+          : (ownerInfo?.owner.name || "Vehicle Owner")
+        }
         callDuration={callDuration}
         isMuted={isMuted}
         isSpeakerOn={isSpeakerOn}
