@@ -143,40 +143,42 @@ export default function CallPage() {
         setOwnerUserId(data.userId);
       }
 
-      // Handle App Call Answer (Guardian/Emergency)
-      socket.on('app-call-answered', (data) => {
-        console.log("[WEB] Call answered by guardian", data);
-        setCallStatus('connected');
-        remoteSocketIdRef.current = data.fromSocketId;
-
-        // Flush queued candidates if any (reusing queue for app calls too)
-        if (iceCandidatesQueue.current.length > 0) {
-          console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued ICE candidates to ${data.fromSocketId}`);
-          iceCandidatesQueue.current.forEach(candidate => {
-            socket.emit('ice-candidate', { // App expects 'ice-candidate' for web calls? Or 'app-ice-candidate'? 
-              // Logic: If I am Web, App expects 'ice-candidate' (as per CallContext logic)
-              toSocketId: data.fromSocketId,
-              candidate: candidate
-            });
-          });
-          iceCandidatesQueue.current = [];
-        }
-
-        if (peerRef.current) {
-          peerRef.current.signal(data.answer);
-        }
-      });
-
-      socket.on('app-ice-candidate', (data) => {
-        if (peerRef.current && peerRef.current._pc) {
-          peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-        }
-      });
-      // ▲▲▲ FIX 2 ▲▲▲
-
       console.log("[WEB] Signaling answer to SimplePeer");
-      peerRef.current.signal(data.answer);
+      if (peerRef.current) {
+        peerRef.current.signal(data.answer);
+      }
     });
+
+    // Handle App Call Answer (Guardian/Emergency)
+    socket.on('app-call-answered', (data) => {
+      console.log("[WEB] Call answered by guardian", data);
+      setCallStatus('connected');
+      remoteSocketIdRef.current = data.fromSocketId;
+
+      // Flush queued candidates if any (reusing queue for app calls too)
+      if (iceCandidatesQueue.current.length > 0) {
+        console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued ICE candidates to ${data.fromSocketId}`);
+        iceCandidatesQueue.current.forEach(candidate => {
+          socket.emit('ice-candidate', { // App expects 'ice-candidate' for web calls? Or 'app-ice-candidate'?
+            // Logic: If I am Web, App expects 'ice-candidate' (as per CallContext logic)
+            toSocketId: data.fromSocketId,
+            candidate: candidate
+          });
+        });
+        iceCandidatesQueue.current = [];
+      }
+
+      if (peerRef.current) {
+        peerRef.current.signal(data.answer);
+      }
+    });
+
+    socket.on('app-ice-candidate', (data) => {
+      if (peerRef.current && peerRef.current._pc) {
+        peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+      }
+    });
+    // ▲▲▲ FIX 2 ▲▲▲
 
     socket.on('ice-candidate', (data) => {
       if (peerRef.current && peerRef.current._pc) {
