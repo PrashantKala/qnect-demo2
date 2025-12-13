@@ -186,10 +186,26 @@ export default function CallPage() {
 
     return () => {
       console.log("Cleaning up call page.");
-      cleanup();
+
+      // Send hang-up to mobile if we have an active call
       if (socketRef.current && socketRef.current.connected) {
+        const callId = currentCallIdRef.current;
+        const targetSocket = remoteSocketIdRef.current;
+
+        if (callId || targetSocket) {
+          console.log("Sending hang-up before disconnect...");
+          // Use correct event based on call type
+          const eventName = activeCallTarget === 'guardian' ? 'app-hang-up' : 'hang-up';
+          socketRef.current.emit(eventName, {
+            toSocketId: targetSocket || '',
+            callId: callId || null,
+          });
+        }
+
         socketRef.current.disconnect();
       }
+
+      cleanup();
     };
   }, []);
 
