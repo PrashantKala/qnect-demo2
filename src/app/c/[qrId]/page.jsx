@@ -558,8 +558,14 @@ export default function CallPage() {
         initiator: true,
         trickle: true,
         stream: stream,
+        config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
       });
       peerRef.current = peer;
+
+      peer.on('connect', () => {
+        console.log("[WEB] Peer connected (guardian)");
+        setCallStatus('connected');
+      });
 
       peer.on('signal', (data) => {
         if (data.type === 'offer') {
