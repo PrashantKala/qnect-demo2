@@ -49,6 +49,7 @@ export default function CallPage() {
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
+  const remoteStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const messagesEndRef = useRef(null);
   const TEMPLATES = [
@@ -138,10 +139,39 @@ export default function CallPage() {
         iceCandidatesQueue.current = [];
       }
 
-      // Store owner user ID for chat
       if (data.userId) {
         setOwnerUserId(data.userId);
       }
+
+      // Handle App Call Answer (Guardian/Emergency)
+      socket.on('app-call-answered', (data) => {
+        console.log("[WEB] Call answered by guardian", data);
+        setCallStatus('connected');
+        remoteSocketIdRef.current = data.fromSocketId;
+
+        // Flush queued candidates if any (reusing queue for app calls too)
+        if (iceCandidatesQueue.current.length > 0) {
+          console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued ICE candidates to ${data.fromSocketId}`);
+          iceCandidatesQueue.current.forEach(candidate => {
+            socket.emit('ice-candidate', { // App expects 'ice-candidate' for web calls? Or 'app-ice-candidate'? 
+              // Logic: If I am Web, App expects 'ice-candidate' (as per CallContext logic)
+              toSocketId: data.fromSocketId,
+              candidate: candidate
+            });
+          });
+          iceCandidatesQueue.current = [];
+        }
+
+        if (peerRef.current) {
+          peerRef.current.signal(data.answer);
+        }
+      });
+
+      socket.on('app-ice-candidate', (data) => {
+        if (peerRef.current && peerRef.current._pc) {
+          peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+      });
       // ▲▲▲ FIX 2 ▲▲▲
 
       console.log("[WEB] Signaling answer to SimplePeer");
@@ -291,6 +321,7 @@ export default function CallPage() {
 
       peer.on('stream', (remoteStream) => {
         console.log("[WEB] Received remote audio stream");
+        remoteStreamRef.current = remoteStream; // Store persistence
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play().then(() => {
@@ -330,6 +361,7 @@ export default function CallPage() {
       localStreamRef.current.getTracks().forEach(track => track.stop());
       localStreamRef.current = null;
     }
+    remoteStreamRef.current = null;
     remoteSocketIdRef.current = null;
     iceCandidatesQueue.current = [];
     currentCallIdRef.current = null;
@@ -351,6 +383,17 @@ export default function CallPage() {
       if (interval) clearInterval(interval);
     };
   }, [callStatus]);
+
+  // Ensure remote audio plays if stream is available (fixes audio stopping on re-render)
+  useEffect(() => {
+    if (remoteAudioRef.current && remoteStreamRef.current) {
+      if (remoteAudioRef.current.srcObject !== remoteStreamRef.current) {
+        console.log("[WEB] Re-attaching remote stream to audio element");
+        remoteAudioRef.current.srcObject = remoteStreamRef.current;
+        remoteAudioRef.current.play().catch(e => console.error("Audio play error:", e));
+      }
+    }
+  });
 
   // Toggle mute
   const toggleMute = () => {
@@ -542,6 +585,7 @@ export default function CallPage() {
       });
 
       peer.on('stream', (remoteStream) => {
+        remoteStreamRef.current = remoteStream; // Persistence
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play();
@@ -565,21 +609,8 @@ export default function CallPage() {
         setCallingGuardianId(null);
       });
 
-      // Listen for answer (app-call-answered)
-      socketRef.current.on('app-call-answered', (data) => {
-        console.log("Call answered by guardian");
-        setCallStatus('connected');
-        // activeCallTarget is already 'guardian'
-        remoteSocketIdRef.current = data.fromSocketId;
-        peerRef.current.signal(data.answer);
-      });
-
-      // Listen for ICE candidates (app-ice-candidate)
-      socketRef.current.on('app-ice-candidate', (data) => {
-        if (peerRef.current && peerRef.current._pc) {
-          peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-        }
-      });
+      // Listeners are now in main useEffect to handle UI updates correctly
+      // socketRef.current.on('app-call-answered', ...) 
 
     } catch (err) {
       console.error("Failed to get mic:", err);
