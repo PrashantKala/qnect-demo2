@@ -282,6 +282,27 @@ export default function CallPage() {
         initiator: true,
         trickle: true,
         stream: stream,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            {
+              urls: 'turn:a.relay.metered.ca:80',
+              username: 'bc1c04365d6f1afa1c1d3a0e',
+              credential: 'Rc4jI5EsPGVcPnZC',
+            },
+            {
+              urls: 'turn:a.relay.metered.ca:443',
+              username: 'bc1c04365d6f1afa1c1d3a0e',
+              credential: 'Rc4jI5EsPGVcPnZC',
+            },
+            {
+              urls: 'turn:a.relay.metered.ca:443?transport=tcp',
+              username: 'bc1c04365d6f1afa1c1d3a0e',
+              credential: 'Rc4jI5EsPGVcPnZC',
+            },
+          ]
+        }
       });
       peerRef.current = peer;
       peer.on('signal', (data) => {
@@ -558,7 +579,27 @@ export default function CallPage() {
         initiator: true,
         trickle: true,
         stream: stream,
-        config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            {
+              urls: 'turn:a.relay.metered.ca:80',
+              username: 'bc1c04365d6f1afa1c1d3a0e',
+              credential: 'Rc4jI5EsPGVcPnZC',
+            },
+            {
+              urls: 'turn:a.relay.metered.ca:443',
+              username: 'bc1c04365d6f1afa1c1d3a0e',
+              credential: 'Rc4jI5EsPGVcPnZC',
+            },
+            {
+              urls: 'turn:a.relay.metered.ca:443?transport=tcp',
+              username: 'bc1c04365d6f1afa1c1d3a0e',
+              credential: 'Rc4jI5EsPGVcPnZC',
+            },
+          ]
+        }
       });
       peerRef.current = peer;
 
