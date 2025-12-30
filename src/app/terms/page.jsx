@@ -40,25 +40,25 @@ export default function TermsPage() {
         <h3 className="text-lg font-semibold text-text-primary mt-2">4.3. Pricing</h3>
         <p>The specific pricing, features, and renewal fees for continued service will be communicated to you via the QNECT website and/or email notification prior to the end of your validation period.</p>
 
-        <h2 className="text-xl font-bold text-primary-blue pt-4">5. Privacy and Data Protection</h2>
-        <p>QNect prioritizes data privacy and security, as detailed in our separate <Link href="/privacy" className="text-primary-blue hover:text-accent-cyan font-semibold">Privacy Policy</Link>. The Service is designed to maintain the anonymity of both parties by routing calls. We adhere strictly to the principles of the Digital Personal Data Protection Act (DPDPA), 2023.</p>
-
-        <h2 className="text-xl font-bold text-primary-blue pt-4">6. Termination of Service</h2>
-        <p>We reserve the right to suspend or terminate your account and deactivate your QR code immediately, without prior notice or liability, if you breach these Terms. Reasons for termination may include, but are not limited to: providing false information, using the Service for harassment, or attempting to bypass the number masking feature.</p>
-
-        <h2 className="text-xl font-bold text-primary-blue pt-4">7. Limitation of Liability</h2>
-        <p>QNect is a communication enabler and not a parking enforcement or management authority. The Enterprise and its employees shall not be liable for: any direct or indirect damages arising from the use or inability to use the Service; any delay or failure in the call routing mechanism; any disputes, confrontations, or legal issues arising between the Registered User and the Scanner User; or any damage, towing, or vandalism to the vehicle.</p>
-
-        <h2 className="text-xl font-bold text-primary-blue pt-4">8. Governing Law and Dispute Resolution</h2>
-        <p>These Terms shall be governed and construed in accordance with the laws of India. All disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts located in **Delhi, India**.</p>
-
-        <h2 className="text-xl font-bold text-primary-blue pt-4">9. Changes to Terms</h2>
-        <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.</p>
-
-        <h2 className="text-xl font-bold text-primary-blue pt-4">11. Refund policy</h2>
+        <h2 className="text-xl font-bold text-primary-blue pt-4">5. Refund policy</h2>
         <p>Approved Refunds will be credited in 7 days</p>
 
-        <h2 className="text-xl font-bold text-primary-blue pt-4">10. Contact Information</h2>
+        <h2 className="text-xl font-bold text-primary-blue pt-4">6. Privacy and Data Protection</h2>
+        <p>QNect prioritizes data privacy and security, as detailed in our separate <Link href="/privacy" className="text-primary-blue hover:text-accent-cyan font-semibold">Privacy Policy</Link>. The Service is designed to maintain the anonymity of both parties by routing calls. We adhere strictly to the principles of the Digital Personal Data Protection Act (DPDPA), 2023.</p>
+
+        <h2 className="text-xl font-bold text-primary-blue pt-4">7. Termination of Service</h2>
+        <p>We reserve the right to suspend or terminate your account and deactivate your QR code immediately, without prior notice or liability, if you breach these Terms. Reasons for termination may include, but are not limited to: providing false information, using the Service for harassment, or attempting to bypass the number masking feature.</p>
+
+        <h2 className="text-xl font-bold text-primary-blue pt-4">8. Limitation of Liability</h2>
+        <p>QNect is a communication enabler and not a parking enforcement or management authority. The Enterprise and its employees shall not be liable for: any direct or indirect damages arising from the use or inability to use the Service; any delay or failure in the call routing mechanism; any disputes, confrontations, or legal issues arising between the Registered User and the Scanner User; or any damage, towing, or vandalism to the vehicle.</p>
+
+        <h2 className="text-xl font-bold text-primary-blue pt-4">9. Governing Law and Dispute Resolution</h2>
+        <p>These Terms shall be governed and construed in accordance with the laws of India. All disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts located in **Delhi, India**.</p>
+
+        <h2 className="text-xl font-bold text-primary-blue pt-4">10. Changes to Terms</h2>
+        <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.</p>
+
+        <h2 className="text-xl font-bold text-primary-blue pt-4">11. Contact Information</h2>
         <p>If you have any questions about these Terms, please contact us at: <strong>hrconnect@qnect.in</strong></p>
 
       </div>
