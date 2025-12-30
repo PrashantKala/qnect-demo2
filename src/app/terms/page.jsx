@@ -55,9 +55,13 @@ export default function TermsPage() {
         <h2 className="text-xl font-bold text-primary-blue pt-4">9. Changes to Terms</h2>
         <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.</p>
 
+        <h2 className="text-xl font-bold text-primary-blue pt-4">11. Refund policy</h2>
+        <p>Approved Refunds will be credited in 7 days</p>
+
         <h2 className="text-xl font-bold text-primary-blue pt-4">10. Contact Information</h2>
         <p>If you have any questions about these Terms, please contact us at: <strong>hrconnect@qnect.in</strong></p>
+
       </div>
-    </main>
+    </main >
   );
 }
