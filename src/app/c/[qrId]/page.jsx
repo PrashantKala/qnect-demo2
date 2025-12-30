@@ -287,19 +287,24 @@ export default function CallPage() {
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             {
-              urls: 'turn:a.relay.metered.ca:80',
-              username: 'bc1c04365d6f1afa1c1d3a0e',
-              credential: 'Rc4jI5EsPGVcPnZC',
+              urls: 'turn:qnect.metered.live:80',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
             },
             {
-              urls: 'turn:a.relay.metered.ca:443',
-              username: 'bc1c04365d6f1afa1c1d3a0e',
-              credential: 'Rc4jI5EsPGVcPnZC',
+              urls: 'turn:qnect.metered.live:80?transport=tcp',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
             },
             {
-              urls: 'turn:a.relay.metered.ca:443?transport=tcp',
-              username: 'bc1c04365d6f1afa1c1d3a0e',
-              credential: 'Rc4jI5EsPGVcPnZC',
+              urls: 'turn:qnect.metered.live:443',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
+            },
+            {
+              urls: 'turns:qnect.metered.live:443',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
             },
           ]
         }
@@ -584,19 +589,24 @@ export default function CallPage() {
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             {
-              urls: 'turn:a.relay.metered.ca:80',
-              username: 'bc1c04365d6f1afa1c1d3a0e',
-              credential: 'Rc4jI5EsPGVcPnZC',
+              urls: 'turn:qnect.metered.live:80',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
             },
             {
-              urls: 'turn:a.relay.metered.ca:443',
-              username: 'bc1c04365d6f1afa1c1d3a0e',
-              credential: 'Rc4jI5EsPGVcPnZC',
+              urls: 'turn:qnect.metered.live:80?transport=tcp',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
             },
             {
-              urls: 'turn:a.relay.metered.ca:443?transport=tcp',
-              username: 'bc1c04365d6f1afa1c1d3a0e',
-              credential: 'Rc4jI5EsPGVcPnZC',
+              urls: 'turn:qnect.metered.live:443',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
+            },
+            {
+              urls: 'turns:qnect.metered.live:443',
+              username: '25170275b00b2e8d9d57f03b',
+              credential: 'bbHyB+a2quX4Pn0N',
             },
           ]
         }
