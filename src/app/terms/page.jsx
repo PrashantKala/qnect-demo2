@@ -60,6 +60,7 @@ export default function TermsPage() {
 
         <h2 className="text-xl font-bold text-primary-blue pt-4">11. Contact Information</h2>
         <p>If you have any questions about these Terms, please contact us at: <strong>hrconnect@qnect.in</strong></p>
+        <p>Or give a call on: <strong>+91 9599751139</strong></p>
 
       </div>
     </main >
