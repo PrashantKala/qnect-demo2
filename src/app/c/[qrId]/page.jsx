@@ -245,8 +245,21 @@ export default function CallPage() {
       console.warn('[Chat] Owner lookup failed:', payload?.message);
     });
 
+    // Monitor page visibility for debugging background issues
+    const handleVisibilityChange = () => {
+      console.log(`[WEB] Visibility changed: ${document.visibilityState}`);
+      if (document.hidden) {
+        console.log("[WEB] Page hidden - checking audio streams...");
+        if (localStreamRef.current) {
+          console.log("[WEB] Local tracks status:", localStreamRef.current.getTracks().map(t => `${t.kind}: ${t.enabled ? 'enabled' : 'disabled'}, ${t.readyState}`));
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       console.log("Cleaning up call page.");
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
 
       // Send hang-up to mobile if we have an active call
       if (socketRef.current && socketRef.current.connected) {
@@ -1054,7 +1067,7 @@ export default function CallPage() {
             </div>
           )}
         </div>
-        <audio ref={remoteAudioRef} autoPlay />
+        <audio ref={remoteAudioRef} autoPlay playsInline controls={false} />
       </main>
     </>
   );
