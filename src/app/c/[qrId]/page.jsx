@@ -50,6 +50,20 @@ export default function CallPage() {
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
   const silenceAudioRef = useRef(null); // Ref for the keep-alive track
+  const remoteStreamRef = useRef(null);
+  const remoteAudioRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const TEMPLATES = [
+    'Your car is blocking mine, please move it.',
+    'Your headlights are on.',
+    'Your window is open.',
+    'Your car alarm is going off.',
+    'You left your trunk open.',
+    'Please return to your vehicle.',
+    'Urgent: Your car needs to be moved immediately.',
+    'You are double-parked.',
+    'Emergency: Please contact me regarding your car.'
+  ];
 
   // ... (existing refs) ...
 
