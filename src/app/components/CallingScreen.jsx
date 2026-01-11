@@ -104,7 +104,20 @@ export default function CallingScreen({
                             )}
                         </button>
 
-                        {/* Speaker Button Removed */}
+                        {/* Speaker Button */}
+                        <button
+                            onClick={onToggleSpeaker}
+                            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${isSpeakerOn
+                                ? 'bg-white text-blue-900'
+                                : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white'
+                                }`}
+                        >
+                            {isSpeakerOn ? (
+                                <Volume2 size={24} />
+                            ) : (
+                                <VolumeX size={24} />
+                            )}
+                        </button>
                     </div>
                 )}
 
