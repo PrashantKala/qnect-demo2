@@ -367,6 +367,8 @@ export default function CallPage() {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play().then(() => {
             console.log("[WEB] Remote audio playing");
+            // ▼▼▼ FIX: Force Earpiece on Connect ▼▼▼
+            setInitialAudioOutput();
           }).catch(err => {
             console.error("[WEB] Error playing remote audio:", err);
           });
@@ -390,6 +392,57 @@ export default function CallPage() {
       setError('Microphone permission is required to make a call.');
       setCallStatus('failed');
       setActiveCallTarget(null);
+    }
+  };
+
+  // Helper to force earpiece/receiver output on connect
+  const setInitialAudioOutput = async () => {
+    if (!remoteAudioRef.current || !remoteAudioRef.current.setSinkId) {
+      console.log("[WEB] setSinkId not supported, defaulting to browser audio behavior.");
+      return;
+    }
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+      console.log("[WEB] Audio outputs:", audioOutputs);
+
+      // Heuristic: Earpiece is often NOT the 'default' if the default is a speaker.
+      // But on mobile, 'default' is usually the only thing exposed unless permissions are high.
+      // We look for specifically labeled devices first.
+
+      const earpiece = audioOutputs.find(d =>
+        d.label.toLowerCase().includes('earpiece') ||
+        d.label.toLowerCase().includes('receiver') ||
+        d.label.toLowerCase().includes('headset')
+      );
+
+      const speaker = audioOutputs.find(d =>
+        d.label.toLowerCase().includes('speaker')
+      );
+
+      // Strategy: 
+      // 1. If we find an explicit earpiece, use it.
+      // 2. If we find a speaker, use anything *else* (the implicit earpiece).
+      // 3. If we find multiple, pick the first non-default one (often the individual receiver).
+
+      let targetId = 'default';
+
+      if (earpiece) {
+        targetId = earpiece.deviceId;
+      } else if (audioOutputs.length > 1) {
+        // If we have > 1, and one is default (usually speaker), pick the other
+        const nonDefault = audioOutputs.find(d => d.deviceId !== 'default');
+        if (nonDefault) targetId = nonDefault.deviceId;
+      }
+
+      console.log(`[WEB] Attempting to set initial output to: ${targetId}`);
+      if (targetId !== 'default') {
+        await remoteAudioRef.current.setSinkId(targetId);
+        console.log(`[WEB] Set output to ${targetId}`);
+      }
+      setIsSpeakerOn(false); // UI matches reality
+    } catch (e) {
+      console.warn("[WEB] Failed to set initial audio output", e);
     }
   };
 
@@ -454,7 +507,6 @@ export default function CallPage() {
   const toggleSpeaker = async () => {
     if (!remoteAudioRef.current || !remoteAudioRef.current.setSinkId) {
       console.warn("Audio output switching not supported directly.");
-      // Fallback or just toggle state for UI
       setIsSpeakerOn(!isSpeakerOn);
       return;
     }
@@ -464,21 +516,47 @@ export default function CallPage() {
       const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
       console.log("Available audio outputs:", audioOutputs);
 
-      // Simple toggle logic: if on speaker (default), switch to 'earpiece' (first non-default) or vice versa.
-      // Note: 'earpiece' is rarely explicitly labeled. Usually 'default' is the earpiece/system default.
-      // We will try to cycle through available outputs.
+      // Find candidates
+      const earpiece = audioOutputs.find(d =>
+        d.label.toLowerCase().includes('earpiece') ||
+        d.label.toLowerCase().includes('receiver') ||
+        d.label.toLowerCase().includes('headset')
+      );
+      const speaker = audioOutputs.find(d =>
+        d.label.toLowerCase().includes('speaker')
+      );
 
-      const currentSink = remoteAudioRef.current.sinkId;
-      const nextDevice = audioOutputs.find(d => d.deviceId !== 'default' && d.deviceId !== currentSink);
+      // Determine Target
+      // If currently ON, we want to go OFF (to Earpiece)
+      // If currently OFF, we want to go ON (to Speaker)
+      let targetDeviceId = 'default';
 
-      // If we are on default, try the next one. If on specific, go back to default.
-      const targetDeviceId = (isSpeakerOn && nextDevice) ? nextDevice.deviceId : 'default';
+      if (isSpeakerOn) {
+        // Turning Speaker OFF -> Go to Earpiece
+        if (earpiece) {
+          targetDeviceId = earpiece.deviceId;
+        } else if (audioOutputs.length > 1) {
+          // Assume non-default might be earpiece
+          const nonDefault = audioOutputs.find(d => d.deviceId !== 'default');
+          if (nonDefault) targetDeviceId = nonDefault.deviceId;
+        }
+      } else {
+        // Turning Speaker ON -> Go to Speaker
+        if (speaker) {
+          targetDeviceId = speaker.deviceId;
+        } else {
+          // If no explicit speaker, usually 'default' is the speaker on mobile
+          targetDeviceId = 'default';
+        }
+      }
 
       await remoteAudioRef.current.setSinkId(targetDeviceId);
-      setIsSpeakerOn(!isSpeakerOn);
-      console.log(`Switched audio output to: ${targetDeviceId}`);
+      setIsSpeakerOn(!isSpeakerOn); // Toggle state
+      console.log(`Switched audio output to: ${targetDeviceId} (Speaker: ${!isSpeakerOn})`);
     } catch (err) {
       console.error("Failed to switch audio output:", err);
+      // Fallback UI update even if switch fails, so user sees feedback
+      setIsSpeakerOn(!isSpeakerOn);
     }
   };
 
