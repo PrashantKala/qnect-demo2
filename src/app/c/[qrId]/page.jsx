@@ -49,21 +49,136 @@ export default function CallPage() {
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
-  const remoteStreamRef = useRef(null);
-  const remoteAudioRef = useRef(null);
-  const messagesEndRef = useRef(null);
-  const TEMPLATES = [
-    'Your car is blocking mine, please move it.',
-    'Parking alert: You are parked in a no-parking zone.',
-    'Your headlights are on.',
-    'Your window is open.',
-    'Your car alarm is going off.',
-    'You left your trunk open.',
-    'Please return to your vehicle.',
-    'Urgent: Your car needs to be moved immediately.',
-    'You are double-parked.',
-    'Emergency: Please contact me regarding your car.'
-  ];
+  const silenceAudioRef = useRef(null); // Ref for the keep-alive track
+
+  // ... (existing refs) ...
+
+  // Helper to set sink ID for all audio elements
+  const setAudioOutputDevice = async (deviceId) => {
+    const elements = [remoteAudioRef.current, silenceAudioRef.current];
+    for (const el of elements) {
+      if (el && el.setSinkId) {
+        try {
+          await el.setSinkId(deviceId);
+        } catch (e) {
+          console.warn(`[WEB] Failed to set sinkId on element for ${deviceId}`, e);
+        }
+      }
+    }
+  };
+
+  // Helper to force earpiece/receiver output on connect
+  const setInitialAudioOutput = async (attempt = 1) => {
+    if (!remoteAudioRef.current || !remoteAudioRef.current.setSinkId) {
+      console.log("[WEB] setSinkId not supported, defaulting to browser audio behavior.");
+      return;
+    }
+
+    try {
+      // Small delay to ensure permissions/labels are propagated
+      if (attempt === 1) await new Promise(r => setTimeout(r, 500));
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+      console.log(`[WEB] Audio outputs target attempt ${attempt}:`, audioOutputs.map(d => `${d.label} (${d.deviceId})`));
+
+      if (audioOutputs.some(d => !d.label) && attempt < 3) {
+        console.log("[WEB] Some labels missing, retrying device enumeration...");
+        setTimeout(() => setInitialAudioOutput(attempt + 1), 500);
+        return;
+      }
+
+      let targetDevice = audioOutputs.find(d =>
+        d.label.toLowerCase().includes('earpiece') ||
+        d.label.toLowerCase().includes('receiver') ||
+        d.label.toLowerCase().includes('headset') ||
+        d.label.toLowerCase().includes('handset')
+      );
+
+      if (!targetDevice && audioOutputs.length > 2) {
+        targetDevice = audioOutputs.find(d =>
+          !d.label.toLowerCase().includes('speaker') &&
+          d.deviceId !== 'default'
+        );
+      }
+
+      if (!targetDevice && audioOutputs.length > 1) {
+        targetDevice = audioOutputs.find(d => d.deviceId !== 'default');
+      }
+
+      if (targetDevice && targetDevice.deviceId !== 'default') {
+        console.log(`[WEB] Found earpiece candidate: ${targetDevice.label} (${targetDevice.deviceId})`);
+        await setAudioOutputDevice(targetDevice.deviceId); // Apply to ALL audio elements
+        console.log(`[WEB] Successfully set output to: ${targetDevice.label}`);
+        setIsSpeakerOn(false);
+      } else {
+        console.log("[WEB] No earpiece candidate found, staying on default.");
+      }
+    } catch (e) {
+      console.warn("[WEB] Failed to set initial audio output", e);
+      if (attempt < 3) {
+        setTimeout(() => setInitialAudioOutput(attempt + 1), 1000);
+      }
+    }
+  };
+
+  // Toggle speaker (switch audio output)
+  const toggleSpeaker = async () => {
+    if (!remoteAudioRef.current || !remoteAudioRef.current.setSinkId) {
+      console.warn("Audio output switching not supported directly.");
+      setIsSpeakerOn(!isSpeakerOn);
+      return;
+    }
+
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+
+      const earpiece = audioOutputs.find(d =>
+        d.label.toLowerCase().includes('earpiece') ||
+        d.label.toLowerCase().includes('receiver') ||
+        d.label.toLowerCase().includes('headset')
+      );
+      const speaker = audioOutputs.find(d =>
+        d.label.toLowerCase().includes('speaker')
+      );
+
+      let targetDeviceId = 'default';
+
+      if (isSpeakerOn) {
+        // Turning Speaker OFF -> Go to Earpiece
+        if (earpiece) {
+          targetDeviceId = earpiece.deviceId;
+        } else if (audioOutputs.length > 1) {
+          const nonDefault = audioOutputs.find(d => d.deviceId !== 'default');
+          if (nonDefault) targetDeviceId = nonDefault.deviceId;
+        }
+      } else {
+        // Turning Speaker ON -> Go to Speaker
+        if (speaker) {
+          targetDeviceId = speaker.deviceId;
+        } else {
+          targetDeviceId = 'default';
+        }
+      }
+
+      await setAudioOutputDevice(targetDeviceId); // Apply to ALL audio elements
+      setIsSpeakerOn(!isSpeakerOn);
+      console.log(`Switched audio output to: ${targetDeviceId}`);
+    } catch (err) {
+      console.error("Failed to switch audio output:", err);
+      setIsSpeakerOn(!isSpeakerOn);
+    }
+  };
+
+  // ... (formatDuration) ...
+
+  const silentAudio = "data:audio/mp3;base64,SUQzBAAAAAAAI1RTSV*******"; // (Truncated for brevity)
+  const SILENCE_URL = "https://github.com/anars/blank-audio/raw/master/250-milliseconds-of-silence.mp3";
+
+
+
+
 
   // ▼▼▼ FIX 1: Store the app's socket ID and queue candidates ▼▼▼
   const remoteSocketIdRef = useRef(null);
@@ -395,56 +510,7 @@ export default function CallPage() {
     }
   };
 
-  // Helper to force earpiece/receiver output on connect
-  const setInitialAudioOutput = async () => {
-    if (!remoteAudioRef.current || !remoteAudioRef.current.setSinkId) {
-      console.log("[WEB] setSinkId not supported, defaulting to browser audio behavior.");
-      return;
-    }
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
-      console.log("[WEB] Audio outputs:", audioOutputs);
 
-      // Heuristic: Earpiece is often NOT the 'default' if the default is a speaker.
-      // But on mobile, 'default' is usually the only thing exposed unless permissions are high.
-      // We look for specifically labeled devices first.
-
-      const earpiece = audioOutputs.find(d =>
-        d.label.toLowerCase().includes('earpiece') ||
-        d.label.toLowerCase().includes('receiver') ||
-        d.label.toLowerCase().includes('headset')
-      );
-
-      const speaker = audioOutputs.find(d =>
-        d.label.toLowerCase().includes('speaker')
-      );
-
-      // Strategy: 
-      // 1. If we find an explicit earpiece, use it.
-      // 2. If we find a speaker, use anything *else* (the implicit earpiece).
-      // 3. If we find multiple, pick the first non-default one (often the individual receiver).
-
-      let targetId = 'default';
-
-      if (earpiece) {
-        targetId = earpiece.deviceId;
-      } else if (audioOutputs.length > 1) {
-        // If we have > 1, and one is default (usually speaker), pick the other
-        const nonDefault = audioOutputs.find(d => d.deviceId !== 'default');
-        if (nonDefault) targetId = nonDefault.deviceId;
-      }
-
-      console.log(`[WEB] Attempting to set initial output to: ${targetId}`);
-      if (targetId !== 'default') {
-        await remoteAudioRef.current.setSinkId(targetId);
-        console.log(`[WEB] Set output to ${targetId}`);
-      }
-      setIsSpeakerOn(false); // UI matches reality
-    } catch (e) {
-      console.warn("[WEB] Failed to set initial audio output", e);
-    }
-  };
 
   const cleanup = () => {
     if (peerRef.current) {
@@ -503,73 +569,6 @@ export default function CallPage() {
     });
   };
 
-  // Toggle speaker (switch audio output)
-  const toggleSpeaker = async () => {
-    if (!remoteAudioRef.current || !remoteAudioRef.current.setSinkId) {
-      console.warn("Audio output switching not supported directly.");
-      setIsSpeakerOn(!isSpeakerOn);
-      return;
-    }
-
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
-      console.log("Available audio outputs:", audioOutputs);
-
-      // Find candidates
-      const earpiece = audioOutputs.find(d =>
-        d.label.toLowerCase().includes('earpiece') ||
-        d.label.toLowerCase().includes('receiver') ||
-        d.label.toLowerCase().includes('headset')
-      );
-      const speaker = audioOutputs.find(d =>
-        d.label.toLowerCase().includes('speaker')
-      );
-
-      // Determine Target
-      // If currently ON, we want to go OFF (to Earpiece)
-      // If currently OFF, we want to go ON (to Speaker)
-      let targetDeviceId = 'default';
-
-      if (isSpeakerOn) {
-        // Turning Speaker OFF -> Go to Earpiece
-        if (earpiece) {
-          targetDeviceId = earpiece.deviceId;
-        } else if (audioOutputs.length > 1) {
-          // Assume non-default might be earpiece
-          const nonDefault = audioOutputs.find(d => d.deviceId !== 'default');
-          if (nonDefault) targetDeviceId = nonDefault.deviceId;
-        }
-      } else {
-        // Turning Speaker ON -> Go to Speaker
-        if (speaker) {
-          targetDeviceId = speaker.deviceId;
-        } else {
-          // If no explicit speaker, usually 'default' is the speaker on mobile
-          targetDeviceId = 'default';
-        }
-      }
-
-      await remoteAudioRef.current.setSinkId(targetDeviceId);
-      setIsSpeakerOn(!isSpeakerOn); // Toggle state
-      console.log(`Switched audio output to: ${targetDeviceId} (Speaker: ${!isSpeakerOn})`);
-    } catch (err) {
-      console.error("Failed to switch audio output:", err);
-      // Fallback UI update even if switch fails, so user sees feedback
-      setIsSpeakerOn(!isSpeakerOn);
-    }
-  };
-
-  // Format call duration as MM:SS
-  const formatDuration = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Silent audio to keep background session alive
-  const silentAudio = "data:audio/mp3;base64,SUQzBAAAAAAAI1RTSU*******"; // (Truncated for brevity, using a real short silence base64 below)
-  const SILENCE_URL = "https://github.com/anars/blank-audio/raw/master/250-milliseconds-of-silence.mp3"; // Reliable external source or base64
 
   // ▼▼▼ FIX 3: Update the hangup function ▼▼▼
   const handleHangUp = () => {
@@ -840,6 +839,13 @@ export default function CallPage() {
     }
   };
 
+  // Format call duration as MM:SS
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const [success, setSuccess] = useState(''); // Add a success state
 
   const renderButton = () => {
@@ -908,7 +914,7 @@ export default function CallPage() {
   return (
     <>
       {/* Hidden silence track to keep background audio alive (Interstate fix) */}
-      <audio autoPlay loop playsInline controls={false} src={SILENCE_URL} />
+      <audio ref={silenceAudioRef} autoPlay loop playsInline controls={false} src={SILENCE_URL} />
 
       {/* Calling Screen Overlay */}
       <CallingScreen
