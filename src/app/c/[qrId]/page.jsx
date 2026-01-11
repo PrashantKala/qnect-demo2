@@ -375,12 +375,84 @@ export default function CallPage() {
     });
 
     // Monitor page visibility for debugging background issues
-    const handleVisibilityChange = () => {
+    let keepAliveInterval = null;
+    let webLock = null;
+
+    const handleVisibilityChange = async () => {
       console.log(`[WEB] Visibility changed: ${document.visibilityState}`);
+
       if (document.hidden) {
-        console.log("[WEB] Page hidden - checking audio streams...");
+        console.log("[WEB] Page hidden - activating keep-alive mechanisms...");
+
+        // Log track status
         if (localStreamRef.current) {
           console.log("[WEB] Local tracks status:", localStreamRef.current.getTracks().map(t => `${t.kind}: ${t.enabled ? 'enabled' : 'disabled'}, ${t.readyState}`));
+        }
+
+        // 1. Request a Web Lock to tell the browser this page is doing important work
+        if (navigator.locks) {
+          try {
+            navigator.locks.request('qnect-call-active', { mode: 'exclusive' }, async lock => {
+              webLock = lock;
+              console.log("[WEB] Web Lock acquired - browser should keep us alive");
+              // Hold the lock until we release it or page closes
+              return new Promise(() => { }); // Never resolve to hold the lock
+            });
+          } catch (e) {
+            console.warn("[WEB] Web Locks API failed:", e);
+          }
+        }
+
+        // 2. Start a keep-alive ping to keep JS execution alive
+        // This sends small pings through the socket to prevent idle timeouts
+        keepAliveInterval = setInterval(() => {
+          if (socketRef.current && socketRef.current.connected) {
+            socketRef.current.emit('ping'); // Lightweight keep-alive
+          }
+          // Also check if peer connection is still alive
+          if (peerRef.current && peerRef.current._pc) {
+            const state = peerRef.current._pc.iceConnectionState;
+            console.log(`[WEB] Background: ICE state = ${state}`);
+            if (state === 'disconnected' || state === 'failed') {
+              console.warn("[WEB] Connection degraded in background, will try to recover on foreground");
+            }
+          }
+        }, 5000); // Every 5 seconds
+
+      } else {
+        console.log("[WEB] Page visible - checking connection health...");
+
+        // Clear the keep-alive interval
+        if (keepAliveInterval) {
+          clearInterval(keepAliveInterval);
+          keepAliveInterval = null;
+        }
+
+        // Check if we need to recover the connection
+        if (peerRef.current && peerRef.current._pc) {
+          const state = peerRef.current._pc.iceConnectionState;
+          console.log(`[WEB] Foreground: ICE state = ${state}`);
+
+          if (state === 'disconnected' || state === 'failed') {
+            console.log("[WEB] Attempting ICE restart to recover connection...");
+            try {
+              // Trigger ICE restart by creating a new offer with iceRestart: true
+              peerRef.current._pc.restartIce();
+              console.log("[WEB] ICE restart initiated");
+            } catch (e) {
+              console.error("[WEB] ICE restart failed:", e);
+            }
+          } else if (state === 'connected' || state === 'completed') {
+            console.log("[WEB] Connection healthy after background");
+          }
+        }
+
+        // Re-attach audio stream if needed
+        if (remoteAudioRef.current && remoteStreamRef.current) {
+          if (remoteAudioRef.current.paused) {
+            console.log("[WEB] Remote audio was paused, resuming...");
+            remoteAudioRef.current.play().catch(e => console.warn("[WEB] Resume play failed:", e));
+          }
         }
       }
     };
@@ -389,6 +461,11 @@ export default function CallPage() {
     return () => {
       console.log("Cleaning up call page.");
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+
+      // Clear background keep-alive interval
+      if (keepAliveInterval) {
+        clearInterval(keepAliveInterval);
+      }
 
       // Send hang-up to mobile if we have an active call
       if (socketRef.current && socketRef.current.connected) {
