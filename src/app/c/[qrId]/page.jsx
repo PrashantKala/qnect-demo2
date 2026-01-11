@@ -386,7 +386,16 @@ export default function CallPage() {
 
         // Log track status
         if (localStreamRef.current) {
-          console.log("[WEB] Local tracks status:", localStreamRef.current.getTracks().map(t => `${t.kind}: ${t.enabled ? 'enabled' : 'disabled'}, ${t.readyState}`));
+          const tracks = localStreamRef.current.getTracks();
+          console.log("[WEB] Local tracks status:", tracks.map(t => `${t.kind}: ${t.enabled ? 'enabled' : 'disabled'}, ${t.readyState}`));
+
+          // CRITICAL: Force all tracks to stay enabled
+          tracks.forEach(track => {
+            if (!track.enabled) {
+              console.log(`[WEB] Re-enabling ${track.kind} track that was disabled`);
+              track.enabled = true;
+            }
+          });
         }
 
         // 1. Request a Web Lock to tell the browser this page is doing important work
@@ -395,7 +404,6 @@ export default function CallPage() {
             navigator.locks.request('qnect-call-active', { mode: 'exclusive' }, async lock => {
               webLock = lock;
               console.log("[WEB] Web Lock acquired - browser should keep us alive");
-              // Hold the lock until we release it or page closes
               return new Promise(() => { }); // Never resolve to hold the lock
             });
           } catch (e) {
@@ -403,21 +411,39 @@ export default function CallPage() {
           }
         }
 
-        // 2. Start a keep-alive ping to keep JS execution alive
-        // This sends small pings through the socket to prevent idle timeouts
+        // 2. Start an aggressive keep-alive interval
         keepAliveInterval = setInterval(() => {
+          // Socket ping
           if (socketRef.current && socketRef.current.connected) {
-            socketRef.current.emit('ping'); // Lightweight keep-alive
+            socketRef.current.emit('ping');
           }
-          // Also check if peer connection is still alive
+
+          // WebRTC data channel ping (keeps the peer connection alive)
+          if (peerRef.current && peerRef.current.connected) {
+            try {
+              peerRef.current.send(JSON.stringify({ type: 'keepalive', ts: Date.now() }));
+              console.log("[WEB] Background: Sent keepalive through data channel");
+            } catch (e) {
+              console.warn("[WEB] Background: Data channel send failed", e);
+            }
+          }
+
+          // Re-enable tracks if browser disabled them
+          if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => {
+              if (!track.enabled && track.readyState === 'live') {
+                console.log(`[WEB] Background: Re-enabling disabled ${track.kind} track`);
+                track.enabled = true;
+              }
+            });
+          }
+
+          // Log ICE state
           if (peerRef.current && peerRef.current._pc) {
             const state = peerRef.current._pc.iceConnectionState;
             console.log(`[WEB] Background: ICE state = ${state}`);
-            if (state === 'disconnected' || state === 'failed') {
-              console.warn("[WEB] Connection degraded in background, will try to recover on foreground");
-            }
           }
-        }, 5000); // Every 5 seconds
+        }, 3000); // Every 3 seconds (more aggressive)
 
       } else {
         console.log("[WEB] Page visible - checking connection health...");
@@ -428,6 +454,24 @@ export default function CallPage() {
           keepAliveInterval = null;
         }
 
+        // CRITICAL: Re-enable all local tracks immediately
+        if (localStreamRef.current) {
+          const tracks = localStreamRef.current.getTracks();
+          console.log("[WEB] Foreground: Local tracks:", tracks.map(t => `${t.kind}: ${t.enabled}, ${t.readyState}`));
+
+          tracks.forEach(track => {
+            if (!track.enabled) {
+              console.log(`[WEB] Foreground: Re-enabling ${track.kind} track`);
+              track.enabled = true;
+            }
+
+            // If track ended, we need to renegotiate (this is bad)
+            if (track.readyState === 'ended') {
+              console.error(`[WEB] Foreground: ${track.kind} track has ENDED - call may need reconnection`);
+            }
+          });
+        }
+
         // Check if we need to recover the connection
         if (peerRef.current && peerRef.current._pc) {
           const state = peerRef.current._pc.iceConnectionState;
@@ -436,7 +480,6 @@ export default function CallPage() {
           if (state === 'disconnected' || state === 'failed') {
             console.log("[WEB] Attempting ICE restart to recover connection...");
             try {
-              // Trigger ICE restart by creating a new offer with iceRestart: true
               peerRef.current._pc.restartIce();
               console.log("[WEB] ICE restart initiated");
             } catch (e) {
@@ -447,8 +490,9 @@ export default function CallPage() {
           }
         }
 
-        // Re-attach audio stream if needed
+        // Re-attach and play audio stream
         if (remoteAudioRef.current && remoteStreamRef.current) {
+          remoteAudioRef.current.srcObject = remoteStreamRef.current;
           if (remoteAudioRef.current.paused) {
             console.log("[WEB] Remote audio was paused, resuming...");
             remoteAudioRef.current.play().catch(e => console.warn("[WEB] Resume play failed:", e));
