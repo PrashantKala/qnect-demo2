@@ -170,7 +170,7 @@ export default function HomePage() {
                 className="rounded-full mb-4 self-center border-4 border-white"
               />
               <p className="flex-grow opacity-90">
-                "The best ₹299 I've spent. It's already saved me from one towing. The peace of mind is worth 10x the price."
+                "The best ₹399 I've spent. It's already saved me from one towing. The peace of mind is worth 10x the price."
               </p>
               <p className="font-bold mt-4 text-center text-white">- Priya K.</p>
             </div>
