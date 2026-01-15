@@ -35,37 +35,37 @@ export default function HomePage() {
 
 
       {/* How It Works Section (Fix #2 - Doc) */}
-<section id="how-it-works" className="py-20 container mx-auto px-6 text-center">
-  <h2 className="text-4xl font-bold text-center mb-12 text-primary-blue">
-    How It Works
-  </h2>
+      <section id="how-it-works" className="py-20 container mx-auto px-6 text-center">
+        <h2 className="text-4xl font-bold text-center mb-12 text-primary-blue">
+          How It Works
+        </h2>
 
-  <div className="flex flex-col md:flex-row justify-center items-stretch gap-8">
-    {/* Card 1 */}
-    <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
-      <h3 className="text-2xl font-bold mb-3">1. Get Your QR</h3>
-      <p className="text-white/90">
-        Get your personalized QNect QR code today! We’ll email you a high-quality PDF to print and display on your vehicle until your original sticker arrives at your doorstep.
-      </p>
-    </div>
+        <div className="flex flex-col md:flex-row justify-center items-stretch gap-8">
+          {/* Card 1 */}
+          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
+            <h3 className="text-2xl font-bold mb-3">1. Get Your QR</h3>
+            <p className="text-white/90">
+              Get your personalized QNect QR code today! We’ll email you a high-quality PDF to print and display on your vehicle until your original sticker arrives at your doorstep.
+            </p>
+          </div>
 
-    {/* Card 2 */}
-    <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
-      <h3 className="text-2xl font-bold mb-3">2. Activate in App</h3>
-      <p className="text-white/90">
-        Download QNect app to activate and sync QR to your vehicle. Quick, encrypted, and fully private.
-      </p>
-    </div>
+          {/* Card 2 */}
+          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
+            <h3 className="text-2xl font-bold mb-3">2. Activate in App</h3>
+            <p className="text-white/90">
+              Download QNect app to activate and sync QR to your vehicle. Quick, encrypted, and fully private.
+            </p>
+          </div>
 
-    {/* Card 3 */}
-    <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
-      <h3 className="text-2xl font-bold mb-3">3. Get Connected</h3>
-      <p className="text-white/90">
-        If your car causes an issue, anyone can scan your QNect QR to contact you instantly—without ever seeing your phone number.
-      </p>
-    </div>
-  </div>
-</section>
+          {/* Card 3 */}
+          <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-lg w-full md:w-1/3 transform transition-all duration-300 hover:-translate-y-1">
+            <h3 className="text-2xl font-bold mb-3">3. Get Connected</h3>
+            <p className="text-white/90">
+              If your car causes an issue, anyone can scan your QNect QR to contact you instantly—without ever seeing your phone number.
+            </p>
+          </div>
+        </div>
+      </section>
 
 
 
@@ -84,7 +84,7 @@ export default function HomePage() {
               <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary-blue text-white px-4 py-1 rounded-full text-sm font-semibold">Our Only Plan</span>
               <h3 className="text-3xl font-bold text-gray-400 mt-4">QNect Digital QR</h3>
               <p className="text-5xl font-bold my-4 text-primary-blue">
-                ₹299 + GST
+                ₹399 + GST
               </p>
               <ul className="text-text-secondary space-y-3 text-left my-8">
                 <li>✓ <strong>Instant Soft Copy:</strong> Till original QNect OR is delivered to your doorstep.</li>
@@ -207,7 +207,7 @@ export default function HomePage() {
               </p>
             </div>
             <img
-              src="https://via.placeholder.com/500x350"
+              src="/payEveryYear.jpeg"
               alt="Privacy Protection"
               className="w-full rounded-xl shadow-md"
             />
@@ -223,7 +223,7 @@ export default function HomePage() {
             }}
           >
             <img
-              src="https://via.placeholder.com/500x350"
+              src="/sellMycar.jpeg"
               alt="Sell Car"
               className="w-full rounded-xl shadow-md order-1 md:order-none"
             />
@@ -253,12 +253,12 @@ export default function HomePage() {
                 Do I need to pay every year?
               </h3>
               <p className="text-white/90 text-lg leading-relaxed">
-                No! Get full QNect services free for 2 years when you purchase your QR
-                for ₹299 + GST. After that, you can easily recharge to continue.
+                Yes! Get full QNect services free for 1 years when you purchase your QR
+                for ₹399 + GST. After that, you can easily recharge to continue.
               </p>
             </div>
             <img
-              src="https://via.placeholder.com/500x350"
+              src="/payEveryYear.jpeg"
               alt="Payment Info"
               className="w-full rounded-xl shadow-md"
             />
@@ -278,25 +278,25 @@ export default function HomePage() {
 
 
       {/* Refer Section (No changes, but now in correct theme) */}
-<section id="refer" className="py-20 bg-white">
-  <div className="container mx-auto px-6 text-center">
-    <h2 className="text-4xl font-bold text-primary-blue mb-6">
-      Refer a Friend, Get Rewarded
-    </h2>
-    <p className="text-lg text-text-secondary mb-8 max-w-xl mx-auto">
-      Love QNect? Share it with your friends and family and earn exciting
-      rewards for every successful referral.
-    </p>
+      <section id="refer" className="py-20 bg-white">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold text-primary-blue mb-6">
+            Refer a Friend, Get Rewarded
+          </h2>
+          <p className="text-lg text-text-secondary mb-8 max-w-xl mx-auto">
+            Love QNect? Share it with your friends and family and earn exciting
+            rewards for every successful referral.
+          </p>
 
-      <Link
-        href="/refer"
-        className="inline-block px-10 py-4 bg-gradient-to-r from-[#3BDAD7] to-[#26BCCA] text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
-        style={{ boxShadow: "0 4px 15px rgba(59, 218, 215, 0.3)" }}
-      >
-        Know More
-      </Link>
-  </div>
-</section>
+          <Link
+            href="/refer"
+            className="inline-block px-10 py-4 bg-gradient-to-r from-[#3BDAD7] to-[#26BCCA] text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
+            style={{ boxShadow: "0 4px 15px rgba(59, 218, 215, 0.3)" }}
+          >
+            Know More
+          </Link>
+        </div>
+      </section>
 
 
       {/* Sticky App Scanner */}
