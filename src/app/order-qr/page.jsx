@@ -68,7 +68,7 @@ export default function OrderQRPage() {
         amount: orderData.order.amount,
         currency: orderData.order.currency,
         name: 'QNect',
-        description: 'QNect Digital QR (Lifetime)',
+        description: 'QNect Digital QR (Yearly)',
         order_id: orderData.order.id,
         handler: async function (response) {
           // Step 3: Verify payment and generate QR
