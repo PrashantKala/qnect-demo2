@@ -36,7 +36,7 @@ export default function ProfilePage() {
   const [editAddress, setEditAddress] = useState(false);
   const [editedAddress, setEditedAddress] = useState({});
   const [editedProfile, setEditedProfile] = useState({});
-  
+
   // Guardian states
   const [manageGuardians, setManageGuardians] = useState(false);
   const [newGuardian, setNewGuardian] = useState({ name: '', email: '', phoneNumber: '', relation: '' });
@@ -168,7 +168,7 @@ export default function ProfilePage() {
     <main className="container mx-auto px-6 py-12 pt-24 min-h-screen">
       <h1 className="text-4xl font-bold text-primary-blue mb-8">My Profile & QRs</h1>
 
-      <div className="grid md:grid-cols-[40%_60%] gap-8">
+      <div className="grid md:grid-cols-[40%_60%] gap-8 min-w-0">
         {/* Profile Section */}
         <div className="space-y-6">
           {/* Profile Card */}
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                     type="text"
                     value={editedProfile.mobileNumber || ''}
                     onChange={(e) => setEditedProfile({ ...editedProfile, mobileNumber: e.target.value })}
-                    className="w-full p-2 rounded-lg mt-1 text-black"
+                    className="w-full p-2 rounded-lg mt-1 text-black bg-white"
                   />
                 </div>
                 <div>
@@ -209,7 +209,7 @@ export default function ProfilePage() {
                     type="text"
                     value={editedProfile.vehicleNumber || ''}
                     onChange={(e) => setEditedProfile({ ...editedProfile, vehicleNumber: e.target.value })}
-                    className="w-full p-2 rounded-lg mt-1 text-black"
+                    className="w-full p-2 rounded-lg mt-1 text-black bg-white"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -304,7 +304,7 @@ export default function ProfilePage() {
                   type="text"
                   placeholder="Name *"
                   value={newGuardian.name}
-                  onChange={(e) => setNewGuardian({...newGuardian, name: e.target.value})}
+                  onChange={(e) => setNewGuardian({ ...newGuardian, name: e.target.value })}
                   className="w-full p-2 rounded text-black"
                   required
                 />
@@ -312,7 +312,7 @@ export default function ProfilePage() {
                   type="tel"
                   placeholder="Phone Number *"
                   value={newGuardian.phoneNumber}
-                  onChange={(e) => setNewGuardian({...newGuardian, phoneNumber: e.target.value})}
+                  onChange={(e) => setNewGuardian({ ...newGuardian, phoneNumber: e.target.value })}
                   className="w-full p-2 rounded text-black"
                   required
                 />
@@ -320,7 +320,7 @@ export default function ProfilePage() {
                   type="email"
                   placeholder="Email (Required - Must have account) *"
                   value={newGuardian.email}
-                  onChange={(e) => setNewGuardian({...newGuardian, email: e.target.value})}
+                  onChange={(e) => setNewGuardian({ ...newGuardian, email: e.target.value })}
                   className="w-full p-2 rounded text-black"
                   required
                 />
@@ -328,7 +328,7 @@ export default function ProfilePage() {
                   type="text"
                   placeholder="Relation (e.g. Father)"
                   value={newGuardian.relation}
-                  onChange={(e) => setNewGuardian({...newGuardian, relation: e.target.value})}
+                  onChange={(e) => setNewGuardian({ ...newGuardian, relation: e.target.value })}
                   className="w-full p-2 rounded text-black"
                 />
                 <div className="flex gap-2 pt-2">
@@ -398,38 +398,77 @@ export default function ProfilePage() {
           </div>
           <div className="space-y-4">
             {qrs.length > 0 ? (
-              qrs.map(qr => (
-                <div key={qr._id} className="p-6 bg-white/10 rounded-lg">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="font-mono text-sm text-white/80">ID: {qr.qrId}</p>
-                      <p className="text-lg font-semibold">
-                        Status: <span className={`capitalize ${qr.status === 'activated' ? 'text-green-300' : 'text-yellow-200'}`}>{qr.status}</span>
-                      </p>
-                      <p className="text-sm text-white/70 mt-1">
-                        Activated: {new Date(qr.activatedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button onClick={() => handleResendQR(qr.qrId)} className="px-3 py-2 text-sm font-medium bg-white text-primary-blue rounded flex items-center hover:opacity-90">
-                        <IoDownloadOutline className="h-4 w-4 mr-1" /> Resend
-                      </button>
-                      <button
-                        onClick={() => handleToggleQRStatus(qr.qrId)}
-                        className={`px-3 py-2 text-sm font-medium rounded flex items-center hover:opacity-90 ${
-                          qr.status === 'activated' ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700'
-                        }`}
-                      >
-                        <IoToggleOutline className="h-4 w-4 mr-1" />
-                        {qr.status === 'activated' ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button onClick={() => handleReorder(qr.qrId)} className="px-3 py-2 text-sm font-medium bg-white/20 rounded flex items-center hover:bg-white/30">
-                        <IoRepeatOutline className="h-4 w-4 mr-1" /> Reorder
-                      </button>
+              qrs.map(qr => {
+                // Calculate expiry status
+                const now = new Date();
+                const expiresAt = qr.expiresAt ? new Date(qr.expiresAt) : null;
+                const isExpired = expiresAt ? now > expiresAt : false;
+                const daysRemaining = expiresAt && !isExpired
+                  ? Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24))
+                  : null;
+                const isExpiringSoon = daysRemaining !== null && daysRemaining <= 30;
+
+                return (
+                  <div key={qr._id} className="p-6 bg-white/10 rounded-lg">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="font-mono text-sm text-white/80">ID: {qr.qrId}</p>
+                        <p className="text-lg font-semibold">
+                          Status: <span className={`capitalize ${qr.status === 'activated' ? 'text-green-300' : 'text-yellow-200'}`}>{qr.status}</span>
+                        </p>
+                        <p className="text-sm text-white/70 mt-1">
+                          Activated: {new Date(qr.activatedAt).toLocaleDateString()}
+                        </p>
+                        {/* Expiry Status */}
+                        {expiresAt && (
+                          <div className="mt-2">
+                            {isExpired ? (
+                              <span className="inline-block px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
+                                EXPIRED
+                              </span>
+                            ) : isExpiringSoon ? (
+                              <span className="inline-block px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded">
+                                Expires in {daysRemaining} days
+                              </span>
+                            ) : (
+                              <p className="text-sm text-white/70">
+                                Expires: {expiresAt.toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {!expiresAt && (
+                          <p className="text-sm text-green-300 mt-2">✓ Lifetime (Legacy)</p>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <button onClick={() => handleResendQR(qr.qrId)} className="px-3 py-2 text-sm font-medium bg-white/20 text-white rounded flex items-center hover:bg-white/30">
+                            <IoDownloadOutline className="h-4 w-4 mr-1" /> Resend
+                          </button>
+                          <button
+                            onClick={() => handleToggleQRStatus(qr.qrId)}
+                            className={`px-3 py-2 text-sm font-medium rounded flex items-center hover:opacity-90 ${qr.status === 'activated' ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700'
+                              }`}
+                          >
+                            <IoToggleOutline className="h-4 w-4 mr-1" />
+                            {qr.status === 'activated' ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
+                        {/* Renew Button for expired or expiring QRs */}
+                        {expiresAt && (isExpired || isExpiringSoon) && (
+                          <Link
+                            href={`/renew-qr?qrId=${qr.qrId}`}
+                            className="px-4 py-2 text-sm font-bold bg-accent-cyan text-primary-blue rounded flex items-center hover:opacity-90"
+                          >
+                            <IoRepeatOutline className="h-4 w-4 mr-1" /> Renew (₹399)
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <p className="text-white/80 text-center py-8">
                 You have not purchased or activated any QR codes yet.

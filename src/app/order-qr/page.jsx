@@ -169,8 +169,8 @@ export default function OrderQRPage() {
             <li className="flex gap-3">
               <span className="font-bold">✓</span>
               <div>
-                <h3 className="font-bold">One-Time Payment, Lifetime Validity</h3>
-                <p>Pay ₹399 just once. No subscriptions, no hidden fees, and your QR code works forever.</p>
+                <h3 className="font-bold">One Year of Service</h3>
+                <p>Pay ₹399 for a full year of QNect service. Easy renewal when your plan expires.</p>
               </div>
             </li>
             <li className="flex gap-3">
@@ -188,7 +188,7 @@ export default function OrderQRPage() {
           <h1 className="text-3xl font-bold mb-6 text-center">Confirm Your Order</h1>
           <div className="my-6 p-4 bg-white/10 rounded-lg">
             <div className="flex justify-between items-center">
-              <span>QNect Digital QR (Lifetime)</span>
+              <span>QNect Digital QR (1 Year)</span>
               <span className="text-xl font-bold">₹399</span>
             </div>
           </div>

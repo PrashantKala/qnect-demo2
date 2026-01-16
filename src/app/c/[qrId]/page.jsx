@@ -45,6 +45,7 @@ export default function CallPage() {
   // Owner info state
   const [ownerInfo, setOwnerInfo] = useState(null);
   const [loadingOwnerInfo, setLoadingOwnerInfo] = useState(true);
+  const [isExpired, setIsExpired] = useState(false);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -209,6 +210,10 @@ export default function CallPage() {
         const response = await fetchQRInfo(qrId);
         if (response.data.success) {
           setOwnerInfo(response.data.data);
+          // Check if QR is expired
+          if (response.data.data.expiry?.isExpired) {
+            setIsExpired(true);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch owner info:", error);
@@ -1089,7 +1094,20 @@ export default function CallPage() {
                 <p className="text-gray-500 mb-6">Owner information not available</p>
               )}
 
-              {renderButton()}
+              {/* Expired QR Warning */}
+              {isExpired && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-2 text-red-600 mb-2">
+                    <AlertTriangle size={20} />
+                    <span className="font-bold">QR Code Expired</span>
+                  </div>
+                  <p className="text-sm text-red-700">
+                    This QR code subscription has expired. The owner needs to renew their subscription to receive calls.
+                  </p>
+                </div>
+              )}
+
+              {!isExpired && renderButton()}
 
               {error && <p className="text-red-500 text-center mt-4">{error}</p>}
               {success && <p className="text-green-600 text-center mt-4">{success}</p>}

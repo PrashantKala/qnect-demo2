@@ -74,7 +74,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold text-primary-blue">Our Pricing</h2> {/* Title Updated */}
           <p className="text-lg text-text-secondary mt-4 mb-16">
-            No subscriptions. No hidden fees. Just one price for a lifetime of convenience.
+            Simple pricing. One year of service. Easy renewal when you need it.
           </p>
           <div className="flex justify-center">
             <div
@@ -88,7 +88,7 @@ export default function HomePage() {
               </p>
               <ul className="text-text-secondary space-y-3 text-left my-8">
                 <li>✓ <strong>Instant Soft Copy:</strong> Till original QNect OR is delivered to your doorstep.</li>
-                <li>✓ <strong>Validity:</strong> Enjoy our services for Two year from the date of activation with easy recharge to continue enjoying hassle-free connections.</li>
+                <li>✓ <strong>Validity:</strong> Enjoy our services for one year from the date of activation with easy renewal to continue enjoying hassle-free connections.</li>
                 <li>✓ <strong>100% Privacy:</strong> With QNect, your number is never shared—so you can connect instantly without compromising your privacy.</li>
               </ul>
               <Link
@@ -253,7 +253,7 @@ export default function HomePage() {
                 Do I need to pay every year?
               </h3>
               <p className="text-white/90 text-lg leading-relaxed">
-                Yes! Get full QNect services free for 1 years when you purchase your QR
+                Yes! Get full QNect services for 1 year when you purchase your QR
                 for ₹399 + GST. After that, you can easily recharge to continue.
               </p>
             </div>

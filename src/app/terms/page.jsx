@@ -34,9 +34,9 @@ export default function TermsPage() {
 
         <h2 className="text-xl font-bold text-primary-blue pt-4">4. Subscription, Validation, and Renewal</h2>
         <h3 className="text-lg font-semibold text-text-primary mt-2">4.1. Sticker Validation Period</h3>
-        <p>The services provided through a single, unique QNECT QR code (the "Sticker") are valid for an initial period of **two (2) years** from the date the QR code is officially activated by the QNECT administrator.</p>
+        <p>The services provided through a single, unique QNECT QR code (the "Sticker") are valid for an initial period of **one (1) year** from the date the QR code is officially activated by the QNECT administrator.</p>
         <h3 className="text-lg font-semibold text-text-primary mt-2">4.2. Service Continuity and Renewal</h3>
-        <p>To continue receiving the full range of services, including the critical call routing and number masking functionality, after the initial two-year validation period expires, the Registered User must renew their subscription or service plan. Failure to renew will result in the deactivation of the QR code in the system.</p>
+        <p>To continue receiving the full range of services, including the critical call routing and number masking functionality, after the initial one-year validation period expires, the Registered User must renew their subscription or service plan. Failure to renew will result in the deactivation of the QR code in the system.</p>
         <h3 className="text-lg font-semibold text-text-primary mt-2">4.3. Pricing</h3>
         <p>The specific pricing, features, and renewal fees for continued service will be communicated to you via the QNECT website and/or email notification prior to the end of your validation period.</p>
 
