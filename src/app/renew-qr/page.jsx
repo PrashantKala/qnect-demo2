@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 
-export default function RenewQRPage() {
+function RenewQRContent() {
     const { userToken, isLoading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -19,7 +19,7 @@ export default function RenewQRPage() {
         if (!isLoading && !userToken) {
             router.replace('/login?redirect=/profile');
         }
-        if (!qrId) {
+        if (!isLoading && !qrId) {
             router.replace('/profile');
         }
     }, [userToken, isLoading, router, qrId]);
@@ -114,10 +114,18 @@ export default function RenewQRPage() {
         }
     };
 
-    if (isLoading || !userToken || !qrId) {
+    if (isLoading || !userToken) {
         return (
             <main className="container mx-auto px-6 py-12 pt-24 min-h-screen">
                 <p>Loading...</p>
+            </main>
+        );
+    }
+
+    if (!qrId) {
+        return (
+            <main className="container mx-auto px-6 py-12 pt-24 min-h-screen">
+                <p>Redirecting...</p>
             </main>
         );
     }
@@ -153,7 +161,7 @@ export default function RenewQRPage() {
 
                             <div className="bg-white/10 rounded-lg p-4 mb-6">
                                 <p className="text-sm text-white/70 mb-1">QR Code ID</p>
-                                <p className="font-mono text-sm">{qrId}</p>
+                                <p className="font-mono text-sm break-all">{qrId}</p>
                             </div>
 
                             <div className="bg-white/10 rounded-lg p-4 mb-6">
@@ -209,5 +217,17 @@ export default function RenewQRPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function RenewQRPage() {
+    return (
+        <Suspense fallback={
+            <main className="container mx-auto px-6 py-12 pt-24 min-h-screen">
+                <p>Loading...</p>
+            </main>
+        }>
+            <RenewQRContent />
+        </Suspense>
     );
 }
