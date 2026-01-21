@@ -243,6 +243,14 @@ export default function CallPage() {
       }
     });
 
+    socket.on('disconnect', (reason) => {
+      console.log("[WEB] Socket DISCONNECTED! Reason:", reason);
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error("[WEB] Socket connection error:", error);
+    });
+
     socket.on('call-notification-sent', (data) => {
       console.log("Call notification sent, callId:", data.callId);
       if (data.callId) {
