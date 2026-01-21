@@ -13,7 +13,7 @@ function LoginForm() {
   const [error, setError] = useState('');
   const { login, loginWithToken } = useAuth();
   const router = useRouter();
-  
+
   // 2. Get the redirect URL from the query parameters
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/';
@@ -27,7 +27,7 @@ function LoginForm() {
           if (tokenResponse && tokenResponse.access_token) {
             try {
               // Remove extra /api since NEXT_PUBLIC_API_URL already includes it
-              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend.onrender.com/api';
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend-app-zne7q.ondigitalocean.app/api';
               const res = await fetch(`${apiUrl}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -69,9 +69,9 @@ function LoginForm() {
       <div className="max-w-md mx-auto">
         <div className="bg-white p-8 rounded-lg shadow-md">
           <h1 className="text-3xl font-bold text-primary-blue mb-6 text-center">Welcome Back</h1>
-          
+
           <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
-          
+
           <div className="mb-6">
             <button
               type="button"
@@ -112,18 +112,18 @@ function LoginForm() {
             {error && <p className="text-red-500 text-center">{error}</p>}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text-secondary">Email Address</label>
-              <input 
-                type="email" id="email" value={email} 
-                onChange={(e) => setEmail(e.target.value)} required 
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+              <input
+                type="email" id="email" value={email}
+                onChange={(e) => setEmail(e.target.value)} required
+                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-text-secondary">Password</label>
-              <input 
-                type="password" id="password" value={password} 
-                onChange={(e) => setPassword(e.target.value)} required 
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+              <input
+                type="password" id="password" value={password}
+                onChange={(e) => setPassword(e.target.value)} required
+                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
             <div className="text-center pt-4">
@@ -132,7 +132,7 @@ function LoginForm() {
               </button>
             </div>
             <p className="text-center text-sm text-text-secondary">
-              Don't have an account? 
+              Don't have an account?
               <Link href="/signup" className="font-bold text-primary-blue hover:text-accent-cyan"> Sign up here</Link>
             </p>
           </form>

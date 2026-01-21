@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
             // Send FCM token to backend
             saveFCMToken(token);
             axios.post(
-              `${process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend.onrender.com'}/api/users/web-push-token`,
+              `${process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend-app-zne7q.ondigitalocean.app'}/api/users/web-push-token`,
               { token: token },
               { headers: { Authorization: `Bearer ${token}` } }
             ).catch(err => console.error('Error registering web push token:', err));
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
       const response = await registerUser(userData);
       setSession(response.data.token);
       // We no longer redirect here. The signup page will do it.
-    } catch (error) { 
+    } catch (error) {
       console.error("Signup failed:", error);
       throw new Error(error.response?.data?.message || 'Signup Failed');
     }
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ userToken, userEmail, isLoading, login, signup, logout, loginWithToken }}>
-          {console.log("api url"+process.env.API_URL)}
+      {console.log("api url" + process.env.API_URL)}
       {children}
     </AuthContext.Provider>
   );

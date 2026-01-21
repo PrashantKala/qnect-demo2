@@ -37,7 +37,7 @@ export default function SignupPage() {
           if (tokenResponse && tokenResponse.access_token) {
             try {
               // Remove extra /api since NEXT_PUBLIC_API_URL already includes it
-              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend.onrender.com/api';
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend-app-zne7q.ondigitalocean.app/api';
               const res = await fetch(`${apiUrl}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -123,9 +123,9 @@ export default function SignupPage() {
       <div className="max-w-md mx-auto">
         <div className="card">
           <h1 className="text-3xl font-bold text-primary-blue mb-6 text-center">Create Your Account</h1>
-          
+
           <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
-          
+
           <div className="mb-6">
             <button
               type="button"
@@ -167,61 +167,61 @@ export default function SignupPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-text-secondary">First Name *</label>
-                <input 
+                <input
                   type="text" id="firstName" name="firstName"
-                  value={formData.firstName} 
-                  onChange={handleInputChange} required 
-                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                  value={formData.firstName}
+                  onChange={handleInputChange} required
+                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                 />
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-text-secondary">Last Name *</label>
-                <input 
+                <input
                   type="text" id="lastName" name="lastName"
-                  value={formData.lastName} 
-                  onChange={handleInputChange} required 
-                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                  value={formData.lastName}
+                  onChange={handleInputChange} required
+                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text-secondary">Email Address *</label>
-              <input 
+              <input
                 type="email" id="email" name="email"
-                value={formData.email} 
-                onChange={handleInputChange} required 
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                value={formData.email}
+                onChange={handleInputChange} required
+                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-text-secondary">Password *</label>
-              <input 
+              <input
                 type="password" id="password" name="password"
-                value={formData.password} 
-                onChange={handleInputChange} required 
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                value={formData.password}
+                onChange={handleInputChange} required
+                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
 
             <div>
               <label htmlFor="mobileNumber" className="block text-sm font-medium text-text-secondary">Mobile Number *</label>
-              <input 
+              <input
                 type="tel" id="mobileNumber" name="mobileNumber"
-                value={formData.mobileNumber} 
-                onChange={handleInputChange} required 
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                value={formData.mobileNumber}
+                onChange={handleInputChange} required
+                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
 
             <div>
               <label htmlFor="vehicleNumber" className="block text-sm font-medium text-text-secondary">Vehicle Number (Optional)</label>
-              <input 
+              <input
                 type="text" id="vehicleNumber" name="vehicleNumber"
-                value={formData.vehicleNumber} 
+                value={formData.vehicleNumber}
                 onChange={handleInputChange}
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
 
@@ -230,70 +230,70 @@ export default function SignupPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="pincode" className="block text-sm font-medium text-text-secondary">Pincode *</label>
-                  <input 
+                  <input
                     type="text" id="pincode" name="address.pincode"
-                    value={formData.address.pincode} 
-                    onChange={handleInputChange} required 
-                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                    value={formData.address.pincode}
+                    onChange={handleInputChange} required
+                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
                 <div>
                   <label htmlFor="houseNumber" className="block text-sm font-medium text-text-secondary">House Number *</label>
-                  <input 
+                  <input
                     type="text" id="houseNumber" name="address.houseNumber"
-                    value={formData.address.houseNumber} 
-                    onChange={handleInputChange} required 
-                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                    value={formData.address.houseNumber}
+                    onChange={handleInputChange} required
+                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
               </div>
 
               <div>
                 <label htmlFor="streetName" className="block text-sm font-medium text-text-secondary mt-4">Street Name *</label>
-                <input 
+                <input
                   type="text" id="streetName" name="address.streetName"
-                  value={formData.address.streetName} 
-                  onChange={handleInputChange} required 
-                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                  value={formData.address.streetName}
+                  onChange={handleInputChange} required
+                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                 />
               </div>
 
               <div>
                 <label htmlFor="landmark" className="block text-sm font-medium text-text-secondary mt-4">Landmark (Optional)</label>
-                <input 
+                <input
                   type="text" id="landmark" name="address.landmark"
-                  value={formData.address.landmark} 
+                  value={formData.address.landmark}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                  className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-text-secondary">City *</label>
-                  <input 
+                  <input
                     type="text" id="city" name="address.city"
-                    value={formData.address.city} 
-                    onChange={handleInputChange} required 
-                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                    value={formData.address.city}
+                    onChange={handleInputChange} required
+                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
                 <div>
                   <label htmlFor="state" className="block text-sm font-medium text-text-secondary">State *</label>
-                  <input 
+                  <input
                     type="text" id="state" name="address.state"
-                    value={formData.address.state} 
-                    onChange={handleInputChange} required 
-                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                    value={formData.address.state}
+                    onChange={handleInputChange} required
+                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
                 <div>
                   <label htmlFor="country" className="block text-sm font-medium text-text-secondary">Country *</label>
-                  <input 
+                  <input
                     type="text" id="country" name="address.country"
-                    value={formData.address.country} 
-                    onChange={handleInputChange} required 
-                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                    value={formData.address.country}
+                    onChange={handleInputChange} required
+                    className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
               </div>
@@ -301,11 +301,11 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="referralCode" className="block text-sm font-medium text-text-secondary">Referral Code (Optional)</label>
-              <input 
+              <input
                 type="text" id="referralCode" name="referralCode"
-                value={formData.referralCode} 
+                value={formData.referralCode}
                 onChange={handleInputChange}
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan" 
+                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
             <div className="text-center pt-4">
@@ -314,7 +314,7 @@ export default function SignupPage() {
               </button>
             </div>
             <p className="text-center text-sm text-text-secondary">
-              Already have an account? 
+              Already have an account?
               <Link href="/login" className="font-bold text-primary-blue hover:text-accent-cyan"> Login here</Link>
             </p>
           </form>
