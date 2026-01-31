@@ -227,7 +227,10 @@ export default function CallPage() {
 
 
   useEffect(() => {
-    socketRef.current = io(SOCKET_SERVER_URL);
+    socketRef.current = io(SOCKET_SERVER_URL, {
+      transports: ['websocket'], // Skip polling, use WebSocket directly
+      upgrade: false // Don't upgrade from polling to websocket
+    });
     const socket = socketRef.current;
 
     // Get current user ID from localStorage or session
