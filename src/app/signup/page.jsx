@@ -37,7 +37,7 @@ export default function SignupPage() {
           if (tokenResponse && tokenResponse.access_token) {
             try {
               // Remove extra /api since NEXT_PUBLIC_API_URL already includes it
-              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend.onrender.com/api';
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL;
               const res = await fetch(`${apiUrl}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
