@@ -13,7 +13,6 @@ export async function POST(request) {
     if (!authHeader) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-          {console.log("api url"+process.env.API_URL)}
     // Forward the request to the backend
     const backendResponse = await axios.post(
       `${BACKEND_API_URL}/qrs/create-and-send`,
@@ -25,7 +24,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('API Error:', error.message);
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: error.response?.data?.message || 'An internal server error occurred.'
     }, { status: error.response?.status || 500 });
   }
