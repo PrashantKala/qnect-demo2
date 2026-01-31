@@ -27,7 +27,7 @@ function LoginForm() {
           if (tokenResponse && tokenResponse.access_token) {
             try {
               // Remove extra /api since NEXT_PUBLIC_API_URL already includes it
-              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend-app-zne7q.ondigitalocean.app/api';
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://qnect-backend.onrender.com/api';
               const res = await fetch(`${apiUrl}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
