@@ -1062,6 +1062,23 @@ export default function CallPage() {
     }
   };
 
+  // Check for deactivated status
+  if (!loadingOwnerInfo && ownerInfo && (ownerInfo.status === 'disabled' || ownerInfo.qrStatus === 'disabled')) {
+    return (
+      <main className="container mx-auto px-6 py-12 pt-24 min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
+          <div className="mx-auto bg-red-50 w-20 h-20 rounded-full flex items-center justify-center mb-6">
+            <PhoneOff size={40} className="text-red-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-3">QR Code Deactivated</h1>
+          <p className="text-gray-600 mb-8">
+            This QR code has been deactivated by the owner.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <>
       {/* Hidden silence track to keep background audio alive (Interstate fix) */}
