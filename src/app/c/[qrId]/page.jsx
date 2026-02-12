@@ -757,21 +757,33 @@ export default function CallPage() {
 
 
   // ▼▼▼ FIX 3: Update the hangup function ▼▼▼
-  const handleHangUp = () => {
+  const handleHangUp = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     console.log("Website hanging up...");
-    const callId = currentCallIdRef.current;
-    const targetSocket = remoteSocketIdRef.current;
-    cleanup(); // Clean up our local peer
-    setCallStatus('idle');
-    setActiveCallTarget(null);
-    setSuccess('Call ended.'); // Give user feedback
 
-    // Tell the app we are hanging up
-    if (socketRef.current) {
-      socketRef.current.emit('hang-up', {
-        toSocketId: targetSocket || '',
-        callId: callId || null,
-      });
+    try {
+      const callId = currentCallIdRef.current;
+      const targetSocket = remoteSocketIdRef.current;
+      cleanup(); // Clean up our local peer
+      setCallStatus('idle');
+      setActiveCallTarget(null);
+      setSuccess('Call ended.'); // Give user feedback
+
+      // Tell the app we are hanging up
+      if (socketRef.current) {
+        socketRef.current.emit('hang-up', {
+          toSocketId: targetSocket || '',
+          callId: callId || null,
+        });
+      }
+    } catch (err) {
+      console.error("Error in handleHangUp:", err);
+      // Force idle state even if error
+      setCallStatus('idle');
+      setActiveCallTarget(null);
     }
   };
   // ▲▲▲ FIX 3 ▲▲▲
@@ -984,16 +996,28 @@ export default function CallPage() {
     }
   };
 
-  const handleHangUpGuardian = () => {
-    console.log("Hanging up guardian call...");
-    // Check if socket is connected before emitting
-    if (socketRef.current && remoteSocketIdRef.current && socketRef.current.connected) {
-      socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
+  const handleHangUpGuardian = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
-    cleanup();
-    setCallStatus('idle');
-    setActiveCallTarget(null);
-    setCallingGuardianId(null);
+    console.log("Hanging up guardian call...");
+
+    try {
+      // Check if socket is connected before emitting
+      if (socketRef.current && remoteSocketIdRef.current && socketRef.current.connected) {
+        socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
+      }
+      cleanup();
+      setCallStatus('idle');
+      setActiveCallTarget(null);
+      setCallingGuardianId(null);
+    } catch (err) {
+      console.error("Error in handleHangUpGuardian:", err);
+      setCallStatus('idle');
+      setActiveCallTarget(null);
+      setCallingGuardianId(null);
+    }
   };
 
   const handleSendEmergency = async () => {
