@@ -550,7 +550,18 @@ export default function CallPage() {
   }, []);
 
   const handleCall = async () => {
-    // ... (This function remains the same as before)
+    // Prevent multiple calls
+    if (callStatus === 'calling' || callStatus === 'connecting' || callStatus === 'connected') {
+      console.warn("[WEB] call already in progress");
+      return;
+    }
+
+    if (!socketRef.current || !socketRef.current.connected) {
+      setError('Connection to server lost. Please refresh the page.');
+      setCallStatus('idle'); // Ensure we don't get stuck
+      return;
+    }
+
     setCallStatus('calling');
     setActiveCallTarget('owner');
     setError('');
@@ -648,8 +659,12 @@ export default function CallPage() {
       });
       peer.on('error', (err) => {
         console.error("[WEB] Peer error:", err);
-        setError('A connection error occurred.');
-        setCallStatus('failed');
+        if (err.code === 'ERR_WEBRTC_SUPPORT') {
+          setError('WebRTC is not supported in this browser');
+        } else {
+          setError('A connection error occurred.');
+        }
+        setCallStatus('failed'); // Ensure UI reflects failure
         setActiveCallTarget(null);
         cleanup();
       });
@@ -664,12 +679,32 @@ export default function CallPage() {
 
 
   const cleanup = () => {
+    console.log("Cleaning up call resources...");
+
+    // Stop keep-alive interval
+    if (keepAliveInterval) {
+      clearInterval(keepAliveInterval);
+      keepAliveInterval = null;
+    }
+
     if (peerRef.current) {
-      peerRef.current.destroy();
+      try {
+        peerRef.current.destroy();
+      } catch (e) {
+        console.warn("[WEB] Error destroying peer:", e);
+      }
       peerRef.current = null;
     }
+
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => track.stop());
+      try {
+        localStreamRef.current.getTracks().forEach(track => {
+          track.stop();
+          track.enabled = false;
+        });
+      } catch (e) {
+        console.warn("[WEB] Error stopping tracks:", e);
+      }
       localStreamRef.current = null;
     }
     remoteStreamRef.current = null;
@@ -951,14 +986,14 @@ export default function CallPage() {
 
   const handleHangUpGuardian = () => {
     console.log("Hanging up guardian call...");
+    // Check if socket is connected before emitting
+    if (socketRef.current && remoteSocketIdRef.current && socketRef.current.connected) {
+      socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
+    }
     cleanup();
     setCallStatus('idle');
     setActiveCallTarget(null);
     setCallingGuardianId(null);
-
-    if (socketRef.current && remoteSocketIdRef.current) {
-      socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
-    }
   };
 
   const handleSendEmergency = async () => {
