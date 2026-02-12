@@ -349,8 +349,12 @@ export default function CallPage() {
       console.log("Owner hung up.", payload);
       setCallStatus('idle');
       setActiveCallTarget(null);
-      setError('The owner ended the call.');
+      setError(''); // Clear error, don't set it (avoids red error box)
       cleanup();
+      // Optional: specific failure reasons can still be logged or shown as non-error
+      if (payload?.reason && payload.reason !== 'call_ended') {
+        console.warn("Call ended with reason:", payload.reason);
+      }
     });
 
     // Listen for guardian hang up
