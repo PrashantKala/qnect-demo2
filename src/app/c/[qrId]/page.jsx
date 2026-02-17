@@ -535,7 +535,7 @@ export default function CallPage() {
         if (callId || targetSocket) {
           console.log("Sending hang-up before disconnect...");
           // Use correct event based on call type
-          const eventName = activeCallTarget === 'guardian' ? 'app-hang-up' : 'hang-up';
+          const eventName = activeCallTargetRef.current === 'guardian' ? 'app-hang-up' : 'hang-up';
           socketRef.current.emit(eventName, {
             toSocketId: targetSocket || '',
             callId: callId || null,
@@ -721,23 +721,34 @@ export default function CallPage() {
   };
 
 
+  // Track active target in ref for unmount cleanup
+  const activeCallTargetRef = useRef(activeCallTarget);
+  useEffect(() => {
+    activeCallTargetRef.current = activeCallTarget;
+  }, [activeCallTarget]);
+
   // ▼▼▼ FIX 3: Update the hangup function ▼▼▼
   const handleHangUp = () => {
     console.log("Website hanging up...");
     const callId = currentCallIdRef.current;
     const targetSocket = remoteSocketIdRef.current;
+
+    // Tell the app we are hanging up triggers BEFORE cleanup
+    if (socketRef.current && socketRef.current.connected) {
+      console.log(`[WEB] Emitting hang-up to ${targetSocket} for call ${callId}`);
+      const eventName = activeCallTarget === 'guardian' ? 'app-hang-up' : 'hang-up';
+      socketRef.current.emit(eventName, {
+        toSocketId: targetSocket || '',
+        callId: callId || null,
+      });
+    } else {
+      console.warn("[WEB] Socket not connected, cannot send hang-up");
+    }
+
     cleanup(); // Clean up our local peer
     setCallStatus('idle');
     setActiveCallTarget(null);
     setSuccess('Call ended.'); // Give user feedback
-
-    // Tell the app we are hanging up
-    if (socketRef.current) {
-      socketRef.current.emit('hang-up', {
-        toSocketId: targetSocket || '',
-        callId: callId || null,
-      });
-    }
   };
   // ▲▲▲ FIX 3 ▲▲▲
 
