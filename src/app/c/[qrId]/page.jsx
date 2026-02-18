@@ -736,7 +736,8 @@ export default function CallPage() {
     // Tell the app we are hanging up triggers BEFORE cleanup
     if (socketRef.current && socketRef.current.connected) {
       console.log(`[WEB] Emitting hang-up to ${targetSocket} for call ${callId}`);
-      const eventName = activeCallTarget === 'guardian' ? 'app-hang-up' : 'hang-up';
+      // Use 'app-hang-up' for emergency calls (User or Guardian) to ensure backend relays to app
+      const eventName = (activeCallTarget === 'guardian' || showEmergency) ? 'app-hang-up' : 'hang-up';
 
       // Promise wrapper for the emit with timeout
       try {
