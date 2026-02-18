@@ -54,6 +54,7 @@ export default function CallPage() {
   const remoteStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const ringingAudioRef = useRef(null);
   const TEMPLATES = [
     'Your car is blocking mine, please move it.',
     'Your headlights are on.',
@@ -65,6 +66,33 @@ export default function CallPage() {
     'You are double-parked.',
     'Emergency: Please contact me regarding your car.'
   ];
+
+  // Ringing Sound Effect
+  useEffect(() => {
+    if (callStatus === 'calling') {
+      console.log("[WEB] Starting ringing sound...");
+      if (!ringingAudioRef.current) {
+        ringingAudioRef.current = new Audio('/sounds/ringing.mp3');
+        ringingAudioRef.current.loop = true;
+      }
+      ringingAudioRef.current.play().catch(e => console.error("Error playing ringing sound:", e));
+    } else {
+      // Stop ringing for any other state (connected, idle, failed, etc.)
+      if (ringingAudioRef.current) {
+        console.log("[WEB] Stopping ringing sound.");
+        ringingAudioRef.current.pause();
+        ringingAudioRef.current.currentTime = 0;
+      }
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if (ringingAudioRef.current) {
+        ringingAudioRef.current.pause();
+        ringingAudioRef.current.currentTime = 0;
+      }
+    };
+  }, [callStatus]);
 
   // ... (existing refs) ...
 
