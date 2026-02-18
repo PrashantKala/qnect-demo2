@@ -978,16 +978,36 @@ export default function CallPage() {
     }
   };
 
-  const handleHangUpGuardian = () => {
+  const handleHangUpGuardian = async () => {
     console.log("Hanging up guardian call...");
+
+    // Tell the app/guardian we are hanging up triggers BEFORE cleanup
+    if (socketRef.current && socketRef.current.connected && remoteSocketIdRef.current) {
+      console.log(`[WEB] Emitting app-hang-up to ${remoteSocketIdRef.current}`);
+      try {
+        await new Promise((resolve) => {
+          const timeout = setTimeout(() => {
+            console.log("[WEB] Guardian Hang-up ACK timed out, forcing cleanup");
+            resolve();
+          }, 1000); // 1s timeout
+
+          socketRef.current.emit('app-hang-up', {
+            toSocketId: remoteSocketIdRef.current
+          }, (ack) => {
+            clearTimeout(timeout);
+            console.log("[WEB] Guardian Hang-up acknowledged:", ack);
+            resolve();
+          });
+        });
+      } catch (err) {
+        console.error("[WEB] Error sending guardian hang-up:", err);
+      }
+    }
+
     cleanup();
     setCallStatus('idle');
     setActiveCallTarget(null);
     setCallingGuardianId(null);
-
-    if (socketRef.current && remoteSocketIdRef.current) {
-      socketRef.current.emit('app-hang-up', { toSocketId: remoteSocketIdRef.current });
-    }
   };
 
   const handleSendEmergency = async () => {
