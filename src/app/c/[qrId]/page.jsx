@@ -727,8 +727,8 @@ export default function CallPage() {
     activeCallTargetRef.current = activeCallTarget;
   }, [activeCallTarget]);
 
-  // ▼▼▼ FIX 3: Update the hangup function ▼▼▼
-  const handleHangUp = () => {
+  // ▼▼▼ FIX 3: Update the hangup function to wait for ACK ▼▼▼
+  const handleHangUp = async () => {
     console.log("Website hanging up...");
     const callId = currentCallIdRef.current;
     const targetSocket = remoteSocketIdRef.current;
@@ -737,12 +737,29 @@ export default function CallPage() {
     if (socketRef.current && socketRef.current.connected) {
       console.log(`[WEB] Emitting hang-up to ${targetSocket} for call ${callId}`);
       const eventName = activeCallTarget === 'guardian' ? 'app-hang-up' : 'hang-up';
-      socketRef.current.emit(eventName, {
-        toSocketId: targetSocket || '',
-        callId: callId || null,
-      });
+
+      // Promise wrapper for the emit with timeout
+      try {
+        await new Promise((resolve) => {
+          const timeout = setTimeout(() => {
+            console.log("[WEB] Hang-up ACK timed out, forcing cleanup");
+            resolve();
+          }, 1000); // 1s timeout
+
+          socketRef.current.emit(eventName, {
+            toSocketId: targetSocket || '',
+            callId: callId || null,
+          }, (ack) => {
+            clearTimeout(timeout);
+            console.log("[WEB] Hang-up acknowledged by server:", ack);
+            resolve();
+          });
+        });
+      } catch (err) {
+        console.error("[WEB] Error sending hang-up:", err);
+      }
     } else {
-      console.warn("[WEB] Socket not connected, cannot send hang-up");
+      console.error("[WEB] CRITICAL: Socket not connected, cannot send hang-up! Connection State:", socketRef.current?.connected);
     }
 
     cleanup(); // Clean up our local peer
