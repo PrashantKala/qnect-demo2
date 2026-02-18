@@ -67,18 +67,39 @@ export default function CallPage() {
     'Emergency: Please contact me regarding your car.'
   ];
 
+  // Audio ref
+
+
+  // Initialize audio on mount
+  useEffect(() => {
+    ringingAudioRef.current = new Audio('/sounds/ringing.mp3');
+    ringingAudioRef.current.loop = true;
+    ringingAudioRef.current.volume = 1.0;
+
+    // Cleanup
+    return () => {
+      if (ringingAudioRef.current) {
+        ringingAudioRef.current.pause();
+        ringingAudioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
   // Ringing Sound Effect
   useEffect(() => {
     if (callStatus === 'calling') {
       console.log("[WEB] Starting ringing sound...");
-      if (!ringingAudioRef.current) {
-        ringingAudioRef.current = new Audio('/sounds/ringing.mp3');
-        ringingAudioRef.current.loop = true;
-        ringingAudioRef.current.volume = 1.0;
+      if (ringingAudioRef.current) {
+        ringingAudioRef.current.play()
+          .then(() => console.log("[WEB] Ringing sound playing successfully"))
+          .catch(e => {
+            console.error("[WEB] Error playing ringing sound:", e);
+            // Retry once if it was blocked
+            if (e.name === 'NotAllowedError') {
+              console.warn("[WEB] Autoplay blocked, waiting for user interaction...");
+            }
+          });
       }
-      ringingAudioRef.current.play()
-        .then(() => console.log("[WEB] Ringing sound playing successfully"))
-        .catch(e => console.error("[WEB] Error playing ringing sound:", e));
     } else {
       // Stop ringing for any other state (connected, idle, failed, etc.)
       if (ringingAudioRef.current) {
@@ -87,15 +108,16 @@ export default function CallPage() {
         ringingAudioRef.current.currentTime = 0;
       }
     }
-
-    return () => {
-      // Cleanup on unmount
-      if (ringingAudioRef.current) {
-        ringingAudioRef.current.pause();
-        ringingAudioRef.current.currentTime = 0;
-      }
-    };
   }, [callStatus]);
+
+  // Helper to unlock audio on user interaction
+  const unlockAudio = () => {
+    if (ringingAudioRef.current) {
+      ringingAudioRef.current.play().catch(() => { });
+      ringingAudioRef.current.pause();
+      ringingAudioRef.current.currentTime = 0;
+    }
+  };
 
   // ... (existing refs) ...
 
@@ -581,6 +603,7 @@ export default function CallPage() {
   }, []);
 
   const handleCall = async () => {
+    unlockAudio(); // Unlock audio context on user interaction
     // ... (This function remains the same as before)
     setCallStatus('calling');
     setActiveCallTarget('owner');
