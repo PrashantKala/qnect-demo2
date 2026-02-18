@@ -74,8 +74,11 @@ export default function CallPage() {
       if (!ringingAudioRef.current) {
         ringingAudioRef.current = new Audio('/sounds/ringing.mp3');
         ringingAudioRef.current.loop = true;
+        ringingAudioRef.current.volume = 1.0;
       }
-      ringingAudioRef.current.play().catch(e => console.error("Error playing ringing sound:", e));
+      ringingAudioRef.current.play()
+        .then(() => console.log("[WEB] Ringing sound playing successfully"))
+        .catch(e => console.error("[WEB] Error playing ringing sound:", e));
     } else {
       // Stop ringing for any other state (connected, idle, failed, etc.)
       if (ringingAudioRef.current) {
