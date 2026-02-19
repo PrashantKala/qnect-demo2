@@ -1036,8 +1036,9 @@ export default function CallPage() {
     console.log("Hanging up guardian call...");
 
     // Tell the app/guardian we are hanging up triggers BEFORE cleanup
-    if (socketRef.current && socketRef.current.connected && remoteSocketIdRef.current) {
-      console.log(`[WEB] Emitting app-hang-up to ${remoteSocketIdRef.current}`);
+    // FIX: Allow hang-up if we have a callId, even if we don't know the remote socket yet (e.g. ringing state)
+    if (socketRef.current && socketRef.current.connected && (remoteSocketIdRef.current || callId)) {
+      console.log(`[WEB] Emitting app-hang-up. RemoteSocket: ${remoteSocketIdRef.current}, CallId: ${callId}`);
       try {
         await new Promise((resolve) => {
           const timeout = setTimeout(() => {
