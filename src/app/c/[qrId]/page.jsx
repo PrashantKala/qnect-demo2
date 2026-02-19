@@ -1046,7 +1046,8 @@ export default function CallPage() {
           }, 1000); // 1s timeout
 
           socketRef.current.emit('app-hang-up', {
-            toSocketId: remoteSocketIdRef.current
+            toSocketId: remoteSocketIdRef.current,
+            callId: callId || null // Include callId so backend can find the pending call
           }, (ack) => {
             clearTimeout(timeout);
             console.log("[WEB] Guardian Hang-up acknowledged:", ack);
