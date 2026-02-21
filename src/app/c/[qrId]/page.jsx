@@ -639,7 +639,8 @@ export default function CallPage() {
               username: '25170275b00b2e8d9d57f03b',
               credential: 'bbHyB+a2quX4Pn0N',
             },
-          ]
+          ],
+          iceTransportPolicy: 'relay'
         }
       });
       peerRef.current = peer;
@@ -961,7 +962,8 @@ export default function CallPage() {
               username: '25170275b00b2e8d9d57f03b',
               credential: 'bbHyB+a2quX4Pn0N',
             },
-          ]
+          ],
+          iceTransportPolicy: 'relay'
         }
       });
       peerRef.current = peer;
