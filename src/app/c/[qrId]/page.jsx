@@ -350,15 +350,14 @@ export default function CallPage() {
     // Handle App Call Answer (Guardian/Emergency)
     socket.on('app-call-answered', (data) => {
       console.log("[WEB] Call answered by guardian", data);
-      setCallStatus('connected');
+      setCallStatus('connecting'); // Don't set 'connected' yet — wait for SimplePeer 'connect' event
       remoteSocketIdRef.current = data.fromSocketId;
 
       // Flush queued candidates if any (reusing queue for app calls too)
       if (iceCandidatesQueue.current.length > 0) {
         console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued ICE candidates to ${data.fromSocketId}`);
         iceCandidatesQueue.current.forEach(candidate => {
-          socket.emit('ice-candidate', { // App expects 'ice-candidate' for web calls? Or 'app-ice-candidate'?
-            // Logic: If I am Web, App expects 'ice-candidate' (as per CallContext logic)
+          socket.emit('ice-candidate', {
             toSocketId: data.fromSocketId,
             candidate: candidate
           });
@@ -389,6 +388,37 @@ export default function CallPage() {
       if (data.callId) {
         currentCallIdRef.current = data.callId;
       }
+    });
+
+    // Handle app-call-initiated (guardian is ONLINE, backend relayed offer)
+    socket.on('app-call-initiated', (data) => {
+      console.log("[WEB] App call initiated, target socket:", data.targetSocketId, "callId:", data.callId);
+      remoteSocketIdRef.current = data.targetSocketId;
+      if (data.callId) {
+        currentCallIdRef.current = data.callId;
+      }
+
+      // Flush queued ICE candidates now that we know the target
+      if (iceCandidatesQueue.current.length > 0) {
+        console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued ICE candidates to ${data.targetSocketId}`);
+        iceCandidatesQueue.current.forEach(candidate => {
+          socket.emit('ice-candidate', {
+            toSocketId: data.targetSocketId,
+            candidate: candidate
+          });
+        });
+        iceCandidatesQueue.current = [];
+      }
+    });
+
+    // Handle app-call-failed (guardian unreachable, timeout, etc.)
+    socket.on('app-call-failed', (data) => {
+      console.log("[WEB] App call failed:", data.message, data.reason);
+      setError(data.message || 'Call could not be connected.');
+      setCallStatus('failed');
+      setActiveCallTarget(null);
+      setCallingGuardianId(null);
+      cleanup();
     });
 
     socket.on('call-failed', (data) => {
@@ -980,6 +1010,13 @@ export default function CallPage() {
             callerName: 'Emergency Contact',
             callerId: 'web-user', // Anonymous web user
             isEmergency: true // Flag as emergency call
+          }, (response) => {
+            // Callback from server with callId
+            console.log("[WEB] Server response to app-call-user:", response);
+            if (response && response.callId) {
+              console.log("[WEB] Received callId for guardian call:", response.callId);
+              currentCallIdRef.current = response.callId;
+            }
           });
         } else if (data.candidate) {
           // Handle ICE candidates
@@ -1000,7 +1037,12 @@ export default function CallPage() {
         remoteStreamRef.current = remoteStream; // Persistence
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
-          remoteAudioRef.current.play();
+          remoteAudioRef.current.play().then(() => {
+            console.log("[WEB] Guardian remote audio playing");
+            setInitialAudioOutput(); // Route to earpiece on connect
+          }).catch(err => {
+            console.error("[WEB] Error playing guardian remote audio:", err);
+          });
         }
       });
 
