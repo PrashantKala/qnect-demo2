@@ -372,9 +372,10 @@ export default function CallPage() {
 
       // Flush queued candidates if any (reusing queue for app calls too)
       if (iceCandidatesQueue.current.length > 0) {
-        console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued APP ICE candidates to ${data.fromSocketId}`);
+        console.log(`[WEB] Flushing ${iceCandidatesQueue.current.length} queued ICE candidates to ${data.fromSocketId}`);
         iceCandidatesQueue.current.forEach(candidate => {
-          socket.emit('app-ice-candidate', { // App expects 'app-ice-candidate' for web emergency calls (which pretend to be app-call-user)
+          socket.emit('ice-candidate', { // App expects 'ice-candidate' for web calls? Or 'app-ice-candidate'?
+            // Logic: If I am Web, App expects 'ice-candidate' (as per CallContext logic)
             toSocketId: data.fromSocketId,
             candidate: candidate
           });
@@ -685,7 +686,7 @@ export default function CallPage() {
               credential: 'bbHyB+a2quX4Pn0N',
             },
           ],
-          iceTransportPolicy: 'relay', // Force TURN relay for guaranteed connectivity
+          iceTransportPolicy: 'relay',
         }
       });
       peerRef.current = peer;
@@ -1009,7 +1010,7 @@ export default function CallPage() {
               credential: 'bbHyB+a2quX4Pn0N',
             },
           ],
-          iceTransportPolicy: 'relay', // Force TURN relay for guaranteed connectivity
+          iceTransportPolicy: 'relay',
         }
       });
       peerRef.current = peer;
@@ -1032,13 +1033,13 @@ export default function CallPage() {
         } else if (data.candidate) {
           // Handle ICE candidates
           if (remoteSocketIdRef.current) {
-            console.log("[WEB] Sending APP ICE candidate to guardian:", remoteSocketIdRef.current);
-            socketRef.current.emit('app-ice-candidate', {
+            console.log("[WEB] Sending ICE candidate to guardian:", remoteSocketIdRef.current);
+            socketRef.current.emit('ice-candidate', {
               toSocketId: remoteSocketIdRef.current,
               candidate: data.candidate
             });
           } else {
-            console.log("[WEB] No remote socket yet, queueing APP ICE candidate");
+            console.log("[WEB] No remote socket yet, queueing ICE candidate");
             iceCandidatesQueue.current.push(data.candidate);
           }
         }
