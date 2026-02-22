@@ -686,7 +686,6 @@ export default function CallPage() {
               credential: 'bbHyB+a2quX4Pn0N',
             },
           ],
-          iceTransportPolicy: 'relay',
         }
       });
       peerRef.current = peer;
@@ -1010,7 +1009,6 @@ export default function CallPage() {
               credential: 'bbHyB+a2quX4Pn0N',
             },
           ],
-          iceTransportPolicy: 'relay',
         }
       });
       peerRef.current = peer;
