@@ -254,6 +254,7 @@ export default function CallPage() {
   // ▼▼▼ FIX 1: Store the app's socket ID and queue candidates ▼▼▼
   const remoteSocketIdRef = useRef(null);
   const iceCandidatesQueue = useRef([]);
+  const remoteIceCandidatesQueue = useRef([]); // Queue for incoming ICE candidates before remote description is set
   const currentCallIdRef = useRef(null); // Store callId for reconnection
   // ▲▲▲ FIX 1 ▲▲▲
 
@@ -347,6 +348,19 @@ export default function CallPage() {
       console.log("[WEB] Signaling answer to SimplePeer");
       if (peerRef.current) {
         peerRef.current.signal(data.answer);
+
+        // Flush queued remote ICE candidates now that remote description is set
+        if (remoteIceCandidatesQueue.current.length > 0) {
+          console.log(`[WEB] Flushing ${remoteIceCandidatesQueue.current.length} queued remote ICE candidates`);
+          setTimeout(() => {
+            remoteIceCandidatesQueue.current.forEach(candidate => {
+              if (peerRef.current && peerRef.current._pc) {
+                peerRef.current._pc.addIceCandidate(new RTCIceCandidate(candidate));
+              }
+            });
+            remoteIceCandidatesQueue.current = [];
+          }, 100);
+        }
       }
     });
 
@@ -371,19 +385,38 @@ export default function CallPage() {
 
       if (peerRef.current) {
         peerRef.current.signal(data.answer);
+
+        // Flush queued remote ICE candidates now that remote description is set
+        if (remoteIceCandidatesQueue.current.length > 0) {
+          console.log(`[WEB] Flushing ${remoteIceCandidatesQueue.current.length} queued remote ICE candidates`);
+          setTimeout(() => {
+            remoteIceCandidatesQueue.current.forEach(candidate => {
+              if (peerRef.current && peerRef.current._pc) {
+                peerRef.current._pc.addIceCandidate(new RTCIceCandidate(candidate));
+              }
+            });
+            remoteIceCandidatesQueue.current = [];
+          }, 100); // Small delay to ensure signal() has processed
+        }
       }
     });
 
     socket.on('app-ice-candidate', (data) => {
-      if (peerRef.current && peerRef.current._pc) {
+      if (peerRef.current && peerRef.current._pc && peerRef.current._pc.remoteDescription) {
         peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+      } else {
+        // Queue candidate until remote description is set
+        remoteIceCandidatesQueue.current.push(data.candidate);
       }
     });
     // ▲▲▲ FIX 2 ▲▲▲
 
     socket.on('ice-candidate', (data) => {
-      if (peerRef.current && peerRef.current._pc) {
+      if (peerRef.current && peerRef.current._pc && peerRef.current._pc.remoteDescription) {
         peerRef.current._pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+      } else {
+        // Queue candidate until remote description is set
+        remoteIceCandidatesQueue.current.push(data.candidate);
       }
     });
 
@@ -742,6 +775,7 @@ export default function CallPage() {
     remoteStreamRef.current = null;
     remoteSocketIdRef.current = null;
     iceCandidatesQueue.current = [];
+    remoteIceCandidatesQueue.current = [];
     currentCallIdRef.current = null;
     setCallDuration(0);
     setIsMuted(false);
