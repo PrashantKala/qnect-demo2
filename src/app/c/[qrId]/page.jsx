@@ -47,6 +47,9 @@ export default function CallPage() {
   const [loadingOwnerInfo, setLoadingOwnerInfo] = useState(true);
   const [isExpired, setIsExpired] = useState(false);
 
+  const callStatusRef = useRef('idle'); // Ref to track callStatus for socket handlers
+  useEffect(() => { callStatusRef.current = callStatus; }, [callStatus]);
+
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
@@ -400,19 +403,29 @@ export default function CallPage() {
 
     socket.on('hang-up', (payload) => {
       console.log("Owner hung up.", payload);
+      // Guard: ignore if we're already idle (stale event from previous call)
+      if (callStatusRef.current === 'idle') {
+        console.log("[WEB] Ignoring stale hang-up event (already idle)");
+        return;
+      }
       setCallStatus('idle');
       setActiveCallTarget(null);
-      setError('The owner ended the call.');
+      setError('The other party ended the call.');
       cleanup();
     });
 
-    // Listen for guardian hang up
+    // Listen for app-side hang up (guardian or owner app)
     socket.on('app-hang-up', () => {
-      console.log("Guardian hung up.");
+      console.log("App hung up.");
+      // Guard: ignore if we're already idle (stale event from previous call)
+      if (callStatusRef.current === 'idle') {
+        console.log("[WEB] Ignoring stale app-hang-up event (already idle)");
+        return;
+      }
       setCallStatus('idle');
       setActiveCallTarget(null);
       setCallingGuardianId(null);
-      setError('The guardian ended the call.');
+      setError('The other party ended the call.');
       cleanup();
     });
 
@@ -790,8 +803,8 @@ export default function CallPage() {
     // Tell the app we are hanging up triggers BEFORE cleanup
     if (socketRef.current && socketRef.current.connected) {
       console.log(`[WEB] Emitting hang-up to ${targetSocket} for call ${callId}`);
-      // Use 'app-hang-up' for emergency calls (User or Guardian) to ensure backend relays to app
-      const eventName = (activeCallTarget === 'guardian' || showEmergency) ? 'app-hang-up' : 'hang-up';
+      // Always use 'hang-up' event - the server knows who is the caller vs target
+      const eventName = 'hang-up';
 
       // Promise wrapper for the emit with timeout
       try {
