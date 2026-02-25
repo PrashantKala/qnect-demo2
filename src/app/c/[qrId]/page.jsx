@@ -8,7 +8,7 @@ import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X, MapPin } from
 import { fetchQRGuardians, sendEmergencyAlert, fetchQRInfo } from '../../../../lib/api';
 import CallingScreen from '../../components/CallingScreen';
 
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '');
+const SOCKET_SERVER_URL = "https://qnect.in";
 export default function CallPage() {
   const params = useParams();
   const { qrId } = params;
