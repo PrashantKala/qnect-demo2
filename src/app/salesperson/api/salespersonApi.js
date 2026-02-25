@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = `https://qnect.in/api/salesperson`;
+const API_URL = `https://qnect-backend-app-zne7q.ondigitalocean.app/api/salesperson`;
 
 const api = axios.create({
     baseURL: API_URL,

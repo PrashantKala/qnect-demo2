@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import axios from 'axios';
 
 // Your backend server
-const BACKEND_API_URL = "https://qnect.in/api";
+const BACKEND_API_URL = "https://qnect-backend-app-zne7q.ondigitalocean.app/api";
 
 export async function POST(request) {
   try {

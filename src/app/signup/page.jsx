@@ -37,7 +37,7 @@ export default function SignupPage() {
           if (tokenResponse && tokenResponse.access_token) {
             try {
               // Remove extra /api since NEXT_PUBLIC_API_URL already includes it
-              const apiUrl = "https://qnect.in/api";
+              const apiUrl = "https://qnect-backend-app-zne7q.ondigitalocean.app/api";
               const res = await fetch(`${apiUrl}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
