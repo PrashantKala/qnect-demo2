@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { fetchQRCodes, generateQRCodes } from '../api/adminApi';
+import { fetchQRCodes, generateQRCodes, fetchSalespersons } from '../api/adminApi';
 
 export default function QRManagementPage() {
     const [qrCodes, setQrCodes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [quantity, setQuantity] = useState(50);
+    const [salespersons, setSalespersons] = useState([]);
+    const [selectedSalespersonId, setSelectedSalespersonId] = useState('');
 
     const fetchAndSetQRCodes = async () => {
         try {
@@ -22,6 +24,12 @@ export default function QRManagementPage() {
         const initialLoad = async () => {
             setIsLoading(true);
             await fetchAndSetQRCodes();
+            try {
+                const spRes = await fetchSalespersons();
+                setSalespersons(spRes.data);
+            } catch (err) {
+                console.error("Could not fetch salespersons", err);
+            }
             setIsLoading(false);
         };
         initialLoad();
@@ -31,7 +39,7 @@ export default function QRManagementPage() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await generateQRCodes(quantity);
+            const response = await generateQRCodes(quantity, selectedSalespersonId || null);
             alert(response.data.message);
             await fetchAndSetQRCodes();
         } catch (err) {
@@ -68,6 +76,22 @@ export default function QRManagementPage() {
                             className="border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 w-32"
                         />
                     </div>
+
+                    <div className="flex flex-col">
+                        <label htmlFor="salesperson" className="text-sm font-medium text-gray-700 mb-1">Assign To Salesperson (Optional)</label>
+                        <select
+                            id="salesperson"
+                            value={selectedSalespersonId}
+                            onChange={(e) => setSelectedSalespersonId(e.target.value)}
+                            className="border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
+                        >
+                            <option value="">None</option>
+                            {salespersons.map(sp => (
+                                <option key={sp._id} value={sp.userId}>{sp.name} ({sp.salespersonId})</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isLoading}
@@ -90,8 +114,10 @@ export default function QRManagementPage() {
                             <tr>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR ID (UUID)</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold By</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Salesperson</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To User</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold By (ID)</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -104,8 +130,9 @@ export default function QRManagementPage() {
                                             {code.status}
                                         </span>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedSalespersonId ? 'Yes' : <span className="text-gray-400 italic">No</span>}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedToUser?.email || <span className="text-gray-400 italic">Unassigned</span>}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.soldBySalesperson?.salespersonId || <span className="text-gray-400 italic">Not Sold</span>}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.soldBySalesperson?.email || code.soldBySalesperson?._id || <span className="text-gray-400 italic">Not Sold</span>}</td>
                                 </tr>
                             ))}
                             {qrCodes.length === 0 && (

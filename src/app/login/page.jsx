@@ -56,9 +56,22 @@ function LoginForm() {
     e.preventDefault();
     setError('');
     try {
-      await login(email, password);
-      // Manually redirect after login is successful
-      router.push(redirectUrl);
+      const authRes = await login(email, password);
+      // Wait for AuthContext to update session and handle routing natively, or read local storage immediately
+      const token = localStorage.getItem('qnect_token');
+      if (token) {
+        try {
+          // hacky way without importing jwtDecode here
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.role === 'admin') router.push('/admin');
+          else if (payload.role === 'salesperson') router.push('/salesperson');
+          else router.push(redirectUrl);
+        } catch (e) {
+          router.push(redirectUrl);
+        }
+      } else {
+        router.push(redirectUrl);
+      }
     } catch (err) {
       setError('Invalid email or password. Please try again.');
     }

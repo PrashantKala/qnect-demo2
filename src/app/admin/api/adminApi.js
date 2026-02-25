@@ -8,7 +8,7 @@ const api = axios.create({
 
 // --- QR ---
 export const fetchQRCodes = () => api.get('/qrs');
-export const generateQRCodes = (quantity) => api.post('/qrs/generate', { quantity });
+export const generateQRCodes = (quantity, assignedSalespersonId) => api.post('/qrs/generate', { quantity, assignedSalespersonId });
 
 // --- Salesperson ---
 export const fetchSalespersons = () => api.get('/salespersons');

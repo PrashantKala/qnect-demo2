@@ -12,6 +12,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [userToken, setUserToken] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter(); // We'll keep router for logout
 
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('qnect_token', token);
       setUserToken(token);
       setUserEmail(decoded.email);
+      setUserRole(decoded.role || 'user'); // default to user if undefined
 
       // Register for push notifications
       setupPushNotifications()
@@ -50,6 +52,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('qnect_token');
       setUserToken(null);
       setUserEmail(null);
+      setUserRole(null);
     }
   };
 
@@ -93,11 +96,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('qnect_token');
     setUserToken(null);
     setUserEmail(null);
+    setUserRole(null);
     router.push('/'); // Go home on logout
   };
 
   return (
-    <AuthContext.Provider value={{ userToken, userEmail, isLoading, login, signup, logout, loginWithToken }}>
+    <AuthContext.Provider value={{ userToken, userEmail, userRole, isLoading, login, signup, logout, loginWithToken }}>
       {children}
     </AuthContext.Provider>
   );
