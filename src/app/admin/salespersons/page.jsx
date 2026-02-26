@@ -9,6 +9,7 @@ export default function SalespersonPage() {
     const [newName, setNewName] = useState('');
     const [newSalespersonId, setNewSalespersonId] = useState('');
     const [newContact, setNewContact] = useState('');
+    const [newPassword, setNewPassword] = useState('');
 
     const fetchAndSetSalespersons = async () => {
         try {
@@ -32,9 +33,9 @@ export default function SalespersonPage() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await createSalesperson({ name: newName, salespersonId: newSalespersonId, contactNumber: newContact });
+            await createSalesperson({ name: newName, salespersonId: newSalespersonId, contactNumber: newContact, password: newPassword });
             alert(`Salesperson "${newName}" created successfully!`);
-            setNewName(''); setNewSalespersonId(''); setNewContact('');
+            setNewName(''); setNewSalespersonId(''); setNewContact(''); setNewPassword('');
             await fetchAndSetSalespersons();
         } catch (err) {
             setError(err.response?.data?.message || "An error occurred.");
@@ -79,13 +80,23 @@ export default function SalespersonPage() {
                                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500 uppercase placeholder-gray-400"
                             />
                         </div>
-                        <div className="md:col-span-2">
+                        <div className="md:col-span-1">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
                             <input
                                 type="text"
                                 value={newContact}
                                 onChange={(e) => setNewContact(e.target.value)}
-                                className="w-full md:w-1/2 border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
+                            />
+                        </div>
+                        <div className="md:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password *</label>
+                            <input
+                                type="text"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
                             />
                         </div>
                     </div>

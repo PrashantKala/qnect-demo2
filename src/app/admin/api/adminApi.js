@@ -6,6 +6,16 @@ const api = axios.create({
     baseURL: API_URL,
 });
 
+api.interceptors.request.use((config) => {
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('qnect_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    }
+    return config;
+});
+
 // --- QR ---
 export const fetchQRCodes = () => api.get('/qrs');
 export const generateQRCodes = (quantity, assignedSalespersonId) => api.post('/qrs/generate', { quantity, assignedSalespersonId });
