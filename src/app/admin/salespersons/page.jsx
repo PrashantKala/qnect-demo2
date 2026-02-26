@@ -9,6 +9,7 @@ export default function SalespersonPage() {
     const [newName, setNewName] = useState('');
     const [newSalespersonId, setNewSalespersonId] = useState('');
     const [newContact, setNewContact] = useState('');
+    const [newEmail, setNewEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
 
     const fetchAndSetSalespersons = async () => {
@@ -33,9 +34,9 @@ export default function SalespersonPage() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await createSalesperson({ name: newName, salespersonId: newSalespersonId, contactNumber: newContact, password: newPassword });
+            await createSalesperson({ name: newName, salespersonId: newSalespersonId, contactNumber: newContact, email: newEmail, password: newPassword });
             alert(`Salesperson "${newName}" created successfully!`);
-            setNewName(''); setNewSalespersonId(''); setNewContact(''); setNewPassword('');
+            setNewName(''); setNewSalespersonId(''); setNewContact(''); setNewEmail(''); setNewPassword('');
             await fetchAndSetSalespersons();
         } catch (err) {
             setError(err.response?.data?.message || "An error occurred.");
@@ -78,6 +79,17 @@ export default function SalespersonPage() {
                                 onChange={(e) => setNewSalespersonId(e.target.value)}
                                 required
                                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500 uppercase placeholder-gray-400"
+                            />
+                        </div>
+                        <div className="md:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Gmail Address *</label>
+                            <input
+                                type="email"
+                                value={newEmail}
+                                onChange={(e) => setNewEmail(e.target.value)}
+                                required
+                                placeholder="name@gmail.com"
+                                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
                             />
                         </div>
                         <div className="md:col-span-1">
