@@ -20,4 +20,4 @@ api.interceptors.request.use((config) => {
 // --- Salesperson Endpoints ---
 export const fetchDashboard = () => api.get('/dashboard');
 export const fetchAssignedQRs = () => api.get('/qrs');
-export const registerQRSale = (qrId, endUserEmail) => api.post('/qrs/register-sale', { qrId, endUserEmail });
+export const registerQRSale = (qrId, userData) => api.post('/qrs/register-sale', { qrId, ...userData });

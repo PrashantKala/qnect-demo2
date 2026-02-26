@@ -11,12 +11,22 @@ export default function SalespersonDashboard() {
     // Register Sale Form State
     const [selectedQrId, setSelectedQrId] = useState('');
     const [endUserEmail, setEndUserEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [mobileNumber, setMobileNumber] = useState('');
+    const [vehicleNumber, setVehicleNumber] = useState('');
+    const [address, setAddress] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const openModal = (qrId) => {
         setSelectedQrId(qrId);
         setEndUserEmail('');
+        setFirstName('');
+        setLastName('');
+        setMobileNumber('');
+        setVehicleNumber('');
+        setAddress('');
         setIsModalOpen(true);
     };
 
@@ -24,6 +34,11 @@ export default function SalespersonDashboard() {
         setIsModalOpen(false);
         setSelectedQrId('');
         setEndUserEmail('');
+        setFirstName('');
+        setLastName('');
+        setMobileNumber('');
+        setVehicleNumber('');
+        setAddress('');
     };
 
     const loadData = async () => {
@@ -54,7 +69,14 @@ export default function SalespersonDashboard() {
         e.preventDefault();
         setIsRegistering(true);
         try {
-            const response = await registerQRSale(selectedQrId, endUserEmail);
+            const response = await registerQRSale(selectedQrId, {
+                endUserEmail,
+                firstName,
+                lastName,
+                mobileNumber,
+                vehicleNumber,
+                address
+            });
             alert(response.data.message);
             closeModal();
             // Reload table
@@ -150,8 +172,8 @@ export default function SalespersonDashboard() {
                                                 onClick={() => openModal(code.qrId)}
                                                 disabled={isSold}
                                                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors border ${isSold
-                                                        ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                                        : 'bg-white text-green-600 border-green-200 hover:bg-green-50 shadow-sm'
+                                                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                                    : 'bg-white text-green-600 border-green-200 hover:bg-green-50 shadow-sm'
                                                     }`}
                                             >
                                                 {isSold ? 'Registered' : 'Register'}
@@ -184,20 +206,79 @@ export default function SalespersonDashboard() {
                         </h3>
                         <p className="text-sm text-gray-500 mb-6">Assigning QR Code: <br /><span className="font-mono bg-gray-100 px-2 py-1 rounded text-gray-800 text-xs break-all mt-1 inline-block">{selectedQrId}</span></p>
 
-                        <form onSubmit={handleRegisterSale} className="space-y-4">
+                        <form onSubmit={handleRegisterSale} className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                    <input
+                                        id="firstName"
+                                        type="text"
+                                        required
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                    <input
+                                        id="lastName"
+                                        type="text"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
+                                    />
+                                </div>
+                            </div>
+
                             <div>
-                                <label htmlFor="endUserEmail" className="block text-sm font-medium text-gray-700 mb-1">End User Email</label>
+                                <label htmlFor="endUserEmail" className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
                                 <input
                                     id="endUserEmail"
                                     type="email"
                                     required
-                                    placeholder="user@example.com"
                                     value={endUserEmail}
                                     onChange={(e) => setEndUserEmail(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">The user must verify this email to claim the QR code.</p>
                             </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 mb-1">Mobile No *</label>
+                                    <input
+                                        id="mobileNumber"
+                                        type="text"
+                                        required
+                                        value={mobileNumber}
+                                        onChange={(e) => setMobileNumber(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="vehicleNumber" className="block text-sm font-medium text-gray-700 mb-1">Vehicle No</label>
+                                    <input
+                                        id="vehicleNumber"
+                                        type="text"
+                                        value={vehicleNumber}
+                                        onChange={(e) => setVehicleNumber(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500 uppercase"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                <textarea
+                                    id="address"
+                                    rows="2"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
+                                ></textarea>
+                            </div>
+
+                            <p className="mt-1 text-xs text-gray-500 italic">If this email doesn't exist, an account will be created. Their default password will be their Mobile No.</p>
 
                             <div className="mt-8 flex gap-3 justify-end pt-4 border-t border-gray-100">
                                 <button
