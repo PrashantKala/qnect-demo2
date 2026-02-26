@@ -12,6 +12,19 @@ export default function SalespersonDashboard() {
     const [selectedQrId, setSelectedQrId] = useState('');
     const [endUserEmail, setEndUserEmail] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = (qrId) => {
+        setSelectedQrId(qrId);
+        setEndUserEmail('');
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedQrId('');
+        setEndUserEmail('');
+    };
 
     const loadData = async () => {
         try {
@@ -43,9 +56,7 @@ export default function SalespersonDashboard() {
         try {
             const response = await registerQRSale(selectedQrId, endUserEmail);
             alert(response.data.message);
-            // Reset form
-            setSelectedQrId('');
-            setEndUserEmail('');
+            closeModal();
             // Reload table
             await loadData();
         } catch (err) {
@@ -86,56 +97,15 @@ export default function SalespersonDashboard() {
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Register QR Sale</h3>
-                <form onSubmit={handleRegisterSale} className="flex flex-col md:flex-row items-end gap-4">
-                    <div className="flex flex-col flex-1">
-                        <label htmlFor="qrId" className="text-sm font-medium text-gray-700 mb-1">Select QR Code</label>
-                        <select
-                            id="qrId"
-                            required
-                            value={selectedQrId}
-                            onChange={(e) => setSelectedQrId(e.target.value)}
-                            className="border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
-                        >
-                            <option value="">-- Choose a QR to sell --</option>
-                            {availableQrs.map(qr => (
-                                <option key={qr.qrId} value={qr.qrId}>{qr.qrId}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex flex-col flex-1">
-                        <label htmlFor="endUserEmail" className="text-sm font-medium text-gray-700 mb-1">End User Email</label>
-                        <input
-                            id="endUserEmail"
-                            type="email"
-                            required
-                            placeholder="user@example.com"
-                            value={endUserEmail}
-                            onChange={(e) => setEndUserEmail(e.target.value)}
-                            className="border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={isRegistering || availableQrs.length === 0}
-                        className="bg-green-600 text-white font-medium px-6 py-2 rounded-md hover:bg-green-700 transition-colors disabled:bg-green-300 h-[42px]"
-                    >
-                        {isRegistering ? 'Registering...' : 'Complete Sale'}
-                    </button>
-                </form>
-                {availableQrs.length === 0 && (
-                    <p className="mt-2 text-sm text-yellow-600 flex items-center">
-                        No available QRs left to sell. Request more from an Admin.
-                    </p>
-                )}
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+                <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <h2 className="text-xl font-semibold text-gray-800">Your Assigned QRs</h2>
+                    {availableQrs.length === 0 && (
+                        <p className="text-sm text-yellow-600 bg-yellow-50 px-3 py-1.5 rounded-md border border-yellow-100 flex items-center font-medium">
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            No available QRs left to sell. Request more from Admin.
+                        </p>
+                    )}
                 </div>
 
                 <div className="overflow-x-auto">
@@ -146,6 +116,7 @@ export default function SalespersonDashboard() {
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ownership Status</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End User Info</th>
+                                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -167,25 +138,92 @@ export default function SalespersonDashboard() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {code.assignedToUser ? (
                                                 <div>
-                                                    <div className="font-medium text-gray-900">{code.assignedToUser.name}</div>
+                                                    <div className="font-medium text-gray-900">{code.assignedToUser.name || code.assignedToUser.firstName}</div>
                                                     <div>{code.assignedToUser.email}</div>
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-400 italic">Not Assigned</span>
                                             )}
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                            <button
+                                                onClick={() => openModal(code.qrId)}
+                                                disabled={isSold}
+                                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors border ${isSold
+                                                        ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                                        : 'bg-white text-green-600 border-green-200 hover:bg-green-50 shadow-sm'
+                                                    }`}
+                                            >
+                                                {isSold ? 'Registered' : 'Register'}
+                                            </button>
+                                        </td>
                                     </tr>
                                 )
                             })}
                             {qrs.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">You have no QRs assigned to you yet.</td>
+                                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500">You have no QRs assigned to you yet.</td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
             </div>
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative border border-gray-100">
+                        <button
+                            onClick={closeModal}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                            <svg className="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                            Register QR Sale
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-6">Assigning QR Code: <br /><span className="font-mono bg-gray-100 px-2 py-1 rounded text-gray-800 text-xs break-all mt-1 inline-block">{selectedQrId}</span></p>
+
+                        <form onSubmit={handleRegisterSale} className="space-y-4">
+                            <div>
+                                <label htmlFor="endUserEmail" className="block text-sm font-medium text-gray-700 mb-1">End User Email</label>
+                                <input
+                                    id="endUserEmail"
+                                    type="email"
+                                    required
+                                    placeholder="user@example.com"
+                                    value={endUserEmail}
+                                    onChange={(e) => setEndUserEmail(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">The user must verify this email to claim the QR code.</p>
+                            </div>
+
+                            <div className="mt-8 flex gap-3 justify-end pt-4 border-t border-gray-100">
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isRegistering || !endUserEmail}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors disabled:bg-green-300 flex items-center shadow-sm"
+                                >
+                                    {isRegistering ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Registering...
+                                        </>
+                                    ) : 'Complete Sale'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
