@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { fetchSalespersons, createSalesperson } from '../api/adminApi';
 
 export default function SalespersonPage() {
@@ -134,16 +135,24 @@ export default function SalespersonPage() {
                             <tr>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salesperson ID</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Number</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">QRs Assigned</th>
+                                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">QRs Sold</th>
+                                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Avg/Day</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {salespersons.map((sp) => (
                                 <tr key={sp._id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{sp.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <Link href={`/admin/salespersons/${sp._id}`} className="text-blue-600 hover:text-blue-800 hover:underline">{sp.name}</Link>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono bg-gray-50">{sp.salespersonId}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sp.contactNumber || <span className="text-gray-400 italic">N/A</span>}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-700">{sp.totalAssigned ?? '—'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-green-700">{sp.totalSold ?? '—'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">{sp.avgPerDay ?? '—'}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${sp.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                             }`}>
@@ -154,7 +163,7 @@ export default function SalespersonPage() {
                             ))}
                             {salespersons.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">No salespersons registered yet.</td>
+                                    <td colSpan="7" className="px-6 py-8 text-center text-gray-500">No salespersons registered yet.</td>
                                 </tr>
                             )}
                         </tbody>

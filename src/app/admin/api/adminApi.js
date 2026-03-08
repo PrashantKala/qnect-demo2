@@ -22,7 +22,9 @@ export const generateQRCodes = (quantity, assignedSalespersonId) => api.post('/q
 
 // --- Salesperson ---
 export const fetchSalespersons = () => api.get('/salespersons');
+export const fetchSalespersonDetail = (id) => api.get(`/salespersons/${id}`);
 export const createSalesperson = (salespersonData) => api.post('/salespersons', salespersonData);
 
 // --- User ---
 export const fetchUsers = () => api.get('/users');
+export const fetchUserDetail = (id) => api.get(`/users/${id}`);

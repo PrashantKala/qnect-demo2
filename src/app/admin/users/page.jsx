@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { fetchUsers } from '../api/adminApi';
 
 export default function UserManagementPage() {
@@ -85,7 +86,7 @@ export default function UserManagementPage() {
                                                 {(user.firstName || 'U').charAt(0).toUpperCase()}
                                             </div>
                                             <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</div>
+                                                <Link href={`/admin/users/${user._id}`} className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</Link>
                                             </div>
                                         </div>
                                     </td>
