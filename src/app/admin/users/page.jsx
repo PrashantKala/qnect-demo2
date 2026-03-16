@@ -1,13 +1,18 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { fetchUsers } from '../api/adminApi';
+import { fetchUsers, fetchUserDetail } from '../api/adminApi';
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+
+    // QR preview modal state
+    const [previewUser, setPreviewUser] = useState(null);
+    const [previewQrs, setPreviewQrs] = useState([]);
+    const [loadingPreview, setLoadingPreview] = useState(false);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -28,6 +33,24 @@ export default function UserManagementPage() {
         return fullName.includes(searchTerm.toLowerCase()) ||
             (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
     });
+
+    const handleViewQrs = async (user) => {
+        setPreviewUser(user);
+        setLoadingPreview(true);
+        try {
+            const res = await fetchUserDetail(user._id);
+            setPreviewQrs(res.data.qrs || []);
+        } catch (err) {
+            setPreviewQrs([]);
+        } finally {
+            setLoadingPreview(false);
+        }
+    };
+
+    const closePreview = () => {
+        setPreviewUser(null);
+        setPreviewQrs([]);
+    };
 
     if (isLoading) {
         return (
@@ -75,6 +98,7 @@ export default function UserManagementPage() {
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sign-up Method</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered On</th>
+                                <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">QRs</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -101,11 +125,20 @@ export default function UserManagementPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                                     </td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-center">
+                                        <button
+                                            onClick={() => handleViewQrs(user)}
+                                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                                            title="View assigned QR codes"
+                                        >
+                                            <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             {filteredUsers.length === 0 && (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                                         {searchTerm ? 'No users found matching your search.' : 'No users registered yet.'}
                                     </td>
                                 </tr>
@@ -114,6 +147,57 @@ export default function UserManagementPage() {
                     </table>
                 </div>
             </div>
+
+            {/* User QR Preview Modal */}
+            {previewUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" onClick={closePreview}>
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative border border-gray-100 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={closePreview}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">
+                            QR Codes for {`${previewUser.firstName || ''} ${previewUser.lastName || ''}`.trim()}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-4">{previewUser.email}</p>
+
+                        {loadingPreview ? (
+                            <div className="py-8 text-center text-gray-500 animate-pulse">Loading QR codes...</div>
+                        ) : previewQrs.length === 0 ? (
+                            <div className="py-8 text-center text-gray-400">No QR codes assigned to this user.</div>
+                        ) : (
+                            <div className="overflow-y-auto space-y-3 flex-1">
+                                {previewQrs.map((qr) => (
+                                    <div key={qr._id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(`https://qnect.in/c/${qr.qrId}`)}`}
+                                            alt="QR"
+                                            className="rounded border border-gray-200 flex-shrink-0"
+                                            width={60}
+                                            height={60}
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-mono text-gray-600 truncate">{qr.qrId}</p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${qr.status === 'activated' ? 'bg-green-100 text-green-800' : qr.status === 'disabled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                                    {qr.status}
+                                                </span>
+                                                {qr.expiresAt && (
+                                                    <span className="text-xs text-gray-400">
+                                                        Expires: {new Date(qr.expiresAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

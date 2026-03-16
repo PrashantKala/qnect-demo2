@@ -9,6 +9,7 @@ export default function QRManagementPage() {
     const [quantity, setQuantity] = useState(50);
     const [salespersons, setSalespersons] = useState([]);
     const [selectedSalespersonId, setSelectedSalespersonId] = useState('');
+    const [previewQrId, setPreviewQrId] = useState(null);
 
     const fetchAndSetQRCodes = async () => {
         try {
@@ -56,6 +57,8 @@ export default function QRManagementPage() {
             </div>
         );
     }
+
+    const qrUrl = previewQrId ? `https://qnect.in/c/${previewQrId}` : '';
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -114,10 +117,10 @@ export default function QRManagementPage() {
                             <tr>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR ID (UUID)</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Salesperson</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned SP</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To User</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold By (ID)</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold By</th>
+                                <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">View</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -133,17 +136,52 @@ export default function QRManagementPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedSalespersonId ? 'Yes' : <span className="text-gray-400 italic">No</span>}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedToUser?.email || <span className="text-gray-400 italic">Unassigned</span>}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.soldBySalesperson?.email || code.soldBySalesperson?._id || <span className="text-gray-400 italic">Not Sold</span>}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-center">
+                                        <button
+                                            onClick={() => setPreviewQrId(code.qrId)}
+                                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                                            title="View QR Code"
+                                        >
+                                            <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             {qrCodes.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">No QR codes found. Generate some above.</td>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No QR codes found. Generate some above.</td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* QR Code Preview Modal */}
+            {previewQrId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setPreviewQrId(null)}>
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative border border-gray-100" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setPreviewQrId(null)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">QR Code Preview</h3>
+                        <div className="flex justify-center mb-4">
+                            <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrUrl)}`}
+                                alt={`QR Code for ${previewQrId}`}
+                                className="rounded-lg border border-gray-200"
+                                width={250}
+                                height={250}
+                            />
+                        </div>
+                        <p className="text-xs text-center text-gray-500 font-mono break-all bg-gray-50 px-3 py-2 rounded">{qrUrl}</p>
+                        <p className="text-xs text-center text-gray-400 mt-2 font-mono">{previewQrId}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
