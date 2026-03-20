@@ -13,6 +13,7 @@ function LoginForm() {
   const [error, setError] = useState('');
   const { login, loginWithToken } = useAuth();
   const router = useRouter();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // 2. Get the redirect URL from the query parameters
   const searchParams = useSearchParams();
@@ -27,7 +28,7 @@ function LoginForm() {
           if (tokenResponse && tokenResponse.access_token) {
             try {
               // Remove extra /api since NEXT_PUBLIC_API_URL already includes it
-              const apiUrl = "https://qnect-backend-app-zne7q.ondigitalocean.app/api";
+              const apiUrl = API_URL;
               const res = await fetch(`${apiUrl}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
