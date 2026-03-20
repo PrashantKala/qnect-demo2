@@ -58,7 +58,7 @@ export default function QRManagementPage() {
         );
     }
 
-    const qrUrl = previewQrId ? `https://qnect.in/c/${previewQrId}` : '';
+    const qrUrl = previewQrId ? `${process.env.NEXT_PUBLIC_SITE_URL}/c/${previewQrId}` : '';
 
     return (
         <div className="max-w-7xl mx-auto">

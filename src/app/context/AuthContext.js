@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
             // Send FCM token to backend
             saveFCMToken(token);
             axios.post(
-              `https://qnect-backend-app-zne7q.ondigitalocean.app/api/users/web-push-token`,
+              `${process.env.NEXT_PUBLIC_API_URL}/users/web-push-token`,
               { token: token },
               { headers: { Authorization: `Bearer ${token}` } }
             ).catch(err => console.error('Error registering web push token:', err));

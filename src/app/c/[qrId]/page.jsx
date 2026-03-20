@@ -8,7 +8,7 @@ import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X, MapPin } from
 import { fetchQRGuardians, sendEmergencyAlert, fetchQRInfo } from '../../../../lib/api';
 import CallingScreen from '../../components/CallingScreen';
 
-const SOCKET_SERVER_URL = "https://qnect-backend-app-zne7q.ondigitalocean.app";
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 export default function CallPage() {
   const params = useParams();
   const { qrId } = params;
@@ -640,24 +640,24 @@ export default function CallPage() {
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             {
-              urls: 'turn:qnect.metered.live:80',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turn:${process.env.NEXT_PUBLIC_TURN_SERVER}:80`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
             {
-              urls: 'turn:qnect.metered.live:80?transport=tcp',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turn:${process.env.NEXT_PUBLIC_TURN_SERVER}:80?transport=tcp`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
             {
-              urls: 'turn:qnect.metered.live:443',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turn:${process.env.NEXT_PUBLIC_TURN_SERVER}:443`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
             {
-              urls: 'turns:qnect.metered.live:443',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turns:${process.env.NEXT_PUBLIC_TURN_SERVER}:443`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
           ],
         }
@@ -963,24 +963,24 @@ export default function CallPage() {
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             {
-              urls: 'turn:qnect.metered.live:80',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turn:${process.env.NEXT_PUBLIC_TURN_SERVER}:80`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
             {
-              urls: 'turn:qnect.metered.live:80?transport=tcp',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turn:${process.env.NEXT_PUBLIC_TURN_SERVER}:80?transport=tcp`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
             {
-              urls: 'turn:qnect.metered.live:443',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turn:${process.env.NEXT_PUBLIC_TURN_SERVER}:443`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
             {
-              urls: 'turns:qnect.metered.live:443',
-              username: '25170275b00b2e8d9d57f03b',
-              credential: 'bbHyB+a2quX4Pn0N',
+              urls: `turns:${process.env.NEXT_PUBLIC_TURN_SERVER}:443`,
+              username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
             },
           ],
         }

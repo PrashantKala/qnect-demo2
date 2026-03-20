@@ -36,7 +36,7 @@ function RenewQRContent() {
             if (!token) throw new Error('You are not logged in. Please refresh and try again.');
 
             // Step 1: Create renewal order via backend
-            const orderResponse = await fetch(`https://qnect-backend-app-zne7q.ondigitalocean.app/api/payments/renew/create-order`, {
+            const orderResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/renew/create-order`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ function RenewQRContent() {
                 handler: async function (response) {
                     // Step 3: Verify payment and extend expiry
                     try {
-                        const verifyResponse = await fetch(`https://qnect-backend-app-zne7q.ondigitalocean.app/api/payments/renew/verify`, {
+                        const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/renew/verify`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

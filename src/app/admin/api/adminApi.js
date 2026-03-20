@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = `https://qnect-backend-app-zne7q.ondigitalocean.app/api/admin`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/admin`;
 
 const api = axios.create({
     baseURL: API_URL,

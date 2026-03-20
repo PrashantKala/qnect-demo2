@@ -49,7 +49,7 @@ export default function OrderQRPage() {
       if (!token) throw new Error('You are not logged in. Please refresh and try again.');
 
       // Step 1: Create Razorpay order via backend
-      const orderResponse = await fetch(`https://qnect-backend-app-zne7q.ondigitalocean.app/api/payments/create-order`, {
+      const orderResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export default function OrderQRPage() {
         handler: async function (response) {
           // Step 3: Verify payment and generate QR
           try {
-            const verifyResponse = await fetch(`https://qnect-backend-app-zne7q.ondigitalocean.app/api/payments/verify`, {
+            const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/verify`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

@@ -172,7 +172,7 @@ export default function UserManagementPage() {
                                 {previewQrs.map((qr) => (
                                     <div key={qr._id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
                                         <img
-                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(`https://qnect.in/c/${qr.qrId}`)}`}
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL}/c/${qr.qrId}`)}`}
                                             alt="QR"
                                             className="rounded border border-gray-200 flex-shrink-0"
                                             width={60}
