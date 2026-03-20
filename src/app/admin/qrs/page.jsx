@@ -90,7 +90,7 @@ export default function QRManagementPage() {
                         >
                             <option value="">None</option>
                             {salespersons.map(sp => (
-                                <option key={sp._id} value={sp.userId}>{sp.name} ({sp.salespersonId})</option>
+                                <option key={sp._id} value={sp.userId?._id || sp.userId}>{sp.name} ({sp.salespersonId})</option>
                             ))}
                         </select>
                     </div>
