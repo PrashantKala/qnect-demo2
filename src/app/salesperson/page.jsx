@@ -16,6 +16,7 @@ export default function SalespersonDashboard() {
     const [mobileNumber, setMobileNumber] = useState('');
     const [vehicleNumber, setVehicleNumber] = useState('');
     const [address, setAddress] = useState('');
+    const [password, setPassword] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -27,6 +28,7 @@ export default function SalespersonDashboard() {
         setMobileNumber('');
         setVehicleNumber('');
         setAddress('');
+        setPassword('');
         setIsModalOpen(true);
     };
 
@@ -39,6 +41,7 @@ export default function SalespersonDashboard() {
         setMobileNumber('');
         setVehicleNumber('');
         setAddress('');
+        setPassword('');
     };
 
     const loadData = async () => {
@@ -65,6 +68,14 @@ export default function SalespersonDashboard() {
         init();
     }, []);
 
+    // Auto-generate password: first 4 letters of firstName (lowercase) + first 4 digits of mobile
+    useEffect(() => {
+        const namePart = (firstName || '').replace(/[^a-zA-Z]/g, '').slice(0, 4).toLowerCase();
+        const mobilePart = (mobileNumber || '').replace(/\D/g, '').slice(0, 4);
+        const generated = namePart + mobilePart;
+        if (generated) setPassword(generated);
+    }, [firstName, mobileNumber]);
+
     const handleRegisterSale = async (e) => {
         e.preventDefault();
         setIsRegistering(true);
@@ -75,7 +86,8 @@ export default function SalespersonDashboard() {
                 lastName,
                 mobileNumber,
                 vehicleNumber,
-                address
+                address,
+                password
             });
             alert(response.data.message);
             closeModal();
@@ -279,7 +291,21 @@ export default function SalespersonDashboard() {
                                 ></textarea>
                             </div>
 
-                            <p className="mt-1 text-xs text-gray-500 italic">If this email doesn't exist, an account will be created. Their default password will be their Mobile No.</p>
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                                <input
+                                    id="password"
+                                    type="text"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500 font-mono"
+                                    placeholder="Auto-generated from name + mobile"
+                                />
+                                <p className="text-xs text-gray-400 mt-1">First 4 letters of name + first 4 digits of mobile (editable)</p>
+                            </div>
+
+                            <p className="mt-1 text-xs text-gray-500 italic">If this email doesn't exist, an account will be created. The password will be emailed to the user.</p>
 
                             <div className="mt-8 flex gap-3 justify-end pt-4 border-t border-gray-100">
                                 <button
