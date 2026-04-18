@@ -6,7 +6,7 @@ import RoleGuard from '../components/RoleGuard';
 
 export default function AdminLayout({ children }) {
     const pathname = usePathname();
-    const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     const getLinkClasses = (path) => {
         const isActive = pathname === path;
@@ -18,9 +18,9 @@ export default function AdminLayout({ children }) {
 
     return (
         <RoleGuard allowedRoles={['admin']}>
-            <div className="flex h-screen bg-gray-50 overflow-hidden">
+            <div className="flex min-h-screen bg-gray-50">
                 {/* Sidebar */}
-                <nav className={`${isSidebarOpen ? 'w-64 px-4' : 'w-0 px-0 opacity-0 md:opacity-100'} transition-all duration-300 ease-in-out bg-white border-r border-gray-200 flex-shrink-0 flex flex-col pt-8 h-full shadow-sm overflow-hidden whitespace-nowrap`}>
+                <nav className={`${isSidebarOpen ? 'w-64 px-4' : 'w-0 px-0 opacity-0 md:opacity-100'} transition-all duration-300 ease-in-out bg-white border-r border-gray-200 flex-shrink-0 flex flex-col pt-8 h-screen sticky top-0 shadow-sm overflow-hidden whitespace-nowrap`}>
                     <h2 className="text-2xl font-bold mb-8 text-gray-800 px-2 tracking-tight">QNect Admin</h2>
                     <ul className="flex-1 overflow-y-auto">
                         <li>
@@ -47,8 +47,8 @@ export default function AdminLayout({ children }) {
                 </nav>
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center shadow-sm">
+                <div className="flex-1 flex flex-col min-w-0">
+                    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center shadow-sm sticky top-0 z-10 w-full">
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                             className="p-2 mr-4 bg-gray-100 rounded hover:bg-gray-200 text-gray-700 transition flex items-center justify-center font-bold"
@@ -58,7 +58,7 @@ export default function AdminLayout({ children }) {
                         </button>
                         <h1 className="text-xl font-semibold text-gray-800 tracking-tight">Admin Portal</h1>
                     </header>
-                    <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
+                    <main className="flex-1 p-4 md:p-8 bg-gray-50">
                         {children}
                     </main>
                 </div>
