@@ -265,12 +265,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-white/80">Password</p>
-                  <div className="flex items-center space-x-2">
-                    <p>{showPassword ? (editedProfile.password ? editedProfile.password : '********') : '********'}</p>
-                    <button onClick={() => setShowPassword(!showPassword)} className="text-white/60 hover:text-white transition">
-                      {showPassword ? <IoEyeOffOutline className="h-4 w-4" /> : <IoEyeOutline className="h-4 w-4" />}
-                    </button>
-                  </div>
+                  <p>********</p>
                 </div>
                 <div>
                   <p className="text-sm text-white/80">Mobile Number</p>
