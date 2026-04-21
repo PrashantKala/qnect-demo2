@@ -22,7 +22,9 @@ import {
   IoToggleOutline,
   IoAddCircleOutline,
   IoTrashOutline,
-  IoCloseCircleOutline
+  IoCloseCircleOutline,
+  IoEyeOutline,
+  IoEyeOffOutline
 } from 'react-icons/io5';
 
 export default function ProfilePage() {
@@ -36,6 +38,7 @@ export default function ProfilePage() {
   const [editAddress, setEditAddress] = useState(false);
   const [editedAddress, setEditedAddress] = useState({});
   const [editedProfile, setEditedProfile] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   // Guardian states
   const [manageGuardians, setManageGuardians] = useState(false);
@@ -76,9 +79,12 @@ export default function ProfilePage() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await updateProfile(editedProfile);
+      const payload = { ...editedProfile };
+      if (!payload.password) delete payload.password;
+
+      const response = await updateProfile(payload);
       if (response.data) {
-        setProfile(prev => ({ ...prev, ...editedProfile }));
+        setProfile(prev => ({ ...prev, ...payload }));
         setEditMode(false);
       }
     } catch (error) {
@@ -151,6 +157,8 @@ export default function ProfilePage() {
           setProfile(profileResponse.data);
           setEditedAddress(profileResponse.data.address || {});
           setEditedProfile({
+            email: profileResponse.data.email || '',
+            password: '',
             mobileNumber: profileResponse.data.mobileNumber || '',
             vehicleNumber: profileResponse.data.vehicleNumber || ''
           });
@@ -195,6 +203,34 @@ export default function ProfilePage() {
             {editMode ? (
               <form onSubmit={handleProfileSubmit} className="space-y-4 mb-6">
                 <div>
+                  <label className="text-sm text-white/80">Email</label>
+                  <input
+                    type="email"
+                    value={editedProfile.email || ''}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
+                    className="w-full p-2 rounded-lg mt-1 text-black bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-white/80">Password</label>
+                  <div className="relative w-full mt-1">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={editedProfile.password || ''}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, password: e.target.value })}
+                      className="w-full p-2 rounded-lg pr-10 text-black bg-white"
+                      placeholder="Enter new password to change"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? <IoEyeOffOutline className="h-5 w-5" /> : <IoEyeOutline className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+                <div>
                   <label className="text-sm text-white/80">Mobile Number</label>
                   <input
                     type="text"
@@ -223,6 +259,19 @@ export default function ProfilePage() {
               </form>
             ) : (
               <div className="space-y-4 mb-6">
+                <div>
+                  <p className="text-sm text-white/80">Email</p>
+                  <p>{profile?.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-white/80">Password</p>
+                  <div className="flex items-center space-x-2">
+                    <p>{showPassword ? (editedProfile.password ? editedProfile.password : '********') : '********'}</p>
+                    <button onClick={() => setShowPassword(!showPassword)} className="text-white/60 hover:text-white transition">
+                      {showPassword ? <IoEyeOffOutline className="h-4 w-4" /> : <IoEyeOutline className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
                 <div>
                   <p className="text-sm text-white/80">Mobile Number</p>
                   <p>{profile?.mobileNumber}</p>
