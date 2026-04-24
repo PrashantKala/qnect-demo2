@@ -71,7 +71,7 @@ export default function SalespersonDashboard() {
     // Auto-generate password: first 4 letters of firstName (lowercase) + first 4 digits of mobile
     useEffect(() => {
         const namePart = (firstName || '').replace(/[^a-zA-Z]/g, '').slice(0, 4).toLowerCase();
-        const mobilePart = (mobileNumber || '').replace(/\D/g, '').slice(0, 4);
+        const mobilePart = mobileNumber ? (mobileNumber).replace(/\D/g, '').slice(0, 4) : '1234';
         const generated = namePart + mobilePart;
         if (generated) setPassword(generated);
     }, [firstName, mobileNumber]);
@@ -257,22 +257,20 @@ export default function SalespersonDashboard() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 mb-1">Mobile No *</label>
+                                    <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 mb-1">Mobile No</label>
                                     <input
                                         id="mobileNumber"
                                         type="text"
-                                        required
                                         value={mobileNumber}
                                         onChange={(e) => setMobileNumber(e.target.value)}
                                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="vehicleNumber" className="block text-sm font-medium text-gray-700 mb-1">Vehicle No *</label>
+                                    <label htmlFor="vehicleNumber" className="block text-sm font-medium text-gray-700 mb-1">Vehicle No</label>
                                     <input
                                         id="vehicleNumber"
                                         type="text"
-                                        required
                                         value={vehicleNumber}
                                         onChange={(e) => setVehicleNumber(e.target.value)}
                                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500 uppercase"

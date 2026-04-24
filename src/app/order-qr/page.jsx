@@ -4,24 +4,66 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 
-// Success Popup Component
-const SuccessPopup = () => (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md mx-4">
-      <div className="text-green-500 mb-4">
-        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
+const SuccessPopup = ({ qrId, onSkip }) => {
+  const [vehicleNumber, setVehicleNumber] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!vehicleNumber.trim()) {
+      onSkip();
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('qnect_token');
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qrs/${qrId}/update-vehicle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ vehicleNumber })
+      });
+      onSkip();
+    } catch (err) {
+      console.error(err);
+      onSkip();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md mx-4">
+        <div className="text-green-500 mb-4">
+          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-primary-blue mb-4">QR Code Generated!</h2>
+        <div className="space-y-2 text-text-secondary mb-6">
+          <p>Your QR code has been generated successfully and sent to your email address.</p>
+        </div>
+        <div className="border-t pt-4 text-left">
+           <h3 className="font-bold text-gray-800 mb-2">Link Vehicle (Optional)</h3>
+           <p className="text-sm text-gray-600 mb-4">Would you like to link a vehicle number to this newly purchased QR code? You can always do this later in your profile.</p>
+           <input
+             type="text"
+             value={vehicleNumber}
+             onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
+             placeholder="Enter Vehicle Number"
+             className="w-full border border-gray-300 rounded px-3 py-2 mb-4 text-black focus:ring-accent-cyan"
+           />
+           <div className="flex gap-4">
+             <button onClick={onSkip} className="flex-1 bg-gray-100 text-gray-700 py-2 rounded font-bold hover:bg-gray-200 transition">Skip</button>
+             <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-primary-blue text-white py-2 rounded font-bold hover:opacity-90 transition">
+               {isSaving ? 'Saving...' : 'Save & Continue'}
+             </button>
+           </div>
+        </div>
       </div>
-      <h2 className="text-2xl font-bold text-primary-blue mb-4">QR Code Generated!</h2>
-      <div className="space-y-2 text-text-secondary">
-        <p>Your QR code has been generated successfully and sent to your email address.</p>
-        <p className="text-sm">Please check your inbox (and spam folder) for the PDF attachment.</p>
-      </div>
-      <p className="mt-4 text-sm text-accent-cyan">Redirecting to your profile...</p>
     </div>
-  </div>
-);
+  );
+};
 
 export default function OrderQRPage() {
   const { userToken, isLoading } = useAuth();
@@ -29,6 +71,7 @@ export default function OrderQRPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [purchasedQrId, setPurchasedQrId] = useState(null);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   useEffect(() => {
@@ -92,11 +135,9 @@ export default function OrderQRPage() {
             }
 
             // Success!
+            setPurchasedQrId(verifyData.qr.qrId);
             setShowSuccess(true);
             setIsProcessing(false);
-            setTimeout(() => {
-              router.push('/profile');
-            }, 3000);
           } catch (verifyError) {
             setError(verifyError.message);
             setIsProcessing(false);
@@ -145,7 +186,7 @@ export default function OrderQRPage() {
         onLoad={() => setRazorpayLoaded(true)}
       />
 
-      {showSuccess && <SuccessPopup />}
+      {showSuccess && <SuccessPopup qrId={purchasedQrId} onSkip={() => router.push('/profile')} />}
       <div className="grid md:grid-cols-2 gap-12 items-start">
 
         {/* Benefits Section */}

@@ -89,14 +89,7 @@ export default function SignupPage() {
         'firstName',
         'lastName',
         'email',
-        'password',
-        'mobileNumber',
-        'address.pincode',
-        'address.houseNumber',
-        'address.streetName',
-        'address.city',
-        'address.state',
-        'address.country'
+        'password'
       ];
 
       const missingFields = requiredFields.filter(field => {
@@ -206,11 +199,11 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="mobileNumber" className="block text-sm font-medium text-text-secondary">Mobile Number *</label>
+              <label htmlFor="mobileNumber" className="block text-sm font-medium text-text-secondary">Mobile Number</label>
               <input
                 type="tel" id="mobileNumber" name="mobileNumber"
                 value={formData.mobileNumber}
-                onChange={handleInputChange} required
+                onChange={handleInputChange}
                 className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
               />
             </div>
@@ -221,31 +214,31 @@ export default function SignupPage() {
               <h2 className="text-lg font-semibold text-text-secondary mb-4">Address Details</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="pincode" className="block text-sm font-medium text-text-secondary">Pincode *</label>
+                  <label htmlFor="pincode" className="block text-sm font-medium text-text-secondary">Pincode</label>
                   <input
                     type="text" id="pincode" name="address.pincode"
                     value={formData.address.pincode}
-                    onChange={handleInputChange} required
+                    onChange={handleInputChange}
                     className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
                 <div>
-                  <label htmlFor="houseNumber" className="block text-sm font-medium text-text-secondary">House Number *</label>
+                  <label htmlFor="houseNumber" className="block text-sm font-medium text-text-secondary">House Number</label>
                   <input
                     type="text" id="houseNumber" name="address.houseNumber"
                     value={formData.address.houseNumber}
-                    onChange={handleInputChange} required
+                    onChange={handleInputChange}
                     className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="streetName" className="block text-sm font-medium text-text-secondary mt-4">Street Name *</label>
+                <label htmlFor="streetName" className="block text-sm font-medium text-text-secondary mt-4">Street Name</label>
                 <input
                   type="text" id="streetName" name="address.streetName"
                   value={formData.address.streetName}
-                  onChange={handleInputChange} required
+                  onChange={handleInputChange}
                   className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                 />
               </div>
@@ -262,29 +255,29 @@ export default function SignupPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-text-secondary">City *</label>
+                  <label htmlFor="city" className="block text-sm font-medium text-text-secondary">City</label>
                   <input
                     type="text" id="city" name="address.city"
                     value={formData.address.city}
-                    onChange={handleInputChange} required
+                    onChange={handleInputChange}
                     className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
                 <div>
-                  <label htmlFor="state" className="block text-sm font-medium text-text-secondary">State *</label>
+                  <label htmlFor="state" className="block text-sm font-medium text-text-secondary">State</label>
                   <input
                     type="text" id="state" name="address.state"
                     value={formData.address.state}
-                    onChange={handleInputChange} required
+                    onChange={handleInputChange}
                     className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
                 <div>
-                  <label htmlFor="country" className="block text-sm font-medium text-text-secondary">Country *</label>
+                  <label htmlFor="country" className="block text-sm font-medium text-text-secondary">Country</label>
                   <input
                     type="text" id="country" name="address.country"
                     value={formData.address.country}
-                    onChange={handleInputChange} required
+                    onChange={handleInputChange}
                     className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
                   />
                 </div>
