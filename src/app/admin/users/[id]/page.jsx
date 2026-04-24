@@ -62,7 +62,6 @@ export default function UserDetailPage() {
                     <div><span className="font-medium text-gray-500">Last Name:</span> <span className="text-gray-900 ml-2">{user.lastName || 'N/A'}</span></div>
                     <div><span className="font-medium text-gray-500">Email:</span> <span className="text-gray-900 ml-2">{user.email}</span></div>
                     <div><span className="font-medium text-gray-500">Mobile:</span> <span className="text-gray-900 ml-2">{user.mobileNumber || 'N/A'}</span></div>
-                    <div><span className="font-medium text-gray-500">Vehicle No:</span> <span className="text-gray-900 ml-2 uppercase">{user.vehicleNumber || 'N/A'}</span></div>
                     <div><span className="font-medium text-gray-500">Role:</span> <span className="text-gray-900 ml-2 capitalize">{user.role}</span></div>
                     <div><span className="font-medium text-gray-500">Auth Method:</span> <span className="text-gray-900 ml-2 capitalize">{user.authMethod}</span></div>
                     <div><span className="font-medium text-gray-500">Referral Code:</span> <span className="text-gray-900 ml-2 font-mono">{user.referralCode || 'N/A'}</span></div>

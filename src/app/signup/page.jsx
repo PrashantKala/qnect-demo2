@@ -12,7 +12,6 @@ export default function SignupPage() {
     email: '',
     password: '',
     mobileNumber: '',
-    vehicleNumber: '',
     address: {
       pincode: '',
       houseNumber: '',
@@ -216,15 +215,7 @@ export default function SignupPage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="vehicleNumber" className="block text-sm font-medium text-text-secondary">Vehicle Number (Optional)</label>
-              <input
-                type="text" id="vehicleNumber" name="vehicleNumber"
-                value={formData.vehicleNumber}
-                onChange={handleInputChange}
-                className="mt-1 block w-full border border-border-color rounded-md shadow-sm p-3 focus:ring-accent-cyan focus:border-accent-cyan"
-              />
-            </div>
+
 
             <div className="border-t pt-4 mt-4">
               <h2 className="text-lg font-semibold text-text-secondary mb-4">Address Details</h2>

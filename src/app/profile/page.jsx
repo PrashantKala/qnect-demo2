@@ -10,6 +10,7 @@ import {
   updateProfile,
   toggleQRStatus as toggleQRStatusApi,
   resendQR,
+  updateQRVehicleNumber,
   addGuardian,
   deleteGuardian
 } from '../../../lib/api';
@@ -39,6 +40,10 @@ export default function ProfilePage() {
   const [editedAddress, setEditedAddress] = useState({});
   const [editedProfile, setEditedProfile] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  
+  // QR Vehicle Edit States
+  const [editingQrId, setEditingQrId] = useState(null);
+  const [editingVehicleNumber, setEditingVehicleNumber] = useState('');
 
   // Guardian states
   const [manageGuardians, setManageGuardians] = useState(false);
@@ -69,6 +74,22 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error toggling QR status:', error);
       alert('Failed to update QR status. Please try again.');
+    }
+  };
+
+  const handleUpdateQRVehicleNumber = async (qrId) => {
+    try {
+      const response = await updateQRVehicleNumber(qrId, editingVehicleNumber);
+      if (response.data) {
+        setQrs(qrs.map(q => 
+          q.qrId === qrId ? { ...q, vehicleNumber: editingVehicleNumber } : q
+        ));
+        setEditingQrId(null);
+        setEditingVehicleNumber('');
+      }
+    } catch (error) {
+      console.error('Error updating vehicle number:', error);
+      alert('Failed to update vehicle number. Please try again.');
     }
   };
 
@@ -159,8 +180,7 @@ export default function ProfilePage() {
           setEditedProfile({
             email: profileResponse.data.email || '',
             password: '',
-            mobileNumber: profileResponse.data.mobileNumber || '',
-            vehicleNumber: profileResponse.data.vehicleNumber || ''
+            mobileNumber: profileResponse.data.mobileNumber || ''
           });
         })
         .catch(err => console.error("Failed to fetch data", err))
@@ -239,15 +259,6 @@ export default function ProfilePage() {
                     className="w-full p-2 rounded-lg mt-1 text-black bg-white"
                   />
                 </div>
-                <div>
-                  <label className="text-sm text-white/80">Vehicle Number</label>
-                  <input
-                    type="text"
-                    value={editedProfile.vehicleNumber || ''}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, vehicleNumber: e.target.value })}
-                    className="w-full p-2 rounded-lg mt-1 text-black bg-white"
-                  />
-                </div>
                 <div className="flex gap-2">
                   <button type="submit" className="flex-1 px-4 py-2 bg-white text-primary-blue font-medium rounded-lg">
                     Save
@@ -271,12 +282,6 @@ export default function ProfilePage() {
                   <p className="text-sm text-white/80">Mobile Number</p>
                   <p>{profile?.mobileNumber}</p>
                 </div>
-                {profile?.vehicleNumber && (
-                  <div>
-                    <p className="text-sm text-white/80">Vehicle Number</p>
-                    <p>{profile.vehicleNumber}</p>
-                  </div>
-                )}
               </div>
             )}
 
@@ -457,6 +462,48 @@ export default function ProfilePage() {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <p className="font-mono text-sm text-white/80">ID: {qr.qrId}</p>
+                        
+                        <div className="my-2 p-3 bg-white/5 rounded-lg border border-white/10">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <p className="text-xs text-white/60 mb-1">Vehicle Number</p>
+                              {editingQrId === qr.qrId ? (
+                                <div className="flex items-center gap-2">
+                                  <input 
+                                    type="text" 
+                                    value={editingVehicleNumber}
+                                    onChange={(e) => setEditingVehicleNumber(e.target.value)}
+                                    placeholder="Enter vehicle number"
+                                    className="px-2 py-1 text-sm text-black rounded"
+                                    autoFocus
+                                  />
+                                  <button onClick={() => handleUpdateQRVehicleNumber(qr.qrId)} className="text-green-400 hover:text-green-300">
+                                    <IoCheckmark size={20} />
+                                  </button>
+                                  <button onClick={() => setEditingQrId(null)} className="text-red-400 hover:text-red-300">
+                                    <IoCloseCircleOutline size={20} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 group">
+                                  <p className="text-sm font-semibold tracking-wider">
+                                    {qr.vehicleNumber || <span className="text-white/40 italic">Not set</span>}
+                                  </p>
+                                  <button 
+                                    onClick={() => {
+                                      setEditingQrId(qr.qrId);
+                                      setEditingVehicleNumber(qr.vehicleNumber || '');
+                                    }} 
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-white/60 hover:text-white"
+                                  >
+                                    <IoPencilOutline size={16} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
                         <p className="text-lg font-semibold">
                           Status: <span className={`capitalize ${qr.status === 'activated' ? 'text-green-300' : 'text-yellow-200'}`}>{qr.status}</span>
                         </p>
