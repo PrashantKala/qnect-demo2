@@ -111,7 +111,7 @@ export default function OrderQRPage() {
         amount: orderData.order.amount,
         currency: orderData.order.currency,
         name: 'QNect',
-        description: 'QNect Digital QR (Yearly)',
+        description: 'QNect Digital QR (2 Years)',
         order_id: orderData.order.id,
         handler: async function (response) {
           // Step 3: Verify payment and generate QR
@@ -210,8 +210,8 @@ export default function OrderQRPage() {
             <li className="flex gap-3">
               <span className="font-bold">✓</span>
               <div>
-                <h3 className="font-bold">One Year of Service</h3>
-                <p>Pay ₹399 for a full year of QNect service. Easy renewal when your plan expires.</p>
+                <h3 className="font-bold">Two Years of Service</h3>
+                <p>Pay ₹249 + GST for two full years of QNect service. Easy renewal when your plan expires.</p>
               </div>
             </li>
             <li className="flex gap-3">
@@ -229,8 +229,8 @@ export default function OrderQRPage() {
           <h1 className="text-3xl font-bold mb-6 text-center">Confirm Your Order</h1>
           <div className="my-6 p-4 bg-white/10 rounded-lg">
             <div className="flex justify-between items-center">
-              <span>QNect Digital QR (1 Year)</span>
-              <span className="text-xl font-bold">₹399</span>
+              <span>QNect Digital QR (2 Years)</span>
+              <span className="text-xl font-bold">₹249 + GST</span>
             </div>
           </div>
 
@@ -290,7 +290,7 @@ export default function OrderQRPage() {
               ) : !razorpayLoaded ? (
                 'Loading Payment...'
               ) : (
-                'Pay ₹399 & Get QR via Email'
+                'Pay ₹249 + GST & Get QR via Email'
               )}
             </button>
           </div>

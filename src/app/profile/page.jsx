@@ -552,7 +552,7 @@ export default function ProfilePage() {
                             href={`/renew-qr?qrId=${qr.qrId}`}
                             className="px-4 py-2 text-sm font-bold bg-accent-cyan text-primary-blue rounded flex items-center hover:opacity-90"
                           >
-                            <IoRepeatOutline className="h-4 w-4 mr-1" /> Renew (₹399)
+                            <IoRepeatOutline className="h-4 w-4 mr-1" /> Renew (₹249 + GST)
                           </Link>
                         )}
                       </div>

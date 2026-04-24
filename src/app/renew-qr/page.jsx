@@ -56,7 +56,7 @@ function RenewQRContent() {
                 amount: orderData.order.amount,
                 currency: orderData.order.currency,
                 name: 'QNect',
-                description: 'QNect QR Renewal (1 Year)',
+                description: 'QNect QR Renewal (2 Years)',
                 order_id: orderData.order.id,
                 handler: async function (response) {
                     // Step 3: Verify payment and extend expiry
@@ -150,13 +150,13 @@ function RenewQRContent() {
                                 </svg>
                             </div>
                             <h2 className="text-xl font-bold">Renewal Successful!</h2>
-                            <p className="text-white/80">Your QR validity has been extended by 1 year.</p>
+                            <p className="text-white/80">Your QR validity has been extended by 2 years.</p>
                             <p className="text-sm text-accent-cyan">Redirecting to your profile...</p>
                         </div>
                     ) : (
                         <>
                             <p className="text-white/80 mb-6">
-                                Extend your QR code validity by 1 year to continue receiving calls from scanners.
+                                Extend your QR code validity by 2 years to continue receiving calls from scanners.
                             </p>
 
                             <div className="bg-white/10 rounded-lg p-4 mb-6">
@@ -166,8 +166,8 @@ function RenewQRContent() {
 
                             <div className="bg-white/10 rounded-lg p-4 mb-6">
                                 <div className="flex justify-between items-center">
-                                    <span>Renewal (1 Year)</span>
-                                    <span className="text-xl font-bold">₹399</span>
+                                    <span>Renewal (2 Years)</span>
+                                    <span className="text-xl font-bold">₹249 + GST</span>
                                 </div>
                             </div>
 
@@ -193,7 +193,7 @@ function RenewQRContent() {
                                 ) : !razorpayLoaded ? (
                                     'Loading...'
                                 ) : (
-                                    'Pay ₹399 & Renew'
+                                    'Pay ₹249 + GST & Renew'
                                 )}
                             </button>
 
