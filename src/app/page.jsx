@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { ReviewsSection } from './components/ReviewsSection';
 // import { HeroSlider } from './components/HeroSlider'; // Import the slider
 
 export default function HomePage() {
@@ -74,7 +75,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold text-primary-blue">Our Pricing</h2> {/* Title Updated */}
           <p className="text-lg text-text-secondary mt-4 mb-16">
-            Simple pricing. One year of service. Easy renewal when you need it.
+            Simple pricing. Two years of service. Easy renewal when you need it.
           </p>
           <div className="flex justify-center">
             <div
@@ -84,11 +85,11 @@ export default function HomePage() {
               <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary-blue text-white px-4 py-1 rounded-full text-sm font-semibold">Our Only Plan</span>
               <h3 className="text-3xl font-bold text-gray-400 mt-4">QNect Digital QR</h3>
               <p className="text-5xl font-bold my-4 text-primary-blue">
-                ₹399 + GST
+                ₹249 + GST
               </p>
               <ul className="text-text-secondary space-y-3 text-left my-8">
                 <li>✓ <strong>Instant Soft Copy:</strong> Till original QNect OR is delivered to your doorstep.</li>
-                <li>✓ <strong>Validity:</strong> Enjoy our services for one year from the date of activation with easy renewal to continue enjoying hassle-free connections.</li>
+                <li>✓ <strong>Validity:</strong> Enjoy our services for two years from the date of activation with easy renewal to continue enjoying hassle-free connections.</li>
                 <li>✓ <strong>100% Privacy:</strong> With QNect, your number is never shared—so you can connect instantly without compromising your privacy.</li>
               </ul>
               <Link
@@ -108,76 +109,7 @@ export default function HomePage() {
       </section>
 
       {/* Customer Reviews Section (Fix #2 - Doc) */}
-      <section id="reviews" className="py-20 bg-gray-100">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-primary-blue mb-12">What Our Customers Say</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Review 1 */}
-            <div
-              className="p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              style={{
-                background: "linear-gradient(135deg, #1e40af, #22d3ee)",
-                boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
-              }}
-            >
-              <Image
-                src="/pic1.png"
-                alt="Reviewer A. Sharma"
-                width={80}
-                height={80}
-                className="rounded-full mb-4 self-center border-4 border-white"
-              />
-              <p className="flex-grow opacity-90">
-                "Got a call via the QNect app while in a meeting—my car was blocking someone. Problem solved in 2 minutes! Every car in Jaipur needs this."
-              </p>
-              <p className="font-bold mt-4 text-center text-white">- A. Sharma</p>
-            </div>
-
-            {/* Review 2 */}
-            <div
-              className="p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              style={{
-                background: "linear-gradient(135deg, #1e40af, #22d3ee)",
-                boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
-              }}
-            >
-              <Image
-                src="/pic2.png"
-                alt="Reviewer R. Singh"
-                width={80}
-                height={80}
-                className="rounded-full mb-4 self-center border-4 border-white"
-              />
-              <p className="flex-grow opacity-90">
-                "I was worried about putting my phone number on my car. QNect is the perfect solution. So simple and totally private."
-              </p>
-              <p className="font-bold mt-4 text-center text-white">- R. Singh</p>
-            </div>
-
-            {/* Review 3 */}
-            <div
-              className="p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              style={{
-                background: "linear-gradient(135deg, #1e40af, #22d3ee)",
-                boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
-              }}
-            >
-              <Image
-                src="/pic3.png"
-                alt="Reviewer Priya K."
-                width={80}
-                height={80}
-                className="rounded-full mb-4 self-center border-4 border-white"
-              />
-              <p className="flex-grow opacity-90">
-                "The best ₹399 I've spent. It's already saved me from one towing. The peace of mind is worth 10x the price."
-              </p>
-              <p className="font-bold mt-4 text-center text-white">- Priya K.</p>
-            </div>
-          </div>
-
-        </div>
-      </section>
+      <ReviewsSection />
 
       {/* FAQ Section (First 3 FAQs) */}
       <section id="faq" className="py-20 container mx-auto px-6">
@@ -253,8 +185,8 @@ export default function HomePage() {
                 Do I need to pay every year?
               </h3>
               <p className="text-white/90 text-lg leading-relaxed">
-                Yes! Get full QNect services for 1 year when you purchase your QR
-                for ₹399 + GST. After that, you can easily recharge to continue.
+                No! Get full QNect services for 2 years when you purchase your QR
+                for ₹249 + GST. After that, you can easily recharge to continue.
               </p>
             </div>
             <img

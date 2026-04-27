@@ -16,7 +16,7 @@ export default function FAQPage() {
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                     <h3 className="text-xl font-bold text-primary-blue mb-2">Do I need to pay every year?</h3>
-                    <p className="text-text-secondary">Yes! Get full QNect services for 1 year when you purchase your QR for ₹399 + GST. After that, you can easily renew to continue.</p>
+                    <p className="text-text-secondary">No! Get full QNect services for 2 years when you purchase your QR for ₹249 + GST. After that, you can easily renew to continue.</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                     <h3 className="text-xl font-bold text-primary-blue mb-2">Does the person scanning need the app?</h3>
@@ -49,7 +49,7 @@ export default function FAQPage() {
             </div>
 
             {/* Ask a Query Form */}
-            <div className="bg-white p-8 rounded-lg shadow-lg mt-16">
+            <div className="bg-qnect-gradient text-white p-8 rounded-lg shadow-lg mt-16">
                 <QueryForm formTitle="Still have questions? Ask us directly!" />
             </div>
         </main>
