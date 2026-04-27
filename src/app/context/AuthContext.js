@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { loginUser, registerUser } from '../../../lib/api';
+import { loginUser, registerUser, phoneLogin as phoneLoginApi } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 import { setupPushNotifications, requestNotificationPermission, saveFCMToken } from '../../../lib/notificationService';
@@ -92,6 +92,17 @@ export const AuthProvider = ({ children }) => {
     setSession(token);
   };
 
+  const loginWithPhone = async (idToken) => {
+    try {
+      const response = await phoneLoginApi(idToken);
+      setSession(response.data.token);
+      return response.data; // Return full response so caller can check isNewUser
+    } catch (error) {
+      console.error("Phone login failed:", error);
+      throw new Error(error.response?.data?.message || 'Phone Login Failed');
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('qnect_token');
     setUserToken(null);
@@ -101,7 +112,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ userToken, userEmail, userRole, isLoading, login, signup, logout, loginWithToken }}>
+    <AuthContext.Provider value={{ userToken, userEmail, userRole, isLoading, login, signup, logout, loginWithToken, loginWithPhone }}>
       {children}
     </AuthContext.Provider>
   );
