@@ -5,7 +5,7 @@ import Script from 'next/script';
 import { useAuth } from '../context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Phone, Mail, ArrowRight, ShieldCheck, RefreshCw } from 'lucide-react';
-import { auth, RecaptchaVerifier, signInWithPhoneNumber } from '../../../lib/firebase';
+import { getFirebaseAuth, RecaptchaVerifier, signInWithPhoneNumber } from '../../../lib/firebase';
 
 function LoginForm() {
   // --- Shared State ---
@@ -74,7 +74,7 @@ function LoginForm() {
 
     if (recaptchaContainerRef.current) {
       recaptchaContainerRef.current.innerHTML = '';
-      const recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+      const recaptchaVerifier = new RecaptchaVerifier(getFirebaseAuth(), recaptchaContainerRef.current, {
         size: 'invisible',
         callback: () => {
           // reCAPTCHA solved — will proceed with phone sign in
@@ -166,7 +166,7 @@ function LoginForm() {
       }
 
       const fullPhone = `+91${cleanPhone}`;
-      const result = await signInWithPhoneNumber(auth, fullPhone, recaptchaVerifierRef.current);
+      const result = await signInWithPhoneNumber(getFirebaseAuth(), fullPhone, recaptchaVerifierRef.current);
       setConfirmationResult(result);
       setOtpSent(true);
       setResendTimer(30);
