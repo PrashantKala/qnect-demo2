@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { fetchReviews } from '../../../lib/api';
 import { ReviewForm } from './ReviewForm';
 
@@ -58,13 +57,6 @@ export const ReviewsSection = () => {
                   boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
                 }}
               >
-                <Image
-                  src={review.imagePath || "/pic1.png"}
-                  alt={`Reviewer ${review.name}`}
-                  width={80}
-                  height={80}
-                  className="rounded-full mb-4 self-center border-4 border-white"
-                />
                 <p className="flex-grow opacity-90">
                   "{review.text}"
                 </p>
