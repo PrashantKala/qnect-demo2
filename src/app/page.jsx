@@ -135,7 +135,7 @@ export default function HomePage() {
               </p>
             </div>
             <img
-              src="/payEveryYear.jpeg"
+              src="/privacyProtected.png"
               alt="Privacy Protection"
               className="w-full h-64 md:h-80 object-cover rounded-xl shadow-md"
             />
@@ -186,7 +186,7 @@ export default function HomePage() {
               </p>
             </div>
             <img
-              src="/payEveryYear.jpeg"
+              src="/needToPayEveryYear.jpeg"
               alt="Payment Info"
               className="w-full h-64 md:h-80 object-cover rounded-xl shadow-md"
             />
