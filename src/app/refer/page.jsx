@@ -19,7 +19,7 @@ export default function ReferPage() {
           <div className="mt-10">
             <Link
               href="/profile"
-              className="inline-block px-10 py-4 bg-[#3BDAD7] text-[#1e40af] text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:bg-[#26BCCA]"
+              className="inline-block px-10 py-4 bg-transparent border-2 border-white text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:bg-white/10"
             >
               Get Your Referral Link
             </Link>

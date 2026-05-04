@@ -260,7 +260,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 px-4 py-2 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg transition hover:bg-[#26BCCA]">
+                  <button type="submit" className="flex-1 px-4 py-2 bg-transparent text-white font-bold border-2 border-white rounded-lg transition hover:bg-white/10">
                     Save
                   </button>
                   <button type="button" onClick={() => setEditMode(false)} className="flex-1 px-4 py-2 bg-white/20 text-white font-medium rounded-lg hover:bg-white/30 transition">
@@ -320,7 +320,7 @@ export default function ProfilePage() {
                   </div>
                 ))}
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 px-4 py-2 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg transition hover:bg-[#26BCCA]">
+                  <button type="submit" className="flex-1 px-4 py-2 bg-transparent text-white font-bold border-2 border-white rounded-lg transition hover:bg-white/10">
                     Save
                   </button>
                   <button type="button" onClick={() => setEditAddress(false)} className="flex-1 px-4 py-2 bg-white/20 text-white font-medium rounded-lg hover:bg-white/30 transition">
@@ -381,7 +381,7 @@ export default function ProfilePage() {
                   className="w-full p-2 rounded text-black bg-white placeholder-gray-500"
                 />
                 <div className="flex gap-2 pt-2">
-                  <button type="submit" className="flex-1 bg-[#3BDAD7] text-[#1e40af] hover:bg-[#26BCCA] py-2 rounded font-bold transition">Add</button>
+                  <button type="submit" className="flex-1 bg-transparent text-white border-2 border-white hover:bg-white/10 py-2 rounded font-bold transition">Add</button>
                   <button type="button" onClick={() => setManageGuardians(false)} className="flex-1 bg-white/20 text-white hover:bg-white/30 py-2 rounded font-medium transition">Cancel</button>
                 </div>
               </form>
@@ -441,7 +441,7 @@ export default function ProfilePage() {
         <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">My Activated QR Codes ({qrs.length})</h2>
-            <Link href="/order-qr" className="inline-block px-4 py-2 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg text-sm hover:opacity-90">
+            <Link href="/order-qr" className="inline-block px-4 py-2 bg-transparent text-white font-bold border-2 border-white rounded-lg text-sm hover:bg-white/10 transition">
               + Get New QR
             </Link>
           </div>

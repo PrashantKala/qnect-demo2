@@ -90,7 +90,7 @@ export const ReviewForm = ({ onReviewAdded }) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-block px-8 py-3 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-50"
+            className="inline-block px-8 py-3 bg-transparent text-white font-bold rounded-lg border-2 border-white shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:bg-white/10 disabled:opacity-50"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Review'}
           </button>
