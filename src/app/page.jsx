@@ -94,11 +94,7 @@ export default function HomePage() {
               </ul>
               <Link
                 href="/order-qr"
-                className="inline-block w-full px-10 py-4 text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
-                style={{
-                  background: "linear-gradient(90deg, #1e40af, #22d3ee)",
-                  boxShadow: "0 4px 15px rgba(59, 218, 215, 0.3)",
-                }}
+                className="inline-block w-full text-center px-10 py-4 bg-qnect-gradient text-white text-lg font-bold border-2 border-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
               >
                 Buy Now
               </Link>
@@ -201,7 +197,7 @@ export default function HomePage() {
         <div className="text-center mt-16">
           <Link
             href="/faq"
-            className="inline-block px-10 py-4 bg-primary-blue text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+            className="inline-block px-10 py-4 bg-qnect-gradient text-white text-lg font-bold border-2 border-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
           >
             Have More Questions?
           </Link>
@@ -222,8 +218,7 @@ export default function HomePage() {
 
           <Link
             href="/refer"
-            className="inline-block px-10 py-4 bg-gradient-to-r from-[#3BDAD7] to-[#26BCCA] text-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
-            style={{ boxShadow: "0 4px 15px rgba(59, 218, 215, 0.3)" }}
+            className="inline-block px-10 py-4 bg-qnect-gradient text-white text-lg font-bold border-2 border-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
           >
             Know More
           </Link>

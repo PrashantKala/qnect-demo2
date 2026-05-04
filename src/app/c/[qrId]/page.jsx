@@ -1129,7 +1129,7 @@ export default function CallPage() {
     switch (callStatus) {
       case 'idle':
         return (
-          <button onClick={handleCall} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-accent-cyan text-primary-blue font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
+          <button onClick={handleCall} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-qnect-gradient text-white border-2 border-white font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
             <Phone size={24} /> Call Vehicle Owner
           </button>
         );
@@ -1179,7 +1179,7 @@ export default function CallPage() {
         }
       case 'failed':
         return (
-          <button onClick={handleCall} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-accent-cyan text-primary-blue font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
+          <button onClick={handleCall} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-qnect-gradient text-white border-2 border-white font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
             <Phone size={24} /> Try Call Again
           </button>
         );
@@ -1269,7 +1269,7 @@ export default function CallPage() {
               {/* Notify Owner button (always available) */}
               <button
                 onClick={handleOpenNotify}
-                className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                className="w-full mt-4 flex items-center justify-center gap-2 px-10 py-3 bg-qnect-gradient text-white font-bold border-2 border-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90"
               >
                 <Bell size={20} /> Notify Owner
               </button>

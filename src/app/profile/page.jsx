@@ -550,7 +550,7 @@ export default function ProfilePage() {
                         {expiresAt && (isExpired || isExpiringSoon) && (
                           <Link
                             href={`/renew-qr?qrId=${qr.qrId}`}
-                            className="px-4 py-2 text-sm font-bold bg-accent-cyan text-primary-blue rounded flex items-center hover:opacity-90"
+                            className="px-4 py-2 text-sm font-bold bg-qnect-gradient text-white border-2 border-white rounded flex items-center hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 transition-all duration-300"
                           >
                             <IoRepeatOutline className="h-4 w-4 mr-1" /> Renew (₹249 + GST)
                           </Link>

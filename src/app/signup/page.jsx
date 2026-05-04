@@ -294,7 +294,7 @@ export default function SignupPage() {
               />
             </div>
             <div className="text-center pt-4">
-              <button type="submit" className="w-full inline-block px-10 py-4 bg-accent-cyan text-primary-blue text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
+              <button type="submit" className="w-full inline-block px-10 py-4 bg-qnect-gradient text-white border-2 border-white text-lg font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90">
                 Create Account
               </button>
             </div>

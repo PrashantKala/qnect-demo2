@@ -55,7 +55,7 @@ const SuccessPopup = ({ qrId, onSkip }) => {
            />
            <div className="flex gap-4">
              <button onClick={onSkip} className="flex-1 bg-gray-100 text-gray-700 py-2 rounded font-bold hover:bg-gray-200 transition">Skip</button>
-             <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-primary-blue text-white py-2 rounded font-bold hover:opacity-90 transition">
+             <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-qnect-gradient text-white border-2 border-white shadow-md py-2 rounded font-bold hover:opacity-90 hover:shadow-lg transition">
                {isSaving ? 'Saving...' : 'Save & Continue'}
              </button>
            </div>

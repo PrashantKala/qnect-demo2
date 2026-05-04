@@ -159,7 +159,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 px-10 py-3.5 bg-accent-cyan text-primary-blue text-lg font-bold rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="w-full flex items-center justify-center gap-2 px-10 py-3.5 bg-qnect-gradient text-white border-2 border-white text-lg font-bold rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 {isLoading ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} />}
                 {isLoading ? 'Logging in...' : 'Login'}
