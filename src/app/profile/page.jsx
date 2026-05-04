@@ -260,10 +260,10 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 px-4 py-2 bg-white text-primary-blue font-medium rounded-lg">
+                  <button type="submit" className="flex-1 px-4 py-2 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg transition hover:bg-[#26BCCA]">
                     Save
                   </button>
-                  <button type="button" onClick={() => setEditMode(false)} className="flex-1 px-4 py-2 bg-white/20 rounded-lg">
+                  <button type="button" onClick={() => setEditMode(false)} className="flex-1 px-4 py-2 bg-white/20 text-white font-medium rounded-lg hover:bg-white/30 transition">
                     Cancel
                   </button>
                 </div>
@@ -315,15 +315,15 @@ export default function ProfilePage() {
                       type="text"
                       value={editedAddress[key] || ''}
                       onChange={(e) => setEditedAddress({ ...editedAddress, [key]: e.target.value })}
-                      className="w-full p-2 rounded-lg mt-1 text-black"
+                      className="w-full p-2 rounded-lg mt-1 text-black bg-white"
                     />
                   </div>
                 ))}
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 px-4 py-2 bg-white text-primary-blue font-medium rounded-lg">
+                  <button type="submit" className="flex-1 px-4 py-2 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg transition hover:bg-[#26BCCA]">
                     Save
                   </button>
-                  <button type="button" onClick={() => setEditAddress(false)} className="flex-1 px-4 py-2 bg-white/20 rounded-lg">
+                  <button type="button" onClick={() => setEditAddress(false)} className="flex-1 px-4 py-2 bg-white/20 text-white font-medium rounded-lg hover:bg-white/30 transition">
                     Cancel
                   </button>
                 </div>
@@ -354,7 +354,7 @@ export default function ProfilePage() {
                   placeholder="Name *"
                   value={newGuardian.name}
                   onChange={(e) => setNewGuardian({ ...newGuardian, name: e.target.value })}
-                  className="w-full p-2 rounded text-black"
+                  className="w-full p-2 rounded text-black bg-white placeholder-gray-500"
                   required
                 />
                 <input
@@ -362,7 +362,7 @@ export default function ProfilePage() {
                   placeholder="Phone Number *"
                   value={newGuardian.phoneNumber}
                   onChange={(e) => setNewGuardian({ ...newGuardian, phoneNumber: e.target.value })}
-                  className="w-full p-2 rounded text-black"
+                  className="w-full p-2 rounded text-black bg-white placeholder-gray-500"
                   required
                 />
                 <input
@@ -370,7 +370,7 @@ export default function ProfilePage() {
                   placeholder="Email (Required - Must have account) *"
                   value={newGuardian.email}
                   onChange={(e) => setNewGuardian({ ...newGuardian, email: e.target.value })}
-                  className="w-full p-2 rounded text-black"
+                  className="w-full p-2 rounded text-black bg-white placeholder-gray-500"
                   required
                 />
                 <input
@@ -378,11 +378,11 @@ export default function ProfilePage() {
                   placeholder="Relation (e.g. Father)"
                   value={newGuardian.relation}
                   onChange={(e) => setNewGuardian({ ...newGuardian, relation: e.target.value })}
-                  className="w-full p-2 rounded text-black"
+                  className="w-full p-2 rounded text-black bg-white placeholder-gray-500"
                 />
                 <div className="flex gap-2 pt-2">
-                  <button type="submit" className="flex-1 bg-white text-primary-blue py-2 rounded font-bold">Add</button>
-                  <button type="button" onClick={() => setManageGuardians(false)} className="flex-1 bg-white/20 py-2 rounded">Cancel</button>
+                  <button type="submit" className="flex-1 bg-[#3BDAD7] text-[#1e40af] hover:bg-[#26BCCA] py-2 rounded font-bold transition">Add</button>
+                  <button type="button" onClick={() => setManageGuardians(false)} className="flex-1 bg-white/20 text-white hover:bg-white/30 py-2 rounded font-medium transition">Cancel</button>
                 </div>
               </form>
             )}
@@ -441,7 +441,7 @@ export default function ProfilePage() {
         <div className="bg-qnect-gradient text-white p-6 md:p-8 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">My Activated QR Codes ({qrs.length})</h2>
-            <Link href="/order-qr" className="inline-block px-4 py-2 bg-white text-primary-blue font-bold rounded-lg text-sm hover:opacity-90">
+            <Link href="/order-qr" className="inline-block px-4 py-2 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg text-sm hover:opacity-90">
               + Get New QR
             </Link>
           </div>

@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import { submitReview } from '../../../lib/api';
 
+import { IoStar } from 'react-icons/io5';
+
 export const ReviewForm = ({ onReviewAdded }) => {
-  const [formData, setFormData] = useState({ name: '', text: '' });
+  const [formData, setFormData] = useState({ name: '', text: '', rating: 5 });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -22,7 +24,7 @@ export const ReviewForm = ({ onReviewAdded }) => {
     try {
       const response = await submitReview(formData);
       setSuccess('Thank you for your review!');
-      setFormData({ name: '', text: '' });
+      setFormData({ name: '', text: '', rating: 5 });
       if (onReviewAdded) {
         onReviewAdded(response.data);
       }
@@ -51,6 +53,23 @@ export const ReviewForm = ({ onReviewAdded }) => {
           />
         </div>
         <div>
+          <label className="block text-sm font-medium mb-1">Rating*</label>
+          <div className="flex space-x-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
+                className={`text-2xl transition-colors ${
+                  star <= formData.rating ? 'text-yellow-400' : 'text-gray-400 opacity-50'
+                }`}
+              >
+                <IoStar />
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
           <label htmlFor="text" className="block text-sm font-medium mb-1">Your Review*</label>
           <textarea
             id="text"
@@ -71,7 +90,7 @@ export const ReviewForm = ({ onReviewAdded }) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-block px-8 py-3 bg-white text-primary-blue font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:bg-gray-100 disabled:opacity-50"
+            className="inline-block px-8 py-3 bg-[#3BDAD7] text-[#1e40af] font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-50"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Review'}
           </button>

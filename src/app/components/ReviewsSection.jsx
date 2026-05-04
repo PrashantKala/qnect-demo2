@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchReviews } from '../../../lib/api';
 import { ReviewForm } from './ReviewForm';
+import { IoStar } from 'react-icons/io5';
 
 export const ReviewsSection = () => {
   const [reviews, setReviews] = useState([]);
@@ -57,6 +58,11 @@ export const ReviewsSection = () => {
                   boxShadow: "0 4px 20px rgba(30, 64, 175, 0.3)",
                 }}
               >
+                <div className="flex justify-center mb-4 text-yellow-400 text-lg">
+                  {[...Array(review.rating || 5)].map((_, i) => (
+                    <IoStar key={i} />
+                  ))}
+                </div>
                 <p className="flex-grow opacity-90">
                   "{review.text}"
                 </p>
