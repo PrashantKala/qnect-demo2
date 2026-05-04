@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function ReferPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-12">
+    <div className="min-h-screen bg-gray-50 pb-12">
       {/* Hero Section */}
       <section className="bg-qnect-gradient text-white py-20 px-6 text-center">
         <div className="container mx-auto max-w-4xl">

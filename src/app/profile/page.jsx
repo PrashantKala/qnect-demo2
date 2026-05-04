@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const [editedAddress, setEditedAddress] = useState({});
   const [editedProfile, setEditedProfile] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // QR Vehicle Edit States
   const [editingQrId, setEditingQrId] = useState(null);
   const [editingVehicleNumber, setEditingVehicleNumber] = useState('');
@@ -81,7 +81,7 @@ export default function ProfilePage() {
     try {
       const response = await updateQRVehicleNumber(qrId, editingVehicleNumber);
       if (response.data) {
-        setQrs(qrs.map(q => 
+        setQrs(qrs.map(q =>
           q.qrId === qrId ? { ...q, vehicleNumber: editingVehicleNumber } : q
         ));
         setEditingQrId(null);
@@ -196,7 +196,7 @@ export default function ProfilePage() {
     <main className="container mx-auto px-6 py-12 pt-24 min-h-screen">
       <h1 className="text-4xl font-bold text-primary-blue mb-8">My Profile & QRs</h1>
 
-      <div className="grid md:grid-cols-[40%_60%] gap-8 min-w-0">
+      <div className="grid md:grid-cols-[40%_60%] gap-2 min-w-0">
         {/* Profile Section */}
         <div className="space-y-6">
           {/* Profile Card */}
@@ -462,15 +462,15 @@ export default function ProfilePage() {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <p className="font-mono text-sm text-white/80">ID: {qr.qrId}</p>
-                        
+
                         <div className="my-2 p-3 bg-white/5 rounded-lg border border-white/10">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <p className="text-xs text-white/60 mb-1">Vehicle Number</p>
                               {editingQrId === qr.qrId ? (
                                 <div className="flex items-center gap-2">
-                                  <input 
-                                    type="text" 
+                                  <input
+                                    type="text"
                                     value={editingVehicleNumber}
                                     onChange={(e) => setEditingVehicleNumber(e.target.value)}
                                     placeholder="Enter vehicle number"
@@ -489,11 +489,11 @@ export default function ProfilePage() {
                                   <p className="text-sm font-semibold tracking-wider">
                                     {qr.vehicleNumber || <span className="text-white/40 italic">Not set</span>}
                                   </p>
-                                  <button 
+                                  <button
                                     onClick={() => {
                                       setEditingQrId(qr.qrId);
                                       setEditingVehicleNumber(qr.vehicleNumber || '');
-                                    }} 
+                                    }}
                                     className="opacity-0 group-hover:opacity-100 transition-opacity text-white/60 hover:text-white"
                                   >
                                     <IoPencilOutline size={16} />
