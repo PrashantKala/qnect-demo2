@@ -141,7 +141,7 @@ export default function HomePage() {
             <img
               src="/payEveryYear.jpeg"
               alt="Privacy Protection"
-              className="w-full rounded-xl shadow-md"
+              className="w-full h-64 md:h-80 object-cover rounded-xl shadow-md"
             />
           </div>
 
@@ -157,7 +157,7 @@ export default function HomePage() {
             <img
               src="/sellMycar.jpeg"
               alt="Sell Car"
-              className="w-full rounded-xl shadow-md order-1 md:order-none"
+              className="w-full h-64 md:h-80 object-cover rounded-xl shadow-md order-1 md:order-none"
             />
             <div>
               <h3 className="text-2xl font-bold mb-3 text-white">
@@ -192,7 +192,7 @@ export default function HomePage() {
             <img
               src="/payEveryYear.jpeg"
               alt="Payment Info"
-              className="w-full rounded-xl shadow-md"
+              className="w-full h-64 md:h-80 object-cover rounded-xl shadow-md"
             />
           </div>
         </div>
