@@ -28,3 +28,7 @@ export const createSalesperson = (salespersonData) => api.post('/salespersons', 
 // --- User ---
 export const fetchUsers = () => api.get('/users');
 export const fetchUserDetail = (id) => api.get(`/users/${id}`);
+
+// --- Queries ---
+export const fetchQueries = () => api.get('/queries');
+export const updateQueryStatus = (id, status) => api.put(`/queries/${id}/status`, { status });

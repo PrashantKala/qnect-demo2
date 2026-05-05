@@ -43,6 +43,11 @@ export default function AdminLayout({ children }) {
                                 User Management
                             </Link>
                         </li>
+                        <li>
+                            <Link href="/admin/queries" className={getLinkClasses('/admin/queries')}>
+                                User Queries
+                            </Link>
+                        </li>
                     </ul>
                 </nav>
 
