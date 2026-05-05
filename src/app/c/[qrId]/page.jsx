@@ -55,8 +55,7 @@ export default function CallPage() {
     lastName: '',
     email: '',
     password: '',
-    mobileNumber: '',
-    vehicleNumber: ''
+    mobileNumber: ''
   });
   const [claimSubmitting, setClaimSubmitting] = useState(false);
   const [claimError, setClaimError] = useState('');
@@ -1463,21 +1462,6 @@ export default function CallPage() {
                     onChange={(e) => setClaimForm({ ...claimForm, mobileNumber: e.target.value })}
                     className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
                     placeholder="9876543210"
-                  />
-                </div>
-              </div>
-
-              {/* Vehicle Number */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Vehicle Number</label>
-                <div className="relative">
-                  <Car size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={claimForm.vehicleNumber}
-                    onChange={(e) => setClaimForm({ ...claimForm, vehicleNumber: e.target.value.toUpperCase() })}
-                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
-                    placeholder="MH 01 AB 1234"
                   />
                 </div>
               </div>
