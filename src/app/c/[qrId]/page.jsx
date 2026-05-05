@@ -4,14 +4,16 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import SimplePeer from 'simple-peer';
-import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X, MapPin } from 'lucide-react';
-import { fetchQRGuardians, sendEmergencyAlert, fetchQRInfo } from '../../../../lib/api';
+import { Phone, PhoneOff, Loader2, Bell, AlertTriangle, Camera, X, MapPin, CheckCircle2, Car, User, Mail, Lock, Smartphone, Eye, EyeOff } from 'lucide-react';
+import { fetchQRGuardians, sendEmergencyAlert, fetchQRInfo, claimQR } from '../../../../lib/api';
 import CallingScreen from '../../components/CallingScreen';
+import { useAuth } from '../../context/AuthContext';
 
 const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 export default function CallPage() {
   const params = useParams();
   const { qrId } = params;
+  const { loginWithToken } = useAuth();
 
   const [callStatus, setCallStatus] = useState('idle');
   const [activeCallTarget, setActiveCallTarget] = useState(null); // 'owner' | 'guardian'
@@ -45,6 +47,22 @@ export default function CallPage() {
   // Owner info state
   const [ownerInfo, setOwnerInfo] = useState(null);
   const [loadingOwnerInfo, setLoadingOwnerInfo] = useState(true);
+
+  // Self-registration (claim) state
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [claimForm, setClaimForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    mobileNumber: '',
+    vehicleNumber: ''
+  });
+  const [claimSubmitting, setClaimSubmitting] = useState(false);
+  const [claimError, setClaimError] = useState('');
+  const [claimSuccess, setClaimSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isExistingUser, setIsExistingUser] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
 
   const callStatusRef = useRef('idle'); // Ref to track callStatus for socket handlers
@@ -266,9 +284,14 @@ export default function CallPage() {
       try {
         const response = await fetchQRInfo(qrId);
         if (response.data.success) {
-          setOwnerInfo(response.data.data);
+          const data = response.data.data;
+          setOwnerInfo(data);
+          // Check if QR is available (not assigned) — show claim form
+          if (data.status === 'available' && !data.owner) {
+            setIsAvailable(true);
+          }
           // Check if QR is expired
-          if (response.data.data.expiry?.isExpired) {
+          if (data.expiry?.isExpired) {
             setIsExpired(true);
           }
         }
@@ -281,6 +304,28 @@ export default function CallPage() {
 
     loadOwnerInfo();
   }, [qrId]);
+
+  // Handle claim form submission
+  const handleClaimSubmit = async (e) => {
+    e.preventDefault();
+    setClaimError('');
+    setClaimSubmitting(true);
+
+    try {
+      const response = await claimQR(qrId, claimForm);
+      if (response.data.success) {
+        // Auto-login the user
+        loginWithToken(response.data.token);
+        setIsExistingUser(!response.data.message.includes('account created'));
+        setClaimSuccess(true);
+      }
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Failed to activate QR. Please try again.';
+      setClaimError(msg);
+    } finally {
+      setClaimSubmitting(false);
+    }
+  };
 
 
   useEffect(() => {
@@ -1200,6 +1245,274 @@ export default function CallPage() {
           <p className="text-gray-600 mb-8">
             This QR code has been deactivated by the owner.
           </p>
+        </div>
+      </main>
+    );
+  }
+
+  // ==========================================
+  // CLAIM SUCCESS SCREEN
+  // ==========================================
+  if (claimSuccess) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #0A2768 0%, #124B8C 40%, #1CB7D1 100%)' }}>
+        <div className="max-w-md w-full">
+          {/* Success Card */}
+          <div className="bg-white rounded-2xl shadow-2xl p-8 text-center relative overflow-hidden">
+            {/* Animated gradient top bar */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-qnect-gradient" />
+
+            {/* Animated checkmark */}
+            <div className="mx-auto w-24 h-24 rounded-full flex items-center justify-center mb-6 relative" style={{
+              background: 'linear-gradient(135deg, #22d3ee 0%, #0A2768 100%)',
+              animation: 'pulseGlow 2s ease-in-out infinite'
+            }}>
+              <CheckCircle2 size={48} className="text-white" strokeWidth={2.5} />
+            </div>
+
+            <h1 className="text-3xl font-bold mb-2" style={{
+              background: 'linear-gradient(90deg, #0A2768, #1CB7D1)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Activated!
+            </h1>
+
+            <p className="text-gray-600 mb-6">
+              {isExistingUser
+                ? 'QR linked to your existing Qnect account.'
+                : 'Your Qnect account has been created and QR is now active.'
+              }
+            </p>
+
+            {/* Status pills */}
+            <div className="flex justify-center gap-3 mb-8">
+              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                QR Active
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                <CheckCircle2 size={14} />
+                2 Year Validity
+              </span>
+            </div>
+
+            {/* What's next */}
+            <div className="bg-gray-50 rounded-xl p-5 mb-6 text-left">
+              <h3 className="font-bold text-gray-800 mb-3">What's Next?</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-sm font-bold text-blue-700">1</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Stick the QR on your vehicle</p>
+                    <p className="text-xs text-gray-500">Visible spot — windshield or dashboard</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-sm font-bold text-blue-700">2</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Download the Qnect App</p>
+                    <p className="text-xs text-gray-500">Sign in to receive calls & notifications</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-sm font-bold text-blue-700">3</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Add emergency contacts</p>
+                    <p className="text-xs text-gray-500">Set up guardians from your profile</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <a
+              href="/profile"
+              className="block w-full py-4 bg-qnect-gradient text-white border-2 border-white font-bold rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 text-center text-lg"
+            >
+              Go to My Profile
+            </a>
+
+            <p className="text-xs text-gray-400 mt-4">
+              You're now logged in. You can manage your QR from your profile.
+            </p>
+          </div>
+        </div>
+
+        {/* Pulse glow animation */}
+        <style jsx>{`
+          @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(28, 183, 209, 0.4); }
+            50% { box-shadow: 0 0 0 16px rgba(28, 183, 209, 0); }
+          }
+        `}</style>
+      </main>
+    );
+  }
+
+  // ==========================================
+  // CLAIM FORM SCREEN (for available/unassigned QRs)
+  // ==========================================
+  if (!loadingOwnerInfo && isAvailable) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #0A2768 0%, #124B8C 40%, #1CB7D1 100%)' }}>
+        <div className="max-w-md w-full">
+          {/* Claim Card */}
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-qnect-gradient px-6 py-8 text-center">
+              <div className="mx-auto w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center mb-4">
+                <Car size={32} className="text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-white mb-1">Activate Your QNect</h1>
+              <p className="text-white/80 text-sm">Enter your details to activate this QR code</p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleClaimSubmit} className="p-6 space-y-4">
+              {claimError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                  <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" />
+                  <span>{claimError}</span>
+                </div>
+              )}
+
+              {/* Name Row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">First Name *</label>
+                  <div className="relative">
+                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      required
+                      value={claimForm.firstName}
+                      onChange={(e) => setClaimForm({ ...claimForm, firstName: e.target.value })}
+                      className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
+                      placeholder="John"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Last Name</label>
+                  <input
+                    type="text"
+                    value={claimForm.lastName}
+                    onChange={(e) => setClaimForm({ ...claimForm, lastName: e.target.value })}
+                    className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Email Address *</label>
+                <div className="relative">
+                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="email"
+                    required
+                    value={claimForm.email}
+                    onChange={(e) => setClaimForm({ ...claimForm, email: e.target.value })}
+                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
+                    placeholder="john@example.com"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Password *</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={claimForm.password}
+                    onChange={(e) => setClaimForm({ ...claimForm, password: e.target.value })}
+                    className="w-full pl-9 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
+                    placeholder="Create a password"
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Used to login to your Qnect account</p>
+              </div>
+
+              {/* Mobile */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Mobile Number</label>
+                <div className="relative">
+                  <Smartphone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="tel"
+                    value={claimForm.mobileNumber}
+                    onChange={(e) => setClaimForm({ ...claimForm, mobileNumber: e.target.value })}
+                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
+                    placeholder="9876543210"
+                  />
+                </div>
+              </div>
+
+              {/* Vehicle Number */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Vehicle Number</label>
+                <div className="relative">
+                  <Car size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={claimForm.vehicleNumber}
+                    onChange={(e) => setClaimForm({ ...claimForm, vehicleNumber: e.target.value.toUpperCase() })}
+                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 outline-none transition-all text-sm bg-gray-50 focus:bg-white"
+                    placeholder="MH 01 AB 1234"
+                  />
+                </div>
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={claimSubmitting}
+                className="w-full py-4 bg-qnect-gradient text-white border-2 border-white font-bold rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg mt-2"
+              >
+                {claimSubmitting ? (
+                  <><Loader2 size={22} className="animate-spin" /> Activating...</>
+                ) : (
+                  <><CheckCircle2 size={22} /> Activate My QNect</>
+                )}
+              </button>
+
+              <p className="text-xs text-center text-gray-400 mt-2">
+                Already have an account? Use the same email to link this QR.
+              </p>
+            </form>
+          </div>
+
+          {/* Trust badges */}
+          <div className="flex justify-center gap-6 mt-6">
+            <div className="flex items-center gap-1.5 text-white/70 text-xs">
+              <Lock size={12} /> Secure
+            </div>
+            <div className="flex items-center gap-1.5 text-white/70 text-xs">
+              <CheckCircle2 size={12} /> Instant Activation
+            </div>
+            <div className="flex items-center gap-1.5 text-white/70 text-xs">
+              <Smartphone size={12} /> 2 Year Validity
+            </div>
+          </div>
         </div>
       </main>
     );
