@@ -12,7 +12,8 @@ import {
   resendQR,
   updateQRVehicleNumber,
   addGuardian,
-  deleteGuardian
+  deleteGuardian,
+  deleteAccount
 } from '../../../lib/api';
 import {
   IoCopy,
@@ -48,6 +49,10 @@ export default function ProfilePage() {
   // Guardian states
   const [manageGuardians, setManageGuardians] = useState(false);
   const [newGuardian, setNewGuardian] = useState({ name: '', email: '', phoneNumber: '', relation: '' });
+
+  // Delete account states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleResendQR = async (qrId) => {
     try {
@@ -159,6 +164,19 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error deleting guardian:', error);
       alert('Failed to delete guardian');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+      logout();
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Failed to delete account. Please try again.');
+      setIsDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -285,9 +303,14 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <button onClick={logout} className="w-full text-center px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition">
-              Logout
-            </button>
+            <div className="flex gap-2">
+              <button onClick={logout} className="flex-1 text-center px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition">
+                Logout
+              </button>
+              <button onClick={() => setShowDeleteModal(true)} className="flex-1 text-center px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition font-semibold">
+                Delete Account
+              </button>
+            </div>
           </div>
 
           {/* Address Card (moved just after profile) */}
@@ -568,6 +591,38 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Your Account?</h3>
+            <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+              This action is <strong>permanent and cannot be undone</strong>. All your data, QR codes, payment history, messages, and associated information will be permanently deleted.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
