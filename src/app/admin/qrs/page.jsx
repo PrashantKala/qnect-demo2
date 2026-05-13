@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { fetchQRCodes, generateQRCodes, fetchSalespersons } from '../api/adminApi';
+import { fetchQRCodes, generateQRCodes, fetchSalespersons, fetchQRBatches, downloadQRSticker, downloadQRBatchZip } from '../api/adminApi';
 
 export default function QRManagementPage() {
     const [qrCodes, setQrCodes] = useState([]);
@@ -10,11 +10,17 @@ export default function QRManagementPage() {
     const [salespersons, setSalespersons] = useState([]);
     const [selectedSalespersonId, setSelectedSalespersonId] = useState('');
     const [previewQrId, setPreviewQrId] = useState(null);
+    const [activeTab, setActiveTab] = useState('individual');
+    const [qrBatches, setQrBatches] = useState([]);
 
     const fetchAndSetQRCodes = async () => {
         try {
-            const response = await fetchQRCodes();
-            setQrCodes(response.data);
+            const [qrRes, batchRes] = await Promise.all([
+                fetchQRCodes(),
+                fetchQRBatches()
+            ]);
+            setQrCodes(qrRes.data);
+            setQrBatches(batchRes.data);
             setError(null);
         } catch (err) {
             setError("Could not load data from the server.");
@@ -57,6 +63,36 @@ export default function QRManagementPage() {
             </div>
         );
     }
+
+    const handleDownloadSticker = async (qrId) => {
+        try {
+            const response = await downloadQRSticker(qrId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `qr_sticker_${qrId.substring(0,8)}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            alert('Failed to download sticker');
+        }
+    };
+
+    const handleDownloadBatchZip = async (batchId) => {
+        try {
+            const response = await downloadQRBatchZip(batchId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `qr_batch_${batchId.substring(0,8)}.zip`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            alert('Failed to download batch ZIP');
+        }
+    };
 
     const qrUrl = previewQrId ? `${process.env.NEXT_PUBLIC_SITE_URL}/c/${previewQrId}` : '';
 
@@ -105,55 +141,118 @@ export default function QRManagementPage() {
                 </form>
             </div>
 
+            <div className="mb-6 flex space-x-4 border-b border-gray-200">
+                <button
+                    onClick={() => setActiveTab('individual')}
+                    className={`pb-2 px-1 text-lg font-medium transition-colors ${activeTab === 'individual' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                    Individual QR Codes
+                </button>
+                <button
+                    onClick={() => setActiveTab('bulk')}
+                    className={`pb-2 px-1 text-lg font-medium transition-colors ${activeTab === 'bulk' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                    Bulk History
+                </button>
+            </div>
+
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-800">Existing QR Codes ({qrCodes.length})</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">
+                        {activeTab === 'individual' ? `Existing QR Codes (${qrCodes.length})` : `Bulk Generations (${qrBatches.length})`}
+                    </h2>
                     {error && <p className="mt-2 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{error}</p>}
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR ID (UUID)</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned SP</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To User</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold By</th>
-                                <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">View</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {qrCodes.map((code) => (
-                                <tr key={code._id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{code.qrId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${code.status === 'activated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                            }`}>
-                                            {code.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedSalespersonId ? 'Yes' : <span className="text-gray-400 italic">No</span>}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedToUser?.email || <span className="text-gray-400 italic">Unassigned</span>}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.soldBySalesperson?.email || code.soldBySalesperson?._id || <span className="text-gray-400 italic">Not Sold</span>}</td>
-                                    <td className="px-4 py-4 whitespace-nowrap text-center">
-                                        <button
-                                            onClick={() => setPreviewQrId(code.qrId)}
-                                            className="text-gray-400 hover:text-blue-600 transition-colors"
-                                            title="View QR Code"
-                                        >
-                                            <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {qrCodes.length === 0 && (
+                    {activeTab === 'individual' ? (
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No QR codes found. Generate some above.</td>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR ID (UUID)</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned SP</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To User</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold By</th>
+                                    <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {qrCodes.map((code) => (
+                                    <tr key={code._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{code.qrId}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${code.status === 'activated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                {code.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedSalespersonId ? 'Yes' : <span className="text-gray-400 italic">No</span>}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedToUser?.email || <span className="text-gray-400 italic">Unassigned</span>}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.soldBySalesperson?.email || code.soldBySalesperson?._id || <span className="text-gray-400 italic">Not Sold</span>}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-center flex justify-center items-center space-x-3">
+                                            <button
+                                                onClick={() => setPreviewQrId(code.qrId)}
+                                                className="text-gray-400 hover:text-blue-600 transition-colors"
+                                                title="View QR Code"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDownloadSticker(code.qrId)}
+                                                className="text-gray-400 hover:text-green-600 transition-colors"
+                                                title="Download Sticker"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {qrCodes.length === 0 && (
+                                    <tr>
+                                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No QR codes found. Generate some above.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch ID</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned SP</th>
+                                    <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {qrBatches.map((batch) => (
+                                    <tr key={batch._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{batch._id}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(batch.createdAt).toLocaleDateString()} {new Date(batch.createdAt).toLocaleTimeString()}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{batch.count}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{batch.assignedSalesperson?.email || batch.assignedSalespersonId || <span className="text-gray-400 italic">None</span>}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                                            <button
+                                                onClick={() => handleDownloadBatchZip(batch._id)}
+                                                className="inline-flex items-center space-x-1 text-sm font-medium text-green-600 hover:text-green-800 transition-colors"
+                                                title="Download ZIP"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                                <span>Download ZIP</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {qrBatches.length === 0 && (
+                                    <tr>
+                                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">No bulk generations found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
 

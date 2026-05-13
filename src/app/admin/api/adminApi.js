@@ -19,6 +19,9 @@ api.interceptors.request.use((config) => {
 // --- QR ---
 export const fetchQRCodes = () => api.get('/qrs');
 export const generateQRCodes = (quantity, assignedSalespersonId) => api.post('/qrs/generate', { quantity, assignedSalespersonId });
+export const fetchQRBatches = () => api.get('/qrs/batches');
+export const downloadQRSticker = (qrId) => api.get(`/qrs/${qrId}/download`, { responseType: 'blob' });
+export const downloadQRBatchZip = (batchId) => api.get(`/qrs/batches/${batchId}/download`, { responseType: 'blob' });
 
 // --- Salesperson ---
 export const fetchSalespersons = () => api.get('/salespersons');
