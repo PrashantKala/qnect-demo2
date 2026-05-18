@@ -65,6 +65,99 @@ const SuccessPopup = ({ qrId, onSkip }) => {
   );
 };
 
+const AddressCollectionPopup = ({ onSave, onCancel }) => {
+  const [address, setAddress] = useState({
+    houseNumber: '',
+    streetName: '',
+    landmark: '',
+    city: '',
+    state: '',
+    pincode: '',
+    country: 'India',
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    // Validate required fields
+    if (!address.houseNumber.trim() || !address.streetName.trim() || !address.city.trim() || !address.state.trim() || !address.pincode.trim()) {
+      setError('Please fill in all required fields: House No, Street, City, State, and Pincode.');
+      return;
+    }
+
+    setIsSaving(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('qnect_token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me/address`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(address)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save address');
+      }
+      
+      onSave(); // Proceed to payment
+    } catch (err) {
+      console.error(err);
+      setError('An error occurred while saving your address.');
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto pt-20 pb-10">
+      <div className="bg-white p-6 md:p-8 rounded-lg shadow-xl max-w-md w-full mx-4 my-auto">
+        <h2 className="text-2xl font-bold text-primary-blue mb-2">Delivery Address Required</h2>
+        <p className="text-sm text-text-secondary mb-6">Since we deliver the physical QR code to your doorstep, please provide your delivery address.</p>
+        
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+        <div className="space-y-4 mb-6 text-left">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">House/Flat No. *</label>
+            <input type="text" value={address.houseNumber} onChange={(e) => setAddress({...address, houseNumber: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="House / Flat No." />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Street Name *</label>
+            <input type="text" value={address.streetName} onChange={(e) => setAddress({...address, streetName: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Street / Locality" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Landmark (Optional)</label>
+            <input type="text" value={address.landmark} onChange={(e) => setAddress({...address, landmark: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Near Hospital, etc." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">City *</label>
+              <input type="text" value={address.city} onChange={(e) => setAddress({...address, city: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="City" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">State *</label>
+              <input type="text" value={address.state} onChange={(e) => setAddress({...address, state: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="State" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Pincode *</label>
+            <input type="text" value={address.pincode} onChange={(e) => setAddress({...address, pincode: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Pincode" />
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <button onClick={onCancel} className="flex-1 bg-gray-100 text-gray-700 py-2 rounded font-bold hover:bg-gray-200 transition">Cancel</button>
+          <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-qnect-gradient text-white border-2 border-white shadow-md py-2 rounded font-bold hover:opacity-90 hover:shadow-lg transition">
+            {isSaving ? 'Saving...' : 'Save & Continue'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function OrderQRPage() {
   const { userToken, isLoading } = useAuth();
   const router = useRouter();
@@ -73,12 +166,43 @@ export default function OrderQRPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [purchasedQrId, setPurchasedQrId] = useState(null);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !userToken) {
       router.replace('/login?redirect=/order-qr');
+    } else if (userToken && !userProfile) {
+      // Fetch user profile to check if address is filled
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${userToken}`
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        setUserProfile(data);
+      })
+      .catch(err => console.error("Failed to fetch profile:", err));
     }
   }, [userToken, isLoading, router]);
+
+  const initiatePurchaseFlow = () => {
+    // Check if address is filled
+    if (userProfile && userProfile.address) {
+      const { houseNumber, streetName, city, state, pincode } = userProfile.address;
+      if (!houseNumber || !streetName || !city || !state || !pincode) {
+        setShowAddressModal(true);
+        return;
+      }
+    } else {
+      setShowAddressModal(true);
+      return;
+    }
+    
+    // Address is complete, proceed to purchase
+    handlePurchase();
+  };
 
   const handlePurchase = async () => {
     if (isProcessing || !razorpayLoaded) return;
@@ -187,6 +311,19 @@ export default function OrderQRPage() {
       />
 
       {showSuccess && <SuccessPopup qrId={purchasedQrId} onSkip={() => router.push('/profile')} />}
+      {showAddressModal && (
+        <AddressCollectionPopup 
+          onCancel={() => setShowAddressModal(false)} 
+          onSave={() => {
+            setShowAddressModal(false);
+            // Fetch updated profile so it's cached, and proceed to payment
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+              headers: { 'Authorization': `Bearer ${userToken}` }
+            }).then(res => res.json()).then(data => setUserProfile(data));
+            handlePurchase();
+          }} 
+        />
+      )}
       <div className="grid md:grid-cols-2 gap-12 items-start">
 
         {/* Benefits Section */}
@@ -238,7 +375,7 @@ export default function OrderQRPage() {
 
           <div className="text-center pt-4">
             <button
-              onClick={handlePurchase}
+              onClick={initiatePurchaseFlow}
               disabled={isProcessing || showSuccess || !razorpayLoaded}
               className={`w-full inline-block px-10 py-4 text-lg font-bold rounded-lg border-2 shadow-md transition-all duration-300
                 ${isProcessing || showSuccess || !razorpayLoaded
