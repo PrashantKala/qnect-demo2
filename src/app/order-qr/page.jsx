@@ -65,15 +65,15 @@ const SuccessPopup = ({ qrId, onSkip }) => {
   );
 };
 
-const AddressCollectionPopup = ({ onSave, onCancel }) => {
+const AddressCollectionPopup = ({ onSave, onCancel, initialAddress }) => {
   const [address, setAddress] = useState({
-    houseNumber: '',
-    streetName: '',
-    landmark: '',
-    city: '',
-    state: '',
-    pincode: '',
-    country: 'India',
+    houseNumber: initialAddress?.houseNumber || '',
+    streetName: initialAddress?.streetName || '',
+    landmark: initialAddress?.landmark || '',
+    city: initialAddress?.city || '',
+    state: initialAddress?.state || '',
+    pincode: initialAddress?.pincode || '',
+    country: initialAddress?.country || 'India',
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -313,6 +313,7 @@ export default function OrderQRPage() {
       {showSuccess && <SuccessPopup qrId={purchasedQrId} onSkip={() => router.push('/profile')} />}
       {showAddressModal && (
         <AddressCollectionPopup 
+          initialAddress={userProfile?.address}
           onCancel={() => setShowAddressModal(false)} 
           onSave={() => {
             setShowAddressModal(false);
