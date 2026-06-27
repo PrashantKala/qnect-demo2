@@ -4,13 +4,17 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { useAuth } from '../context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight, Mail, ArrowLeft } from 'lucide-react';
 
 function LoginForm() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState({ type: '', text: '' });
   const { login, loginWithToken } = useAuth();
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -78,6 +82,30 @@ function LoginForm() {
       setError('Invalid email/phone number or password. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) return;
+    setForgotLoading(true);
+    setForgotMessage({ type: '', text: '' });
+    try {
+      const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setForgotMessage({ type: 'success', text: data.message });
+      } else {
+        setForgotMessage({ type: 'error', text: data.message || 'Something went wrong.' });
+      }
+    } catch (err) {
+      setForgotMessage({ type: 'error', text: 'Network error. Please try again.' });
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -154,6 +182,15 @@ function LoginForm() {
                 placeholder="••••••••"
                 className="block w-full border border-gray-300 rounded-xl shadow-sm p-3 focus:ring-2 focus:ring-accent-cyan/30 focus:border-accent-cyan transition-all"
               />
+              <div className="text-right mt-1">
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotPassword(true); setForgotMessage({ type: '', text: '' }); }}
+                  className="text-sm text-primary-blue hover:text-accent-cyan font-medium transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
             </div>
             <div className="pt-2">
               <button
@@ -166,6 +203,76 @@ function LoginForm() {
               </button>
             </div>
           </form>
+
+          {/* Forgot Password Modal Overlay */}
+          {showForgotPassword && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowForgotPassword(false)}>
+              <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => setShowForgotPassword(false)}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  ✕
+                </button>
+
+                <div className="text-center mb-6">
+                  <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Mail size={24} className="text-primary-blue" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-primary-blue">Forgot Password?</h2>
+                  <p className="text-sm text-gray-500 mt-1">Enter your email and we&apos;ll send you a reset link</p>
+                </div>
+
+                {forgotMessage.text && (
+                  <div className={`rounded-lg p-3 mb-4 border ${
+                    forgotMessage.type === 'success'
+                      ? 'bg-green-50 border-green-200'
+                      : 'bg-red-50 border-red-200'
+                  }`}>
+                    <p className={`text-sm text-center ${
+                      forgotMessage.type === 'success' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {forgotMessage.text}
+                    </p>
+                  </div>
+                )}
+
+                {forgotMessage.type !== 'success' && (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div>
+                      <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-600 mb-1">Email Address</label>
+                      <input
+                        type="email"
+                        id="forgot-email"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        required
+                        placeholder="you@example.com"
+                        className="block w-full border border-gray-300 rounded-xl shadow-sm p-3 focus:ring-2 focus:ring-accent-cyan/30 focus:border-accent-cyan transition-all"
+                        autoFocus
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="w-full flex items-center justify-center gap-2 px-8 py-3 bg-qnect-gradient text-white font-bold rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {forgotLoading ? <Loader2 size={18} className="animate-spin" /> : <Mail size={18} />}
+                      {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+                    </button>
+                  </form>
+                )}
+
+                <button
+                  onClick={() => setShowForgotPassword(false)}
+                  className="w-full flex items-center justify-center gap-2 mt-4 text-sm text-gray-500 hover:text-primary-blue transition-colors"
+                >
+                  <ArrowLeft size={16} />
+                  Back to Login
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Sign up link */}
           <p className="text-center text-sm text-text-secondary mt-6">
