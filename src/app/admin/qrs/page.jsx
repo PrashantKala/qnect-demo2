@@ -13,6 +13,7 @@ export default function QRManagementPage() {
     const [activeTab, setActiveTab] = useState('individual');
     const [qrBatches, setQrBatches] = useState([]);
     const [statusFilter, setStatusFilter] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const fetchAndSetQRCodes = async () => {
         try {
@@ -112,8 +113,26 @@ export default function QRManagementPage() {
     const qrUrl = previewQrId ? `${process.env.NEXT_PUBLIC_SITE_URL}/c/${previewQrId}` : '';
 
     const filteredQRCodes = qrCodes.filter(code => {
-        if (statusFilter === 'All') return true;
-        return code.status.toLowerCase() === statusFilter.toLowerCase();
+        // Status Filter
+        let matchesStatus = true;
+        if (statusFilter !== 'All') {
+            matchesStatus = code.status.toLowerCase() === statusFilter.toLowerCase();
+        }
+
+        // Search Filter
+        let matchesSearch = true;
+        if (searchQuery.trim() !== '') {
+            const query = searchQuery.toLowerCase();
+            const qrIdMatch = code.qrId?.toLowerCase().includes(query);
+            const emailMatch = code.assignedToUser?.email?.toLowerCase().includes(query);
+            const firstNameMatch = code.assignedToUser?.firstName?.toLowerCase().includes(query);
+            const lastNameMatch = code.assignedToUser?.lastName?.toLowerCase().includes(query);
+            const nameMatch = code.assignedToUser?.name?.toLowerCase().includes(query);
+            
+            matchesSearch = !!(qrIdMatch || emailMatch || firstNameMatch || lastNameMatch || nameMatch);
+        }
+
+        return matchesStatus && matchesSearch;
     });
 
     return (
@@ -182,19 +201,33 @@ export default function QRManagementPage() {
                         {activeTab === 'individual' ? `Existing QR Codes (${filteredQRCodes.length})` : `Bulk Generations (${qrBatches.length})`}
                     </h2>
                     {activeTab === 'individual' && (
-                        <div className="mt-4 flex items-center">
-                            <label htmlFor="statusFilter" className="mr-2 text-sm font-medium text-gray-700">Filter by Status:</label>
-                            <select
-                                id="statusFilter"
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="border border-gray-300 rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                            >
-                                <option value="All">All</option>
-                                <option value="Available">Available</option>
-                                <option value="Activated">Sold / Activated</option>
-                                <option value="Disabled">Disabled</option>
-                            </select>
+                        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="flex-1 max-w-md relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Search by QR ID or Username..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                />
+                            </div>
+                            <div className="flex items-center">
+                                <label htmlFor="statusFilter" className="mr-2 text-sm font-medium text-gray-700">Filter:</label>
+                                <select
+                                    id="statusFilter"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="border border-gray-300 rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                >
+                                    <option value="All">All</option>
+                                    <option value="Available">Available</option>
+                                    <option value="Activated">Sold / Activated</option>
+                                    <option value="Disabled">Disabled</option>
+                                </select>
+                            </div>
                         </div>
                     )}
                     {error && <p className="mt-2 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{error}</p>}
