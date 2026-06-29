@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { fetchQRCodes, generateQRCodes, fetchSalespersons, fetchQRBatches, downloadQRSticker, downloadQRBatchZip } from '../api/adminApi';
+import { fetchQRCodes, generateQRCodes, fetchSalespersons, fetchQRBatches, downloadQRSticker, downloadQRBatchZip, resetQRCode } from '../api/adminApi';
 
 export default function QRManagementPage() {
     const [qrCodes, setQrCodes] = useState([]);
@@ -12,6 +12,7 @@ export default function QRManagementPage() {
     const [previewQrId, setPreviewQrId] = useState(null);
     const [activeTab, setActiveTab] = useState('individual');
     const [qrBatches, setQrBatches] = useState([]);
+    const [statusFilter, setStatusFilter] = useState('All');
 
     const fetchAndSetQRCodes = async () => {
         try {
@@ -94,7 +95,26 @@ export default function QRManagementPage() {
         }
     };
 
+    const handleResetQR = async (qrId) => {
+        if (!window.confirm("Are you sure you want to unlink this QR code from its user and salesperson? It will become 'Available' again.")) {
+            return;
+        }
+        setIsLoading(true);
+        try {
+            await resetQRCode(qrId);
+            await fetchAndSetQRCodes();
+        } catch (err) {
+            alert('Failed to reset QR code');
+            setIsLoading(false);
+        }
+    };
+
     const qrUrl = previewQrId ? `${process.env.NEXT_PUBLIC_SITE_URL}/c/${previewQrId}` : '';
+
+    const filteredQRCodes = qrCodes.filter(code => {
+        if (statusFilter === 'All') return true;
+        return code.status.toLowerCase() === statusFilter.toLowerCase();
+    });
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -159,8 +179,24 @@ export default function QRManagementPage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6 border-b border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-800">
-                        {activeTab === 'individual' ? `Existing QR Codes (${qrCodes.length})` : `Bulk Generations (${qrBatches.length})`}
+                        {activeTab === 'individual' ? `Existing QR Codes (${filteredQRCodes.length})` : `Bulk Generations (${qrBatches.length})`}
                     </h2>
+                    {activeTab === 'individual' && (
+                        <div className="mt-4 flex items-center">
+                            <label htmlFor="statusFilter" className="mr-2 text-sm font-medium text-gray-700">Filter by Status:</label>
+                            <select
+                                id="statusFilter"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="border border-gray-300 rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            >
+                                <option value="All">All</option>
+                                <option value="Available">Available</option>
+                                <option value="Activated">Sold / Activated</option>
+                                <option value="Disabled">Disabled</option>
+                            </select>
+                        </div>
+                    )}
                     {error && <p className="mt-2 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{error}</p>}
                 </div>
 
@@ -178,7 +214,7 @@ export default function QRManagementPage() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {qrCodes.map((code) => (
+                                {filteredQRCodes.map((code) => (
                                     <tr key={code._id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{code.qrId}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -189,7 +225,11 @@ export default function QRManagementPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedSalespersonId ? 'Yes' : <span className="text-gray-400 italic">No</span>}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.assignedToUser?.email || <span className="text-gray-400 italic">Unassigned</span>}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{code.soldBySalesperson?.email || code.soldBySalesperson?._id || <span className="text-gray-400 italic">Not Sold</span>}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {code.soldBySalesperson?.email || code.soldBySalesperson?._id || (
+                                                code.assignedToUser ? <span className="text-blue-500 font-medium">Self-Registered</span> : <span className="text-gray-400 italic">Not Sold</span>
+                                            )}
+                                        </td>
                                         <td className="px-4 py-4 whitespace-nowrap text-center flex justify-center items-center space-x-3">
                                             <button
                                                 onClick={() => setPreviewQrId(code.qrId)}
@@ -205,10 +245,19 @@ export default function QRManagementPage() {
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                             </button>
+                                            {code.status !== 'available' && (
+                                                <button
+                                                    onClick={() => handleResetQR(code.qrId)}
+                                                    className="text-gray-400 hover:text-red-600 transition-colors"
+                                                    title="Unlink / Reset QR"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
-                                {qrCodes.length === 0 && (
+                                {filteredQRCodes.length === 0 && (
                                     <tr>
                                         <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No QR codes found. Generate some above.</td>
                                     </tr>

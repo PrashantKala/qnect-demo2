@@ -22,6 +22,7 @@ export const generateQRCodes = (quantity, assignedSalespersonId) => api.post('/q
 export const fetchQRBatches = () => api.get('/qrs/batches');
 export const downloadQRSticker = (qrId) => api.get(`/qrs/${qrId}/download`, { responseType: 'blob' });
 export const downloadQRBatchZip = (batchId) => api.get(`/qrs/batches/${batchId}/download`, { responseType: 'blob' });
+export const resetQRCode = (qrId) => api.post(`/qrs/${qrId}/reset`);
 
 // --- Salesperson ---
 export const fetchSalespersons = () => api.get('/salespersons');
