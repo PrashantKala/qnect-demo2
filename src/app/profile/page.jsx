@@ -435,6 +435,8 @@ export default function ProfilePage() {
             <div className="bg-white/20 rounded-lg p-6 text-center">
               <p className="text-4xl font-bold mb-2">{profile?.wallet?.credits || 0}</p>
               <p className="text-white/80">Credits Available</p>
+              <p className="text-sm text-white/60 mt-2">= ₹{profile?.wallet?.credits || 0} discount • 1 Credit = ₹1</p>
+              <p className="text-xs text-white/50 mt-1">Use on QR purchase or renewal</p>
             </div>
           </div>
 
@@ -455,7 +457,7 @@ export default function ProfilePage() {
               </button>
             </div>
             <p className="text-sm text-white/80 mt-2">
-              Share this code with friends to earn 50 credits when they sign up!
+              Share this code with friends to earn ₹50 in discount credits when they sign up! (1 Credit = ₹1)
             </p>
           </div>
         </div>

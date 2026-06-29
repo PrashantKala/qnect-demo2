@@ -45,12 +45,13 @@ export function Footer() {
           <h3 className="text-2xl font-bold text-white mb-4 relative inline-block after:content-[''] after:block after:w-16 after:h-[3px] after:bg-gradient-to-r after:from-[#3BDAD7] after:to-[#26BCCA] after:mt-2">
             Refer a Friend
           </h3>
-          <p className="text-gray-400 mb-3">Love QNect? Share it with friends and earn rewards. Our referral program is coming soon!</p>
+          <p className="text-gray-400 mb-3">Love QNect? Share it with friends and earn real discounts!</p>
           <ul className="space-y-2 text-lg text-gray-300">
-            <li>✓ Share your unique link</li>
-            <li>✓ Your friend gets 10% off</li>
+            <li>✓ Share your unique referral code</li>
+            <li>✓ Your friend gets ₹50 in credits</li>
             <li>✓ You get ₹50 in credits</li>
-            <li>✓ Unlimited rewards!</li>
+            <li>✓ 1 Credit = ₹1 discount on purchases</li>
+            <li>✓ Unlimited referrals!</li>
           </ul>
         </div>
 

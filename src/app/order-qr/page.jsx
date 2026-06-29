@@ -168,6 +168,7 @@ export default function OrderQRPage() {
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [useCredits, setUseCredits] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !userToken) {
@@ -222,11 +223,37 @@ export default function OrderQRPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ useCredits }),
       });
       const orderData = await orderResponse.json();
 
       if (!orderResponse.ok) {
         throw new Error(orderData.message || 'Failed to create payment order');
+      }
+
+      // Check if credits cover the full amount
+      if (orderData.fullCreditPurchase) {
+        const creditResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/purchase-with-credits`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const creditData = await creditResponse.json();
+
+        if (!creditResponse.ok) {
+          throw new Error(creditData.message || 'Credits purchase failed');
+        }
+
+        setPurchasedQrId(creditData.qr.qrId);
+        setShowSuccess(true);
+        setIsProcessing(false);
+        // Refresh profile to update credit balance
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(res => res.json()).then(data => setUserProfile(data));
+        return;
       }
 
       // Step 2: Open Razorpay checkout
@@ -262,14 +289,16 @@ export default function OrderQRPage() {
             setPurchasedQrId(verifyData.qr.qrId);
             setShowSuccess(true);
             setIsProcessing(false);
+            // Refresh profile to update credit balance
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => res.json()).then(data => setUserProfile(data));
           } catch (verifyError) {
             setError(verifyError.message);
             setIsProcessing(false);
           }
         },
-        prefill: {
-          // Will be auto-filled from Razorpay account
-        },
+        prefill: {},
         theme: {
           color: '#0B2447',
         },
@@ -365,11 +394,67 @@ export default function OrderQRPage() {
         {/* Order Form */}
         <div className="bg-qnect-gradient p-8 rounded-lg shadow-lg text-white">
           <h1 className="text-3xl font-bold mb-6 text-center">Confirm Your Order</h1>
-          <div className="my-6 p-4 bg-white/10 rounded-lg">
+          <div className="my-6 p-4 bg-white/10 rounded-lg space-y-3">
             <div className="flex justify-between items-center">
               <span>QNect Digital QR (2 Years)</span>
-              <span className="text-xl font-bold">₹249 + GST</span>
+              <span className="text-xl font-bold">₹249</span>
             </div>
+
+            {/* Credit Application Section */}
+            {userProfile?.wallet?.credits > 0 && (
+              <div className="bg-white/10 rounded-lg p-3 space-y-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={useCredits}
+                    onChange={(e) => setUseCredits(e.target.checked)}
+                    className="w-5 h-5 rounded accent-cyan-400"
+                  />
+                  <span className="font-semibold">
+                    Apply {Math.min(userProfile.wallet.credits, 249)} credits (₹{Math.min(userProfile.wallet.credits, 249)} off)
+                  </span>
+                </label>
+                <p className="text-xs text-white/60">You have {userProfile.wallet.credits} credits (₹{userProfile.wallet.credits}). 1 Credit = ₹1</p>
+              </div>
+            )}
+
+            {/* Price Breakdown */}
+            {useCredits && userProfile?.wallet?.credits > 0 && (() => {
+              const creditsToUse = Math.min(userProfile.wallet.credits, 249);
+              const discountedBase = 249 - creditsToUse;
+              const gst = (discountedBase * 0.18).toFixed(2);
+              const total = (discountedBase * 1.18).toFixed(2);
+              return (
+                <div className="border-t border-white/20 pt-2 space-y-1 text-sm">
+                  <div className="flex justify-between text-green-300">
+                    <span>Credit Discount</span>
+                    <span>-₹{creditsToUse}</span>
+                  </div>
+                  <div className="flex justify-between text-white/70">
+                    <span>GST (18%)</span>
+                    <span>₹{gst}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg pt-1 border-t border-white/20">
+                    <span>Total</span>
+                    <span>{Number(total) <= 0 ? 'FREE' : `₹${total}`}</span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Original total when no credits */}
+            {(!useCredits || !userProfile?.wallet?.credits) && (
+              <div className="border-t border-white/20 pt-2">
+                <div className="flex justify-between text-sm text-white/70">
+                  <span>GST (18%)</span>
+                  <span>₹{(249 * 0.18).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg pt-1">
+                  <span>Total</span>
+                  <span>₹{(249 * 1.18).toFixed(2)}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {error && <p className="text-red-300 text-center mb-4">{error}</p>}
@@ -427,8 +512,16 @@ export default function OrderQRPage() {
                 </span>
               ) : !razorpayLoaded ? (
                 'Loading Payment...'
+              ) : useCredits && userProfile?.wallet?.credits >= 249 ? (
+                'Get QR Free with Credits'
               ) : (
-                'Pay ₹249 + GST & Get QR via Email'
+                (() => {
+                  if (useCredits && userProfile?.wallet?.credits > 0) {
+                    const total = ((249 - Math.min(userProfile.wallet.credits, 249)) * 1.18).toFixed(2);
+                    return `Pay ₹${total} & Get QR via Email`;
+                  }
+                  return 'Pay ₹249 + GST & Get QR via Email';
+                })()
               )}
             </button>
           </div>

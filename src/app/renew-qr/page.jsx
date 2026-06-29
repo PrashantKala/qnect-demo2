@@ -14,6 +14,8 @@ function RenewQRContent() {
     const [error, setError] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
+    const [useCredits, setUseCredits] = useState(false);
 
     useEffect(() => {
         if (!isLoading && !userToken) {
@@ -21,6 +23,14 @@ function RenewQRContent() {
         }
         if (!isLoading && !qrId) {
             router.replace('/profile');
+        }
+        // Fetch user profile for credit balance
+        if (userToken && !userProfile) {
+            const token = localStorage.getItem('qnect_token');
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => res.json()).then(data => setUserProfile(data))
+              .catch(err => console.error('Failed to fetch profile:', err));
         }
     }, [userToken, isLoading, router, qrId]);
 
@@ -42,12 +52,34 @@ function RenewQRContent() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ qrId }),
+                body: JSON.stringify({ qrId, useCredits }),
             });
             const orderData = await orderResponse.json();
 
             if (!orderResponse.ok) {
                 throw new Error(orderData.message || 'Failed to create renewal order');
+            }
+
+            // Check if credits cover the full amount
+            if (orderData.fullCreditPurchase) {
+                const creditResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/renew-with-credits`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ qrId }),
+                });
+                const creditData = await creditResponse.json();
+
+                if (!creditResponse.ok) {
+                    throw new Error(creditData.message || 'Credits renewal failed');
+                }
+
+                setShowSuccess(true);
+                setIsProcessing(false);
+                setTimeout(() => { router.push('/profile'); }, 3000);
+                return;
             }
 
             // Step 2: Open Razorpay checkout
@@ -164,11 +196,66 @@ function RenewQRContent() {
                                 <p className="font-mono text-sm break-all">{qrId}</p>
                             </div>
 
-                            <div className="bg-white/10 rounded-lg p-4 mb-6">
+                            <div className="bg-white/10 rounded-lg p-4 mb-6 space-y-3">
                                 <div className="flex justify-between items-center">
                                     <span>Renewal (2 Years)</span>
-                                    <span className="text-xl font-bold">₹249 + GST</span>
+                                    <span className="text-xl font-bold">₹249</span>
                                 </div>
+
+                                {/* Credit Application */}
+                                {userProfile?.wallet?.credits > 0 && (
+                                    <div className="bg-white/10 rounded-lg p-3 space-y-2">
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={useCredits}
+                                                onChange={(e) => setUseCredits(e.target.checked)}
+                                                className="w-5 h-5 rounded accent-cyan-400"
+                                            />
+                                            <span className="font-semibold">
+                                                Apply {Math.min(userProfile.wallet.credits, 249)} credits (₹{Math.min(userProfile.wallet.credits, 249)} off)
+                                            </span>
+                                        </label>
+                                        <p className="text-xs text-white/60">You have {userProfile.wallet.credits} credits (₹{userProfile.wallet.credits}). 1 Credit = ₹1</p>
+                                    </div>
+                                )}
+
+                                {/* Price Breakdown */}
+                                {useCredits && userProfile?.wallet?.credits > 0 && (() => {
+                                    const creditsToUse = Math.min(userProfile.wallet.credits, 249);
+                                    const discountedBase = 249 - creditsToUse;
+                                    const gst = (discountedBase * 0.18).toFixed(2);
+                                    const total = (discountedBase * 1.18).toFixed(2);
+                                    return (
+                                        <div className="border-t border-white/20 pt-2 space-y-1 text-sm">
+                                            <div className="flex justify-between text-green-300">
+                                                <span>Credit Discount</span>
+                                                <span>-₹{creditsToUse}</span>
+                                            </div>
+                                            <div className="flex justify-between text-white/70">
+                                                <span>GST (18%)</span>
+                                                <span>₹{gst}</span>
+                                            </div>
+                                            <div className="flex justify-between font-bold text-lg pt-1 border-t border-white/20">
+                                                <span>Total</span>
+                                                <span>{Number(total) <= 0 ? 'FREE' : `₹${total}`}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {(!useCredits || !userProfile?.wallet?.credits) && (
+                                    <div className="border-t border-white/20 pt-2">
+                                        <div className="flex justify-between text-sm text-white/70">
+                                            <span>GST (18%)</span>
+                                            <span>₹{(249 * 0.18).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between font-bold text-lg pt-1">
+                                            <span>Total</span>
+                                            <span>₹{(249 * 1.18).toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {error && <p className="text-red-300 text-center mb-4">{error}</p>}
@@ -192,9 +279,15 @@ function RenewQRContent() {
                                     </span>
                                 ) : !razorpayLoaded ? (
                                     'Loading...'
-                                ) : (
-                                    'Pay ₹249 + GST & Renew'
-                                )}
+                                ) : useCredits && userProfile?.wallet?.credits >= 249 ? (
+                                    'Renew Free with Credits'
+                                ) : (() => {
+                                    if (useCredits && userProfile?.wallet?.credits > 0) {
+                                        const total = ((249 - Math.min(userProfile.wallet.credits, 249)) * 1.18).toFixed(2);
+                                        return `Pay ₹${total} & Renew`;
+                                    }
+                                    return 'Pay ₹249 + GST & Renew';
+                                })()}
                             </button>
 
                             <p className="text-sm text-white/70 mt-4 flex items-center justify-center gap-2">
