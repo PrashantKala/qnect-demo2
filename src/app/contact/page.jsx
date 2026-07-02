@@ -16,10 +16,10 @@ export default function ContactPage() {
             <p>
               <strong>General Inquiries:</strong><br/>
               <a 
-                href="mailto:support@qnect.in" 
+                href="mailto:qnectsupport@gmail.com" 
                 className="text-white underline hover:text-cyan-200 transition-colors"
               >
-                support@qnect.in
+                qnectsupport@gmail.com
               </a>
             </p>
             <p>

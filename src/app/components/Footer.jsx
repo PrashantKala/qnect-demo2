@@ -78,7 +78,7 @@ export function Footer() {
             ))}
           </div>
           <p className="mt-6 text-gray-400 text-lg hover:text-white transition-colors">
-            support@qnect.in
+            qnectsupport@gmail.com
           </p>
         </div>
       </div>
