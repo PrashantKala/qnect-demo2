@@ -230,8 +230,8 @@ export default function HomePage() {
       <div className="fixed bottom-6 right-6 z-50">
         <div className="bg-white p-4 rounded-lg shadow-2xl border border-border-color text-center">
           <p className="font-bold text-primary-blue mb-2">Get the App</p>
-          <div className="w-24 h-24 bg-gray-100 border-border-color border-2 rounded-lg mx-auto flex items-center justify-center text-gray-500 text-sm p-1">
-            [App QR Code]
+          <div className="w-24 h-24 border-border-color border-2 rounded-lg mx-auto flex items-center justify-center p-1 overflow-hidden bg-white">
+            <Image src="/download-qr.png" alt="Download QNect App QR Code" width={96} height={96} className="object-contain" />
           </div>
           <p className="text-xs text-text-secondary mt-2">Scan to Download</p>
         </div>
