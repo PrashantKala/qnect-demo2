@@ -534,7 +534,7 @@ export default function CallPage() {
         // 1. Request a Web Lock to tell the browser this page is doing important work
         if (navigator.locks) {
           try {
-            navigator.locks.request('qnect-call-active', { mode: 'exclusive' }, async lock => {
+            await navigator.locks.request('qnect-call-active', { mode: 'exclusive' }, async lock => {
               webLock = lock;
               console.log("[WEB] Web Lock acquired - browser should keep us alive");
               return new Promise(() => { }); // Never resolve to hold the lock
@@ -652,7 +652,7 @@ export default function CallPage() {
         if (callId || targetSocket) {
           console.log("Sending hang-up before disconnect...");
           // Use correct event based on call type
-          const eventName = activeCallTargetRef.current === 'guardian' ? 'app-hang-up' : 'hang-up';
+          const eventName = activeCallTargetRef.current == 'guardian' ? 'app-hang-up' : 'hang-up';
           socketRef.current.emit(eventName, {
             toSocketId: targetSocket || '',
             callId: callId || null,
@@ -1178,7 +1178,7 @@ export default function CallPage() {
           </button>
         );
       case 'calling':
-        if (activeCallTarget === 'owner') {
+        if (activeCallTarget == 'owner') {
           return (
             <button disabled className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-gray-300 text-gray-500 font-bold rounded-lg shadow-md cursor-not-allowed">
               <Loader2 size={24} className="animate-spin" /> Calling...
@@ -1193,7 +1193,7 @@ export default function CallPage() {
           );
         }
       case 'connecting':
-        if (activeCallTarget === 'owner') {
+        if (activeCallTarget == 'owner') {
           return (
             <button onClick={handleHangUp} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-yellow-500 text-white font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
               <Loader2 size={24} className="animate-spin" /> Connecting...
@@ -1207,7 +1207,7 @@ export default function CallPage() {
           );
         }
       case 'connected':
-        if (activeCallTarget === 'owner') {
+        if (activeCallTarget == 'owner') {
           return (
             <button onClick={handleHangUp} className="w-full text-lg flex items-center justify-center gap-2 px-10 py-4 bg-red-600 text-white font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
               <PhoneOff size={24} /> Hang Up
@@ -1510,7 +1510,7 @@ export default function CallPage() {
       {/* Calling Screen Overlay */}
       <CallingScreen
         callStatus={callStatus}
-        callerName={activeCallTarget === 'guardian'
+        callerName={activeCallTarget == 'guardian'
           ? (guardians.find(g => g._id === callingGuardianId)?.name || "Emergency Contact")
           : (ownerInfo?.owner.name || "Vehicle Owner")
         }
@@ -1519,7 +1519,7 @@ export default function CallPage() {
         isSpeakerOn={isSpeakerOn}
         onToggleMute={toggleMute}
         onToggleSpeaker={toggleSpeaker}
-        onHangUp={activeCallTarget === 'guardian' ? handleHangUpGuardian : handleHangUp}
+        onHangUp={activeCallTarget == 'guardian' ? handleHangUpGuardian : handleHangUp}
       />
 
       <main className="container mx-auto px-6 py-12 pt-24 min-h-screen bg-gray-50">

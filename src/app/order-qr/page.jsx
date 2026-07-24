@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
+import QrCreditPriceSection from '../components/QrCreditPriceSection';
 
 const SuccessPopup = ({ qrId, onSkip }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
@@ -44,21 +45,21 @@ const SuccessPopup = ({ qrId, onSkip }) => {
           <p>Your QR code has been generated successfully and sent to your email address.</p>
         </div>
         <div className="border-t pt-4 text-left">
-           <h3 className="font-bold text-gray-800 mb-2">Link Vehicle (Optional)</h3>
-           <p className="text-sm text-gray-600 mb-4">Would you like to link a vehicle number to this newly purchased QR code? You can always do this later in your profile.</p>
-           <input
-             type="text"
-             value={vehicleNumber}
-             onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
-             placeholder="Enter Vehicle Number"
-             className="w-full border border-gray-300 rounded px-3 py-2 mb-4 text-black focus:ring-accent-cyan"
-           />
-           <div className="flex gap-4">
-             <button onClick={onSkip} className="flex-1 bg-gray-100 text-gray-700 py-2 rounded font-bold hover:bg-gray-200 transition">Skip</button>
-             <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-qnect-gradient text-white border-2 border-white shadow-md py-2 rounded font-bold hover:opacity-90 hover:shadow-lg transition">
-               {isSaving ? 'Saving...' : 'Save & Continue'}
-             </button>
-           </div>
+          <h3 className="font-bold text-gray-800 mb-2">Link Vehicle (Optional)</h3>
+          <p className="text-sm text-gray-600 mb-4">Would you like to link a vehicle number to this newly purchased QR code? You can always do this later in your profile.</p>
+          <input
+            type="text"
+            value={vehicleNumber}
+            onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
+            placeholder="Enter Vehicle Number"
+            className="w-full border border-gray-300 rounded px-3 py-2 mb-4 text-black focus:ring-accent-cyan"
+          />
+          <div className="flex gap-4">
+            <button onClick={onSkip} className="flex-1 bg-gray-100 text-gray-700 py-2 rounded font-bold hover:bg-gray-200 transition">Skip</button>
+            <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-qnect-gradient text-white border-2 border-white shadow-md py-2 rounded font-bold hover:opacity-90 hover:shadow-lg transition">
+              {isSaving ? 'Saving...' : 'Save & Continue'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -97,11 +98,11 @@ const AddressCollectionPopup = ({ onSave, onCancel, initialAddress }) => {
         },
         body: JSON.stringify(address)
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to save address');
       }
-      
+
       onSave(); // Proceed to payment
     } catch (err) {
       console.error(err);
@@ -115,35 +116,35 @@ const AddressCollectionPopup = ({ onSave, onCancel, initialAddress }) => {
       <div className="bg-white p-6 md:p-8 rounded-lg shadow-xl max-w-md w-full mx-4 my-auto">
         <h2 className="text-2xl font-bold text-primary-blue mb-2">Delivery Address Required</h2>
         <p className="text-sm text-text-secondary mb-6">Since we deliver the physical QR code to your doorstep, please provide your delivery address.</p>
-        
+
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
         <div className="space-y-4 mb-6 text-left">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">House/Flat No. *</label>
-            <input type="text" value={address.houseNumber} onChange={(e) => setAddress({...address, houseNumber: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="House / Flat No." />
+            <input type="text" value={address.houseNumber} onChange={(e) => setAddress({ ...address, houseNumber: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="House / Flat No." />
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Street Name *</label>
-            <input type="text" value={address.streetName} onChange={(e) => setAddress({...address, streetName: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Street / Locality" />
+            <input type="text" value={address.streetName} onChange={(e) => setAddress({ ...address, streetName: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Street / Locality" />
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Landmark (Optional)</label>
-            <input type="text" value={address.landmark} onChange={(e) => setAddress({...address, landmark: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Near Hospital, etc." />
+            <input type="text" value={address.landmark} onChange={(e) => setAddress({ ...address, landmark: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Near Hospital, etc." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">City *</label>
-              <input type="text" value={address.city} onChange={(e) => setAddress({...address, city: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="City" />
+              <input type="text" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="City" />
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">State *</label>
-              <input type="text" value={address.state} onChange={(e) => setAddress({...address, state: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="State" />
+              <input type="text" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="State" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Pincode *</label>
-            <input type="text" value={address.pincode} onChange={(e) => setAddress({...address, pincode: e.target.value})} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Pincode" />
+            <input type="text" value={address.pincode} onChange={(e) => setAddress({ ...address, pincode: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Pincode" />
           </div>
         </div>
 
@@ -180,11 +181,11 @@ export default function OrderQRPage() {
           'Authorization': `Bearer ${userToken}`
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        setUserProfile(data);
-      })
-      .catch(err => console.error("Failed to fetch profile:", err));
+        .then(res => res.json())
+        .then(data => {
+          setUserProfile(data);
+        })
+        .catch(err => console.error("Failed to fetch profile:", err));
     }
   }, [userToken, isLoading, router]);
 
@@ -200,7 +201,7 @@ export default function OrderQRPage() {
       setShowAddressModal(true);
       return;
     }
-    
+
     // Address is complete, proceed to purchase
     handlePurchase();
   };
@@ -341,9 +342,9 @@ export default function OrderQRPage() {
 
       {showSuccess && <SuccessPopup qrId={purchasedQrId} onSkip={() => router.push('/profile')} />}
       {showAddressModal && (
-        <AddressCollectionPopup 
+        <AddressCollectionPopup
           initialAddress={userProfile?.address}
-          onCancel={() => setShowAddressModal(false)} 
+          onCancel={() => setShowAddressModal(false)}
           onSave={() => {
             setShowAddressModal(false);
             // Fetch updated profile so it's cached, and proceed to payment
@@ -351,7 +352,7 @@ export default function OrderQRPage() {
               headers: { 'Authorization': `Bearer ${userToken}` }
             }).then(res => res.json()).then(data => setUserProfile(data));
             handlePurchase();
-          }} 
+          }}
         />
       )}
       <div className="grid md:grid-cols-2 gap-12 items-start">
@@ -400,61 +401,11 @@ export default function OrderQRPage() {
               <span className="text-xl font-bold">₹249</span>
             </div>
 
-            {/* Credit Application Section */}
-            {userProfile?.wallet?.credits > 0 && (
-              <div className="bg-white/10 rounded-lg p-3 space-y-2">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={useCredits}
-                    onChange={(e) => setUseCredits(e.target.checked)}
-                    className="w-5 h-5 rounded accent-cyan-400"
-                  />
-                  <span className="font-semibold">
-                    Apply {Math.min(userProfile.wallet.credits, 249)} credits (₹{Math.min(userProfile.wallet.credits, 249)} off)
-                  </span>
-                </label>
-                <p className="text-xs text-white/60">You have {userProfile.wallet.credits} credits (₹{userProfile.wallet.credits}). 1 Credit = ₹1</p>
-              </div>
-            )}
-
-            {/* Price Breakdown */}
-            {useCredits && userProfile?.wallet?.credits > 0 && (() => {
-              const creditsToUse = Math.min(userProfile.wallet.credits, 249);
-              const discountedBase = 249 - creditsToUse;
-              const gst = (discountedBase * 0.18).toFixed(2);
-              const total = (discountedBase * 1.18).toFixed(2);
-              return (
-                <div className="border-t border-white/20 pt-2 space-y-1 text-sm">
-                  <div className="flex justify-between text-green-300">
-                    <span>Credit Discount</span>
-                    <span>-₹{creditsToUse}</span>
-                  </div>
-                  <div className="flex justify-between text-white/70">
-                    <span>GST (18%)</span>
-                    <span>₹{gst}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg pt-1 border-t border-white/20">
-                    <span>Total</span>
-                    <span>{Number(total) <= 0 ? 'FREE' : `₹${total}`}</span>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Original total when no credits */}
-            {(!useCredits || !userProfile?.wallet?.credits) && (
-              <div className="border-t border-white/20 pt-2">
-                <div className="flex justify-between text-sm text-white/70">
-                  <span>GST (18%)</span>
-                  <span>₹{(249 * 0.18).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-lg pt-1">
-                  <span>Total</span>
-                  <span>₹{(249 * 1.18).toFixed(2)}</span>
-                </div>
-              </div>
-            )}
+            <QrCreditPriceSection
+              credits={userProfile?.wallet?.credits || 0}
+              useCredits={useCredits}
+              onUseCreditsChange={setUseCredits}
+            />
           </div>
 
           {error && <p className="text-red-300 text-center mb-4">{error}</p>}
@@ -517,7 +468,7 @@ export default function OrderQRPage() {
               ) : (
                 (() => {
                   if (useCredits && userProfile?.wallet?.credits > 0) {
-                    const total = ((249 - Math.min(userProfile.wallet.credits, 249)) * 1.18).toFixed(2);
+                    const total = ((249 - Math.min(userProfile?.wallet?.credits || 0, 249)) * 1.18).toFixed(2);
                     return `Pay ₹${total} & Get QR via Email`;
                   }
                   return 'Pay ₹249 + GST & Get QR via Email';

@@ -216,8 +216,14 @@ function LoginForm() {
 
           {/* Forgot Password Modal Overlay */}
           {showForgotPassword && (
-            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowForgotPassword(false)}>
-              <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative" onClick={(e) => e.stopPropagation()}>
+            <>
+              <button
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 cursor-default"
+                onClick={() => setShowForgotPassword(false)}
+                aria-label="Close modal"
+              />
+              <div className="fixed inset-0 z-[51] flex items-center justify-center p-4 pointer-events-none">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative pointer-events-auto">
                 <button
                   onClick={() => setShowForgotPassword(false)}
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
@@ -234,14 +240,12 @@ function LoginForm() {
                 </div>
 
                 {forgotMessage.text && (
-                  <div className={`rounded-lg p-3 mb-4 border ${
-                    forgotMessage.type === 'success'
-                      ? 'bg-green-50 border-green-200'
-                      : 'bg-red-50 border-red-200'
-                  }`}>
-                    <p className={`text-sm text-center ${
-                      forgotMessage.type === 'success' ? 'text-green-600' : 'text-red-600'
+                  <div className={`rounded-lg p-3 mb-4 border ${forgotMessage.type === 'success'
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-red-50 border-red-200'
                     }`}>
+                    <p className={`text-sm text-center ${forgotMessage.type === 'success' ? 'text-green-600' : 'text-red-600'
+                      }`}>
                       {forgotMessage.text}
                     </p>
                   </div>
@@ -281,7 +285,8 @@ function LoginForm() {
                   Back to Login
                 </button>
               </div>
-            </div>
+              </div>
+            </>
           )}
 
           {/* Sign up link */}

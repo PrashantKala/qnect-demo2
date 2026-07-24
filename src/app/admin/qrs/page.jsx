@@ -72,7 +72,7 @@ export default function QRManagementPage() {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `qr_sticker_${qrId.substring(0,8)}.pdf`);
+            link.setAttribute('download', `qr_sticker_${qrId.substring(0, 8)}.pdf`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -87,7 +87,7 @@ export default function QRManagementPage() {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `qr_batch_${batchId.substring(0,8)}.zip`);
+            link.setAttribute('download', `qr_batch_${batchId.substring(0, 8)}.zip`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -128,7 +128,7 @@ export default function QRManagementPage() {
             const firstNameMatch = code.assignedToUser?.firstName?.toLowerCase().includes(query);
             const lastNameMatch = code.assignedToUser?.lastName?.toLowerCase().includes(query);
             const nameMatch = code.assignedToUser?.name?.toLowerCase().includes(query);
-            
+
             matchesSearch = !!(qrIdMatch || emailMatch || firstNameMatch || lastNameMatch || nameMatch);
         }
 
@@ -340,28 +340,35 @@ export default function QRManagementPage() {
 
             {/* QR Code Preview Modal */}
             {previewQrId && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setPreviewQrId(null)}>
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative border border-gray-100" onClick={e => e.stopPropagation()}>
-                        <button
-                            onClick={() => setPreviewQrId(null)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">QR Code Preview</h3>
-                        <div className="flex justify-center mb-4">
-                            <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrUrl)}`}
-                                alt={`QR Code for ${previewQrId}`}
-                                className="rounded-lg border border-gray-200"
-                                width={250}
-                                height={250}
-                            />
+                <>
+                    <button
+                        className="fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm cursor-default"
+                        onClick={() => setPreviewQrId(null)}
+                        aria-label="Close preview"
+                    />
+                    <div className="fixed inset-0 z-[51] flex items-center justify-center pointer-events-none">
+                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative border border-gray-100 pointer-events-auto">
+                            <button
+                                onClick={() => setPreviewQrId(null)}
+                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                            <h3 className="text-lg font-bold text-gray-900 mb-4">QR Code Preview</h3>
+                            <div className="flex justify-center mb-4">
+                                <img
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrUrl)}`}
+                                    alt={`QR Code for ${previewQrId}`}
+                                    className="rounded-lg border border-gray-200"
+                                    width={250}
+                                    height={250}
+                                />
+                            </div>
+                            <p className="text-xs text-center text-gray-500 font-mono break-all bg-gray-50 px-3 py-2 rounded">{qrUrl}</p>
+                            <p className="text-xs text-center text-gray-400 mt-2 font-mono">{previewQrId}</p>
                         </div>
-                        <p className="text-xs text-center text-gray-500 font-mono break-all bg-gray-50 px-3 py-2 rounded">{qrUrl}</p>
-                        <p className="text-xs text-center text-gray-400 mt-2 font-mono">{previewQrId}</p>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );
