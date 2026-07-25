@@ -18,6 +18,7 @@ export default function SalespersonPage() {
             const response = await fetchSalespersons();
             setSalespersons(response.data);
         } catch (err) {
+            console.error('[Salespersons] Failed to load data:', err);
             setError("Could not load salesperson data.");
         }
     };
@@ -63,8 +64,9 @@ export default function SalespersonPage() {
                 <form onSubmit={handleAddSubmit} className="max-w-2xl mt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                            <label htmlFor="sp-name" className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                             <input
+                                id="sp-name"
                                 type="text"
                                 value={newName}
                                 onChange={(e) => setNewName(e.target.value)}
@@ -73,8 +75,9 @@ export default function SalespersonPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Salesperson ID * (e.g. JAIPUR01)</label>
+                            <label htmlFor="sp-id" className="block text-sm font-medium text-gray-700 mb-1">Salesperson ID * (e.g. JAIPUR01)</label>
                             <input
+                                id="sp-id"
                                 type="text"
                                 value={newSalespersonId}
                                 onChange={(e) => setNewSalespersonId(e.target.value)}
@@ -83,8 +86,9 @@ export default function SalespersonPage() {
                             />
                         </div>
                         <div className="md:col-span-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Gmail Address *</label>
+                            <label htmlFor="sp-email" className="block text-sm font-medium text-gray-700 mb-1">Gmail Address *</label>
                             <input
+                                id="sp-email"
                                 type="email"
                                 value={newEmail}
                                 onChange={(e) => setNewEmail(e.target.value)}
@@ -94,8 +98,9 @@ export default function SalespersonPage() {
                             />
                         </div>
                         <div className="md:col-span-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                            <label htmlFor="sp-contact" className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
                             <input
+                                id="sp-contact"
                                 type="text"
                                 value={newContact}
                                 onChange={(e) => setNewContact(e.target.value)}
@@ -103,8 +108,9 @@ export default function SalespersonPage() {
                             />
                         </div>
                         <div className="md:col-span-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password *</label>
+                            <label htmlFor="sp-password" className="block text-sm font-medium text-gray-700 mb-1">Temporary Password *</label>
                             <input
+                                id="sp-password"
                                 type="text"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}

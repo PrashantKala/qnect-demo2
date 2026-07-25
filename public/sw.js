@@ -14,7 +14,7 @@ self.addEventListener('push', function(event) {
   try {
     notificationData = event.data.json();
   } catch (e) {
-    console.log('Could not parse push notification data as JSON');
+    console.log('Could not parse push notification data as JSON:', e.message);
     notificationData = {
       title: event.data.text(),
       icon: '/icon-192x192.png',

@@ -63,8 +63,7 @@ export default function CareersPage() {
                   className="underline text-white hover:text-white/90 font-semibold"
                 >
                   hrconnect@qnect.in
-                </a>
-                .
+                </a>.
               </p>
             </div>
 

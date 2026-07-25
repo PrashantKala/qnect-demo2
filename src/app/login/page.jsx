@@ -32,6 +32,7 @@ function LoginForm() {
         else if (payload.role === 'salesperson') router.push('/salesperson');
         else router.push(redirectUrl);
       } catch (e) {
+        console.log('[Login] Token decode error (using default redirect):', e.message);
         router.push(redirectUrl);
       }
     } else {
@@ -45,7 +46,7 @@ function LoginForm() {
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
         callback: async (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
+          if (tokenResponse?.access_token) {
             try {
               const res = await fetch(`${API_URL}/auth/google`, {
                 method: 'POST',
@@ -60,6 +61,7 @@ function LoginForm() {
                 setError(data.message || 'Google login failed');
               }
             } catch (err) {
+              console.error('[Login] Google OAuth error:', err);
               setError('Google login failed');
             }
           }
@@ -80,6 +82,7 @@ function LoginForm() {
       await login(identifier, password);
       handleRedirect();
     } catch (err) {
+      console.error('[Login] Login request error:', err);
       setError('Invalid email/phone number or password. Please try again.');
     } finally {
       setIsLoading(false);
@@ -104,6 +107,7 @@ function LoginForm() {
         setForgotMessage({ type: 'error', text: data.message || 'Something went wrong.' });
       }
     } catch (err) {
+      console.error('[Login] Forgot-password request error:', err);
       setForgotMessage({ type: 'error', text: 'Network error. Please try again.' });
     } finally {
       setForgotLoading(false);

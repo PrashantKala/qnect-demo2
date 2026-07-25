@@ -22,7 +22,6 @@ export default function CallPage() {
   // Notify Owner state
   const [showNotify, setShowNotify] = useState(false);
   const [ownerUserId, setOwnerUserId] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null);
 
   // Emergency Connect state
   const [showEmergency, setShowEmergency] = useState(false);
@@ -73,7 +72,6 @@ export default function CallPage() {
   const silenceAudioRef = useRef(null); // Ref for the keep-alive track
   const remoteStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
-  const messagesEndRef = useRef(null);
   const ringingAudioRef = useRef(null);
   const TEMPLATES = [
     'Your car is blocking mine, please move it.',
@@ -120,13 +118,11 @@ export default function CallPage() {
             }
           });
       }
-    } else {
+    } else if (ringingAudioRef.current) {
       // Stop ringing for any other state (connected, idle, failed, etc.)
-      if (ringingAudioRef.current) {
-        console.log("[WEB] Stopping ringing sound.");
-        ringingAudioRef.current.pause();
-        ringingAudioRef.current.currentTime = 0;
-      }
+      console.log("[WEB] Stopping ringing sound.");
+      ringingAudioRef.current.pause();
+      ringingAudioRef.current.currentTime = 0;
     }
   }, [callStatus]);
 
@@ -145,7 +141,7 @@ export default function CallPage() {
   const setAudioOutputDevice = async (deviceId) => {
     const elements = [remoteAudioRef.current, silenceAudioRef.current];
     for (const el of elements) {
-      if (el && el.setSinkId) {
+      if (el?.setSinkId) {
         try {
           await el.setSinkId(deviceId);
         } catch (e) {
@@ -212,7 +208,7 @@ export default function CallPage() {
 
   // Toggle speaker (switch audio output)
   const toggleSpeaker = async () => {
-    if (!remoteAudioRef.current || !remoteAudioRef.current.setSinkId) {
+    if (!remoteAudioRef.current?.setSinkId) {
       console.warn("Audio output switching not supported directly.");
       setIsSpeakerOn(!isSpeakerOn);
       return;
@@ -241,13 +237,11 @@ export default function CallPage() {
           const nonDefault = audioOutputs.find(d => d.deviceId !== 'default');
           if (nonDefault) targetDeviceId = nonDefault.deviceId;
         }
-      } else {
+      } else if (speaker) {
         // Turning Speaker ON -> Go to Speaker
-        if (speaker) {
-          targetDeviceId = speaker.deviceId;
-        } else {
-          targetDeviceId = 'default';
-        }
+        targetDeviceId = speaker.deviceId;
+      } else {
+        targetDeviceId = 'default';
       }
 
       await setAudioOutputDevice(targetDeviceId); // Apply to ALL audio elements
@@ -261,7 +255,6 @@ export default function CallPage() {
 
   // ... (formatDuration) ...
 
-  const silentAudio = "data:audio/mp3;base64,SUQzBAAAAAAAI1RTSV*******"; // (Truncated for brevity)
   const SILENCE_URL = "https://github.com/anars/blank-audio/raw/master/250-milliseconds-of-silence.mp3";
 
 
@@ -335,7 +328,7 @@ export default function CallPage() {
     const socket = socketRef.current;
 
     // Get current user ID from localStorage or session
-    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId') || 'guest-' + Math.random().toString(36).substr(2, 9);
+    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId') || 'guest-' + crypto.randomUUID();
     setCurrentUserId(userId);
 
     // Handle reconnection
@@ -509,7 +502,6 @@ export default function CallPage() {
 
     // Monitor page visibility for debugging background issues
     let keepAliveInterval = null;
-    let webLock = null;
 
     const handleVisibilityChange = async () => {
       console.log(`[WEB] Visibility changed: ${document.visibilityState}`);
@@ -535,7 +527,6 @@ export default function CallPage() {
         if (navigator.locks) {
           try {
             await navigator.locks.request('qnect-call-active', { mode: 'exclusive' }, async lock => {
-              webLock = lock;
               console.log("[WEB] Web Lock acquired - browser should keep us alive");
               return new Promise(() => { }); // Never resolve to hold the lock
             });
@@ -547,12 +538,12 @@ export default function CallPage() {
         // 2. Start an aggressive keep-alive interval
         keepAliveInterval = setInterval(() => {
           // Socket ping
-          if (socketRef.current && socketRef.current.connected) {
+          if (socketRef.current?.connected) {
             socketRef.current.emit('ping');
           }
 
           // WebRTC data channel ping (keeps the peer connection alive)
-          if (peerRef.current && peerRef.current.connected) {
+          if (peerRef.current?.connected) {
             try {
               peerRef.current.send(JSON.stringify({ type: 'keepalive', ts: Date.now() }));
               console.log("[WEB] Background: Sent keepalive through data channel");
@@ -572,7 +563,7 @@ export default function CallPage() {
           }
 
           // Log ICE state
-          if (peerRef.current && peerRef.current._pc) {
+          if (peerRef.current?._pc) {
             const state = peerRef.current._pc.iceConnectionState;
             console.log(`[WEB] Background: ICE state = ${state}`);
           }
@@ -606,7 +597,7 @@ export default function CallPage() {
         }
 
         // Check if we need to recover the connection
-        if (peerRef.current && peerRef.current._pc) {
+        if (peerRef.current?._pc) {
           const state = peerRef.current._pc.iceConnectionState;
           console.log(`[WEB] Foreground: ICE state = ${state}`);
 
@@ -645,7 +636,7 @@ export default function CallPage() {
       }
 
       // Send hang-up to mobile if we have an active call
-      if (socketRef.current && socketRef.current.connected) {
+      if (socketRef.current?.connected) {
         const callId = currentCallIdRef.current;
         const targetSocket = remoteSocketIdRef.current;
 
@@ -853,7 +844,7 @@ export default function CallPage() {
     const targetSocket = remoteSocketIdRef.current;
 
     // Tell the app we are hanging up triggers BEFORE cleanup
-    if (socketRef.current && socketRef.current.connected) {
+    if (socketRef.current?.connected) {
       console.log(`[WEB] Emitting hang-up to ${targetSocket} for call ${callId}`);
       // Always use 'hang-up' event - the server knows who is the caller vs target
       const eventName = 'hang-up';
@@ -1102,7 +1093,7 @@ export default function CallPage() {
 
     // Tell the app/guardian we are hanging up triggers BEFORE cleanup
     // FIX: Allow hang-up if we have a callId, even if we don't know the remote socket yet (e.g. ringing state)
-    if (socketRef.current && socketRef.current.connected && (remoteSocketIdRef.current || currentCallIdRef.current)) {
+    if (socketRef.current?.connected && (remoteSocketIdRef.current || currentCallIdRef.current)) {
       console.log(`[WEB] Emitting app-hang-up. RemoteSocket: ${remoteSocketIdRef.current}, CallId: ${currentCallIdRef.current}`);
       try {
         await new Promise((resolve) => {
@@ -1291,7 +1282,7 @@ export default function CallPage() {
                 QR Active
               </span>
               <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                <CheckCircle2 size={14} />
+                <CheckCircle2 size={14} />{' '}
                 2 Year Validity
               </span>
             </div>
@@ -1385,10 +1376,11 @@ export default function CallPage() {
               {/* Name Row */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">First Name *</label>
+                  <label htmlFor="claim-firstname" className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">First Name *</label>
                   <div className="relative">
                     <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
+                      id="claim-firstname"
                       type="text"
                       required
                       value={claimForm.firstName}
@@ -1399,8 +1391,9 @@ export default function CallPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Last Name</label>
+                  <label htmlFor="claim-lastname" className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Last Name</label>
                   <input
+                    id="claim-lastname"
                     type="text"
                     value={claimForm.lastName}
                     onChange={(e) => setClaimForm({ ...claimForm, lastName: e.target.value })}
@@ -1412,10 +1405,11 @@ export default function CallPage() {
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Email Address *</label>
+                <label htmlFor="claim-email" className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Email Address *</label>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
+                    id="claim-email"
                     type="email"
                     required
                     value={claimForm.email}
@@ -1428,10 +1422,11 @@ export default function CallPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Password *</label>
+                <label htmlFor="claim-password" className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Password *</label>
                 <div className="relative">
                   <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
+                    id="claim-password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={claimForm.password}
@@ -1453,10 +1448,11 @@ export default function CallPage() {
 
               {/* Mobile */}
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Mobile Number</label>
+                <label htmlFor="claim-mobile" className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Mobile Number</label>
                 <div className="relative">
                   <Smartphone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
+                    id="claim-mobile"
                     type="tel"
                     value={claimForm.mobileNumber}
                     onChange={(e) => setClaimForm({ ...claimForm, mobileNumber: e.target.value })}
@@ -1596,7 +1592,7 @@ export default function CallPage() {
                 <p className="text-sm text-gray-500 mb-2">Select a message to notify the owner:</p>
                 <div className="max-h-80 overflow-auto space-y-2">
                   {TEMPLATES.map((t, idx) => (
-                    <button key={idx} onClick={() => handleSendNotify(t)} className="w-full text-left px-3 py-2 rounded border hover:bg-gray-50">
+                    <button key={t} onClick={() => handleSendNotify(t)} className="w-full text-left px-3 py-2 rounded border hover:bg-gray-50">
                       {t}
                     </button>
                   ))}
@@ -1692,10 +1688,10 @@ export default function CallPage() {
                     <>
                       {/* 1. Media Upload */}
                       <div className="mb-6">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">1. Share Situation (Required)</label>
+                        <p className="block text-sm font-bold text-gray-700 mb-2">1. Share Situation (Required)</p>
                         <div className="flex flex-wrap gap-2 mb-2">
                           {emergencyForm.media.map((m, idx) => (
-                            <div key={idx} className="relative w-24 h-24 border rounded overflow-hidden">
+                            <div key={m.preview || idx} className="relative w-24 h-24 border rounded overflow-hidden">
                               <img src={m.preview} alt="preview" className="w-full h-full object-cover" />
                               <button
                                 onClick={() => handleRemoveMedia(idx)}
@@ -1715,7 +1711,7 @@ export default function CallPage() {
 
                       {/* 2. Share Location */}
                       <div className="mb-6">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">2. Share Location</label>
+                        <p className="block text-sm font-bold text-gray-700 mb-2">2. Share Location</p>
                         <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
                           <div className="flex items-center gap-3">
                             <MapPin size={20} className={emergencyForm.includeLocation ? "text-blue-500" : "text-gray-400"} />
@@ -1747,8 +1743,9 @@ export default function CallPage() {
 
                       {/* 3. Description */}
                       <div className="mb-6">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">3. Describe Situation (Optional)</label>
+                        <label htmlFor="emergency-description" className="block text-sm font-bold text-gray-700 mb-2">3. Describe Situation (Optional)</label>
                         <textarea
+                          id="emergency-description"
                           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
                           rows="3"
                           placeholder="What is happening?"
@@ -1759,8 +1756,9 @@ export default function CallPage() {
 
                       {/* 4. Phone Number */}
                       <div className="mb-6">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">4. Your Phone Number (Optional)</label>
+                        <label htmlFor="emergency-phone" className="block text-sm font-bold text-gray-700 mb-2">4. Your Phone Number (Optional)</label>
                         <input
+                          id="emergency-phone"
                           type="tel"
                           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-200 outline-none"
                           placeholder="So they can call you back"

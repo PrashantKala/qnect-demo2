@@ -13,7 +13,7 @@ function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState(null); // 'success' | 'error'
+  const [status, setStatus] = useState(''); // '' | 'success' | 'error'
   const [message, setMessage] = useState('');
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -58,6 +58,7 @@ function ResetPasswordForm() {
         setMessage(data.message || 'Something went wrong. Please try again.');
       }
     } catch (err) {
+      console.error('[ResetPassword] Network error:', err);
       setStatus('error');
       setMessage('Network error. Please check your connection and try again.');
     } finally {
@@ -91,7 +92,7 @@ function ResetPasswordForm() {
   }
 
   // Success state
-  if (status == 'success') {
+  if (status === 'success') {
     return (
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-md mx-auto">
@@ -127,7 +128,7 @@ function ResetPasswordForm() {
           </div>
 
           {/* Error Display */}
-          {status == 'error' && (
+          {status === 'error' && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
               <p className="text-red-600 text-sm text-center">{message}</p>
             </div>

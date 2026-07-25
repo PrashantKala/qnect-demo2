@@ -98,10 +98,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleReorder = () => {
-    alert('Reorder functionality coming soon!');
-  };
-
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -241,8 +237,9 @@ export default function ProfilePage() {
             {editMode ? (
               <form onSubmit={handleProfileSubmit} className="space-y-4 mb-6">
                 <div>
-                  <label className="text-sm text-white/80">Email</label>
+                  <label htmlFor="edit-email" className="text-sm text-white/80">Email</label>
                   <input
+                    id="edit-email"
                     type="email"
                     value={editedProfile.email || ''}
                     onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
@@ -250,9 +247,10 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-white/80">Password</label>
+                  <label htmlFor="edit-password" className="text-sm text-white/80">Password</label>
                   <div className="relative w-full mt-1">
                     <input
+                      id="edit-password"
                       type={showPassword ? "text" : "password"}
                       value={editedProfile.password || ''}
                       onChange={(e) => setEditedProfile({ ...editedProfile, password: e.target.value })}
@@ -269,8 +267,9 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-white/80">Mobile Number</label>
+                  <label htmlFor="edit-mobile" className="text-sm text-white/80">Mobile Number</label>
                   <input
+                    id="edit-mobile"
                     type="text"
                     value={editedProfile.mobileNumber || ''}
                     onChange={(e) => setEditedProfile({ ...editedProfile, mobileNumber: e.target.value })}

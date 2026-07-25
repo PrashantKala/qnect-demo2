@@ -34,7 +34,7 @@ export default function SignupPage() {
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
         callback: async (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
+          if (tokenResponse?.access_token) {
             try {
               // Remove extra /api since NEXT_PUBLIC_API_URL already includes it
               const apiUrl = API_URL;
@@ -51,6 +51,7 @@ export default function SignupPage() {
                 setError(data.message || 'Google login failed');
               }
             } catch (err) {
+              console.error('[Signup] Google login error:', err);
               setError('Google login failed');
             }
           }

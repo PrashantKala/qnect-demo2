@@ -55,13 +55,13 @@ export default function CallingScreen({
                     <p className="text-blue-200 text-lg mb-4">
                         {callStatus === 'calling' && (
                             <span className="flex items-center gap-2">
-                                <span className="inline-block w-2 h-2 bg-blue-300 rounded-full animate-pulse"></span>
+                                <span className="inline-block w-2 h-2 bg-blue-300 rounded-full animate-pulse"></span>{' '}
                                 Calling...
                             </span>
                         )}
                         {callStatus === 'connecting' && (
                             <span className="flex items-center gap-2">
-                                <span className="inline-block w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></span>
+                                <span className="inline-block w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></span>{' '}
                                 Connecting...
                             </span>
                         )}

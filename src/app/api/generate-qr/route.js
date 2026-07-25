@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 import axios from 'axios';
 
 // Your backend server
@@ -14,7 +13,7 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     // Forward the request to the backend
-    const backendResponse = await axios.post(
+    await axios.post(
       `${BACKEND_API_URL}/qrs/create-and-send`,
       {},
       { headers: { Authorization: authHeader } }

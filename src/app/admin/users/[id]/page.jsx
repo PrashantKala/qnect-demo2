@@ -93,7 +93,7 @@ export default function UserDetailPage() {
                     </div>
                     <div className="p-6 space-y-3">
                         {user.guardians.map((g, i) => (
-                            <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <div key={g._id || g.email || i} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
                                 <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-sm">
                                     {(g.name || '?').charAt(0).toUpperCase()}
                                 </div>

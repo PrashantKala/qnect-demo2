@@ -20,6 +20,7 @@ export default function QueryManagementPage() {
             const response = await fetchQueries();
             setQueries(response.data);
         } catch (err) {
+            console.error('[Queries] Failed to load queries:', err);
             setError("Could not load queries.");
         } finally {
             setIsLoading(false);

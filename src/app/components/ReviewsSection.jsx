@@ -51,7 +51,7 @@ export const ReviewsSection = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {reviews.slice(0, 3).map((review, index) => (
               <div
-                key={index}
+                key={review._id || index}
                 className="p-6 md:p-8 rounded-lg shadow-md text-left flex flex-col text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                 style={{
                   background: "linear-gradient(135deg, #1e40af, #22d3ee)",

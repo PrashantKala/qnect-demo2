@@ -20,6 +20,7 @@ export default function UserManagementPage() {
                 const response = await fetchUsers();
                 setUsers(response.data);
             } catch (err) {
+                console.error('[Users] Failed to load users:', err);
                 setError("Could not load user data.");
             } finally {
                 setIsLoading(false);
@@ -31,7 +32,7 @@ export default function UserManagementPage() {
     const filteredUsers = users.filter(user => {
         const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim().toLowerCase();
         return fullName.includes(searchTerm.toLowerCase()) ||
-            (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
+            (user.email?.toLowerCase().includes(searchTerm.toLowerCase()));
     });
 
     const handleViewQrs = async (user) => {
@@ -41,6 +42,7 @@ export default function UserManagementPage() {
             const res = await fetchUserDetail(user._id);
             setPreviewQrs(res.data.qrs || []);
         } catch (err) {
+            console.error('[Users] Failed to load QR preview:', err);
             setPreviewQrs([]);
         } finally {
             setLoadingPreview(false);

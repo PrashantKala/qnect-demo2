@@ -67,7 +67,7 @@ export function Footer() {
               { Icon: FaTwitter, link: 'https://twitter.com' },
             ].map(({ Icon, link }, i) => (
               <a
-                key={i}
+                key={link}
                 href={link}
                 target="_blank"
                 rel="noopener noreferrer"

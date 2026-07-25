@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 export const NotificationContext = createContext();
 
@@ -8,7 +8,7 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
   const addNotification = useCallback((notification) => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = crypto.randomUUID();
     const newNotification = {
       id,
       type: 'info',
@@ -80,17 +80,19 @@ export const NotificationProvider = ({ children }) => {
     [addNotification]
   );
 
+  const contextValue = useMemo(() => ({
+    notifications,
+    addNotification,
+    removeNotification,
+    showSuccess,
+    showError,
+    showInfo,
+    showWarning,
+  }), [notifications, addNotification, removeNotification, showSuccess, showError, showInfo, showWarning]);
+
   return (
     <NotificationContext.Provider
-      value={{
-        notifications,
-        addNotification,
-        removeNotification,
-        showSuccess,
-        showError,
-        showInfo,
-        showWarning,
-      }}
+      value={contextValue}
     >
       {children}
     </NotificationContext.Provider>

@@ -53,7 +53,7 @@ export const ReviewForm = ({ onReviewAdded }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Rating*</label>
+          <p className="block text-sm font-medium mb-1">Rating*</p>
           <div className="flex space-x-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button

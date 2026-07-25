@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
 import { loginUser, registerUser, phoneLogin as phoneLoginApi } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
@@ -111,8 +111,11 @@ export const AuthProvider = ({ children }) => {
     router.push('/'); // Go home on logout
   };
 
+  const contextValue = useMemo(() => ({ userToken, userEmail, userRole, isLoading, login, signup, logout, loginWithToken, loginWithPhone }),
+    [userToken, userEmail, userRole, isLoading, login, signup, logout, loginWithToken, loginWithPhone]);
+
   return (
-    <AuthContext.Provider value={{ userToken, userEmail, userRole, isLoading, login, signup, logout, loginWithToken, loginWithPhone }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

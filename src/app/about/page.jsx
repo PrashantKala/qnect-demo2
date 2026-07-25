@@ -5,8 +5,8 @@ export default function AboutPage() {
       <section className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-primary-blue mb-6">About QNect</h1>
         <p className="text-lg text-text-secondary leading-relaxed max-w-3xl mx-auto">
-          QNect is a smart communication and safety technology company created to solve one simple but powerful problem —
-          <span className="font-semibold text-primary-blue"> how can someone reach you or help you in an emergency without knowing or sharing your personal mobile number?</span>
+          QNect is a smart communication and safety technology company created to solve one simple but powerful problem —{' '}
+          <span className="font-semibold text-primary-blue">how can someone reach you or help you in an emergency without knowing or sharing your personal mobile number?</span>
         </p>
       </section>
 
@@ -62,19 +62,19 @@ export default function AboutPage() {
         <p className="text-text-secondary mb-4">QNect was built to:</p>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-text-secondary">
           <li className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
-            <span className="text-primary-blue font-bold text-xl">→</span>
+            <span className="text-primary-blue font-bold text-xl">→</span>{' '}
             Reduce disputes and stress caused by wrong parking
           </li>
           <li className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
-            <span className="text-primary-blue font-bold text-xl">→</span>
+            <span className="text-primary-blue font-bold text-xl">→</span>{' '}
             Prevent damage to vehicles and property
           </li>
           <li className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
-            <span className="text-primary-blue font-bold text-xl">→</span>
+            <span className="text-primary-blue font-bold text-xl">→</span>{' '}
             Enable faster response in emergency situations
           </li>
           <li className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
-            <span className="text-primary-blue font-bold text-xl">→</span>
+            <span className="text-primary-blue font-bold text-xl">→</span>{' '}
             Protect the privacy of every user at all times
           </li>
         </ul>
@@ -89,15 +89,15 @@ export default function AboutPage() {
         <p className="text-text-secondary mb-4">QNect can be used on:</p>
         <ul className="space-y-2 text-text-secondary mb-6">
           <li className="flex items-center gap-3">
-            <span className="w-2 h-2 bg-accent-cyan rounded-full"></span>
+            <span className="w-2 h-2 bg-accent-cyan rounded-full"></span>{' '}
             Cars, bikes, and commercial vehicles
           </li>
           <li className="flex items-center gap-3">
-            <span className="w-2 h-2 bg-accent-cyan rounded-full"></span>
+            <span className="w-2 h-2 bg-accent-cyan rounded-full"></span>{' '}
             Parking areas and public spaces
           </li>
           <li className="flex items-center gap-3">
-            <span className="w-2 h-2 bg-accent-cyan rounded-full"></span>
+            <span className="w-2 h-2 bg-accent-cyan rounded-full"></span>{' '}
             Any place where quick, secure, and private contact is important
           </li>
         </ul>

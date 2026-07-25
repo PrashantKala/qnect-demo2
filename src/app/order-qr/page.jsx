@@ -121,30 +121,30 @@ const AddressCollectionPopup = ({ onSave, onCancel, initialAddress }) => {
 
         <div className="space-y-4 mb-6 text-left">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">House/Flat No. *</label>
-            <input type="text" value={address.houseNumber} onChange={(e) => setAddress({ ...address, houseNumber: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="House / Flat No." />
+            <label htmlFor="addr-house" className="block text-sm font-bold text-gray-700 mb-1">House/Flat No. *</label>
+            <input id="addr-house" type="text" value={address.houseNumber} onChange={(e) => setAddress({ ...address, houseNumber: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="House / Flat No." />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Street Name *</label>
-            <input type="text" value={address.streetName} onChange={(e) => setAddress({ ...address, streetName: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Street / Locality" />
+            <label htmlFor="addr-street" className="block text-sm font-bold text-gray-700 mb-1">Street Name *</label>
+            <input id="addr-street" type="text" value={address.streetName} onChange={(e) => setAddress({ ...address, streetName: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Street / Locality" />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Landmark (Optional)</label>
-            <input type="text" value={address.landmark} onChange={(e) => setAddress({ ...address, landmark: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Near Hospital, etc." />
+            <label htmlFor="addr-landmark" className="block text-sm font-bold text-gray-700 mb-1">Landmark (Optional)</label>
+            <input id="addr-landmark" type="text" value={address.landmark} onChange={(e) => setAddress({ ...address, landmark: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Near Hospital, etc." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">City *</label>
-              <input type="text" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="City" />
+              <label htmlFor="addr-city" className="block text-sm font-bold text-gray-700 mb-1">City *</label>
+              <input id="addr-city" type="text" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="City" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">State *</label>
-              <input type="text" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="State" />
+              <label htmlFor="addr-state" className="block text-sm font-bold text-gray-700 mb-1">State *</label>
+              <input id="addr-state" type="text" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="State" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Pincode *</label>
-            <input type="text" value={address.pincode} onChange={(e) => setAddress({ ...address, pincode: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Pincode" />
+            <label htmlFor="addr-pincode" className="block text-sm font-bold text-gray-700 mb-1">Pincode *</label>
+            <input id="addr-pincode" type="text" value={address.pincode} onChange={(e) => setAddress({ ...address, pincode: e.target.value })} className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-accent-cyan" placeholder="Pincode" />
           </div>
         </div>
 
@@ -191,8 +191,9 @@ export default function OrderQRPage() {
 
   const initiatePurchaseFlow = () => {
     // Check if address is filled
-    if (userProfile && userProfile.address) {
-      const { houseNumber, streetName, city, state, pincode } = userProfile.address;
+    const address = userProfile?.address;
+    if (address) {
+      const { houseNumber, streetName, city, state, pincode } = address;
       if (!houseNumber || !streetName || !city || !state || !pincode) {
         setShowAddressModal(true);
         return;

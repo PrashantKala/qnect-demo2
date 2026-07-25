@@ -25,6 +25,7 @@ export default function QRManagementPage() {
             setQrBatches(batchRes.data);
             setError(null);
         } catch (err) {
+            console.error('[QRs] Failed to load data:', err);
             setError("Could not load data from the server.");
         }
     };
@@ -77,6 +78,7 @@ export default function QRManagementPage() {
             link.click();
             link.remove();
         } catch (err) {
+            console.error('[QRs] Failed to download sticker:', err);
             alert('Failed to download sticker');
         }
     };
@@ -92,6 +94,7 @@ export default function QRManagementPage() {
             link.click();
             link.remove();
         } catch (err) {
+            console.error('[QRs] Failed to download batch ZIP:', err);
             alert('Failed to download batch ZIP');
         }
     };
@@ -105,6 +108,7 @@ export default function QRManagementPage() {
             await resetQRCode(qrId);
             await fetchAndSetQRCodes();
         } catch (err) {
+            console.error('[QRs] Failed to reset QR code:', err);
             alert('Failed to reset QR code');
             setIsLoading(false);
         }
