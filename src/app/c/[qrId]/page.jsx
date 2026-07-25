@@ -62,6 +62,7 @@ export default function CallPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isExistingUser, setIsExistingUser] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const callStatusRef = useRef('idle'); // Ref to track callStatus for socket handlers
   useEffect(() => { callStatusRef.current = callStatus; }, [callStatus]);
